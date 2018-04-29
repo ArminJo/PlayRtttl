@@ -47,9 +47,9 @@ void setup() {
 
     pinMode(LDR_PIN, INPUT);
     /*
-     * Check for TEMT_6000 connected
+     * Check for TEMT_6000 connected - 10kOhm to GND
      */
-    pinMode(TEMT_6000_PIN, INPUT_PULLUP);
+    pinMode(TEMT_6000_PIN, INPUT_PULLUP); // 100kOhm to VCC
     delay(2);
     int tTEMTValue = analogRead(TEMT_6000_PIN);
     pinMode(TEMT_6000_PIN, INPUT);
