@@ -33,7 +33,7 @@
 
 #include "PlayRtttl.h"
 
-//uncomment next line to see debug output on serial
+//uncomment next line to see debug output, which shows the note played, on serial.
 //#define DEBUG
 
 struct playRtttlState sPlayRtttlState;
@@ -73,17 +73,22 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char * aRTTTLArrayPtrPGM, void (*
     sPlayRtttlState.TonePin = aTonePin;
     int tNumber;
 
-    char tPGMChar = pgm_read_byte_near(aRTTTLArrayPtrPGM);
-
     /*
      * Skip name and :
      */
+#ifdef DEBUG
+    Serial.print("Title=");
+#endif
+    char tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
     while (tPGMChar != ':') {
+#ifdef DEBUG
+        Serial.print(tPGMChar);
+#endif
         aRTTTLArrayPtrPGM++;
-        tPGMChar = pgm_read_byte_near(aRTTTLArrayPtrPGM);
+        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
     }
     aRTTTLArrayPtrPGM++;
-    tPGMChar = pgm_read_byte_near(aRTTTLArrayPtrPGM);
+    tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
 
     /*
      * Read song info with format: d=N(N),o=N,b=NNN:
@@ -96,18 +101,18 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char * aRTTTLArrayPtrPGM, void (*
     if (tPGMChar == 'd') {
         aRTTTLArrayPtrPGM++;
         aRTTTLArrayPtrPGM++;              // skip "d="
-        tPGMChar = pgm_read_byte_near(aRTTTLArrayPtrPGM);
+        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
         tNumber = 0;
         while (isdigit(tPGMChar)) {
             tNumber = (tNumber * 10) + (tPGMChar - '0');
             aRTTTLArrayPtrPGM++;
-            tPGMChar = pgm_read_byte_near(aRTTTLArrayPtrPGM);
+            tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
         }
         if (tNumber == 0) {
             tNumber = DEFAULT_DURATION;
         }
         aRTTTLArrayPtrPGM++;                   // skip comma
-        tPGMChar = pgm_read_byte_near(aRTTTLArrayPtrPGM);
+        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
     }
     sPlayRtttlState.DefaultDuration = tNumber;
 
@@ -118,7 +123,7 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char * aRTTTLArrayPtrPGM, void (*
     if (tPGMChar == 'o') {
         aRTTTLArrayPtrPGM++;
         aRTTTLArrayPtrPGM++;              // skip "o="
-        tPGMChar = pgm_read_byte_near(aRTTTLArrayPtrPGM);
+        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
         aRTTTLArrayPtrPGM++;
         tNumber = tPGMChar - '0';
         if (tNumber < 3 && tNumber > 7) {
@@ -126,7 +131,7 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char * aRTTTLArrayPtrPGM, void (*
         }
 
         aRTTTLArrayPtrPGM++;                   // skip comma
-        tPGMChar = pgm_read_byte_near(aRTTTLArrayPtrPGM);
+        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
     }
     sPlayRtttlState.DefaultOctave = tNumber;
 
@@ -135,27 +140,27 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char * aRTTTLArrayPtrPGM, void (*
     if (tPGMChar == 'b') {
         aRTTTLArrayPtrPGM++;
         aRTTTLArrayPtrPGM++;              // skip "b="
-        tPGMChar = pgm_read_byte_near(aRTTTLArrayPtrPGM);
+        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
         tNumber = 0;
         while (isdigit(tPGMChar)) {
             tNumber = (tNumber * 10) + (tPGMChar - '0');
             aRTTTLArrayPtrPGM++;
-            tPGMChar = pgm_read_byte_near(aRTTTLArrayPtrPGM);
+            tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
         }
         if (tNumber == 0) {
             tNumber = DEFAULT_BPM;
         }
         aRTTTLArrayPtrPGM++;                   // skip colon
-        tPGMChar = pgm_read_byte_near(aRTTTLArrayPtrPGM);
+        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
     }
     // BPM usually expresses the number of quarter notes per minute
     sPlayRtttlState.TimeForWholeNoteMillis = (60 * 1000L / tNumber) * 4;
 
 #ifdef DEBUG
-    Serial.print("DefaultDuration=");
-    Serial.print (sPlayRtttlState.DefaultDuration);
+    Serial.print(" DefaultDuration=");
+    Serial.print(sPlayRtttlState.DefaultDuration);
     Serial.print(" DefaultOctave=");
-    Serial.print (sPlayRtttlState.DefaultOctave);
+    Serial.print(sPlayRtttlState.DefaultOctave);
     Serial.print(" BPM=");
     Serial.println(tNumber);
 #endif
@@ -172,7 +177,7 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char * aRTTTLArrayPtrPGM, void (*
 
 /*
  * Version for RTTTL Data in RAM. Ie. you must call checkForRtttlToneUpdate() in your loop.
- * Since we do not need all the pgm_read_byte_near() calls this version is more simple and maybe better to understand.
+ * Since we do not need all the pgm_read_byte() calls this version is more simple and maybe better to understand.
  */
 void startPlayRtttl(uint8_t aTonePin, char * aRTTTLArrayPtr, void (*aOnComplete)()) {
     sPlayRtttlState.IsPGMMemory = false;
@@ -182,7 +187,13 @@ void startPlayRtttl(uint8_t aTonePin, char * aRTTTLArrayPtr, void (*aOnComplete)
     /*
      * Skip name and :
      */
+#ifdef DEBUG
+    Serial.print("Title=");
+#endif
     while (*aRTTTLArrayPtr != ':') {
+#ifdef DEBUG
+        Serial.print(*aRTTTLArrayPtr);
+#endif
         aRTTTLArrayPtr++;
     }
     aRTTTLArrayPtr++;
@@ -242,10 +253,10 @@ void startPlayRtttl(uint8_t aTonePin, char * aRTTTLArrayPtr, void (*aOnComplete)
     sPlayRtttlState.TimeForWholeNoteMillis = (60 * 1000L / tNumber) * 4;
 
 #ifdef DEBUG
-    Serial.print("DefaultDuration=");
-    Serial.print (sPlayRtttlState.DefaultDuration);
+    Serial.print(" DefaultDuration=");
+    Serial.print(sPlayRtttlState.DefaultDuration);
     Serial.print(" DefaultOctave=");
-    Serial.print (sPlayRtttlState.DefaultOctave);
+    Serial.print(sPlayRtttlState.DefaultOctave);
     Serial.print(" BPM=");
     Serial.println(tNumber);
 #endif
@@ -265,6 +276,13 @@ void stopPlayRtttl(void) {
     sPlayRtttlState.IsStopped = true;
 }
 
+char getNextCharFromRTTLArray(const char* aRTTTLArrayPtr) {
+    if (sPlayRtttlState.IsPGMMemory) {
+        return pgm_read_byte(aRTTTLArrayPtr);
+    }
+    return *aRTTTLArrayPtr;
+}
+
 /*
  * Returns true if tone is playing, false if tone has ended or stopped
  */
@@ -274,17 +292,18 @@ bool checkForRtttlToneUpdate(void) {
         return false;
     }
 
+#ifdef DEBUG
+    bool isSharp = false;
+    char tNoteCharUppercase;
+#endif
+
     long tMillis = millis();
     if (sPlayRtttlState.MillisOfNextAction <= tMillis) {
         noTone(sPlayRtttlState.TonePin);
         const char * tRTTTLArrayPtr = sPlayRtttlState.NextTonePointer;
 
         char tChar;
-        if (sPlayRtttlState.IsPGMMemory) {
-            tChar = pgm_read_byte_near(tRTTTLArrayPtr);
-        } else {
-            tChar = *tRTTTLArrayPtr;
-        }
+        tChar = getNextCharFromRTTLArray(tRTTTLArrayPtr);
 
         /*
          * Check if end of string reached
@@ -297,31 +316,29 @@ bool checkForRtttlToneUpdate(void) {
             return false;
         }
 
-        int tNumber;
+        uint8_t tDurationNumber;
         long tDuration;
         uint8_t tNote;
         uint8_t tScale;
 
-        // first, get note duration, if available
-        tNumber = 0;
+// first, get note duration, if available
+        tDurationNumber = 0;
         while (isdigit(tChar)) {
-            tNumber = (tNumber * 10) + (tChar - '0');
+            tDurationNumber = (tDurationNumber * 10) + (tChar - '0');
             tRTTTLArrayPtr++;
-            if (sPlayRtttlState.IsPGMMemory) {
-                tChar = pgm_read_byte_near(tRTTTLArrayPtr);
-            } else {
-                tChar = *tRTTTLArrayPtr;
-            }
+            tChar = getNextCharFromRTTLArray(tRTTTLArrayPtr);
         }
 
-        if (tNumber != 0) {
-            tDuration = sPlayRtttlState.TimeForWholeNoteMillis / tNumber;
-        } else {
-            tDuration = sPlayRtttlState.TimeForWholeNoteMillis / sPlayRtttlState.DefaultDuration; // we will need to check if we are a dotted note after
+        if (tDurationNumber == 0) {
+            tDurationNumber = sPlayRtttlState.DefaultDuration; // we will need to check if we are a dotted note after
         }
+        tDuration = sPlayRtttlState.TimeForWholeNoteMillis / tDurationNumber;
 
-        // now get the note
+// now get the note
         tNote = 0;
+#ifdef DEBUG
+        tNoteCharUppercase = tChar - 0x20;
+#endif
 
         switch (tChar) {
         case 'c':
@@ -343,6 +360,7 @@ bool checkForRtttlToneUpdate(void) {
             tNote = 10;
             break;
         case 'b':
+        case 'h':  // I have seen this
             tNote = 12;
             break;
         case 'p':
@@ -351,43 +369,33 @@ bool checkForRtttlToneUpdate(void) {
         }
 
         tRTTTLArrayPtr++;
-        if (sPlayRtttlState.IsPGMMemory) {
-            tChar = pgm_read_byte_near(tRTTTLArrayPtr);
-        } else {
-            tChar = *tRTTTLArrayPtr;
-        }
+        tChar = getNextCharFromRTTLArray(tRTTTLArrayPtr);
 
-        // now, get optional '#' sharp
-        if (tChar == '#') {
+        // now, get optional '#' sharp (or '_' as seen on many songs)
+        if (tChar == '#' || tChar == '_') {
+#ifdef DEBUG
+            isSharp = true;
+#endif
             tNote++;
             tRTTTLArrayPtr++;
-            if (sPlayRtttlState.IsPGMMemory) {
-                tChar = pgm_read_byte_near(tRTTTLArrayPtr);
-            } else {
-                tChar = *tRTTTLArrayPtr;
-            }
+            tChar = getNextCharFromRTTLArray(tRTTTLArrayPtr);
         }
 
-        // now, get optional '.' dotted note
+// now, get optional '.' dotted note
         if (tChar == '.') {
             tDuration += tDuration / 2;
+#ifdef DEBUG
+            tDurationNumber += tDurationNumber / 2;
+#endif
             tRTTTLArrayPtr++;
-            if (sPlayRtttlState.IsPGMMemory) {
-                tChar = pgm_read_byte_near(tRTTTLArrayPtr);
-            } else {
-                tChar = *tRTTTLArrayPtr;
-            }
+            tChar = getNextCharFromRTTLArray(tRTTTLArrayPtr);
         }
 
-        // now, get scale
+// now, get scale
         if (isdigit(tChar)) {
             tScale = tChar - '0';
             tRTTTLArrayPtr++;
-            if (sPlayRtttlState.IsPGMMemory) {
-                tChar = pgm_read_byte_near(tRTTTLArrayPtr);
-            } else {
-                tChar = *tRTTTLArrayPtr;
-            }
+            tChar = getNextCharFromRTTLArray(tRTTTLArrayPtr);
         } else {
             tScale = sPlayRtttlState.DefaultOctave;
         }
@@ -402,23 +410,25 @@ bool checkForRtttlToneUpdate(void) {
          * now play the note
          */
         if (tNote > 0) {
-#ifdef DEBUG
-            Serial.print("Playing: ");
-            Serial.print(tScale, 10);
-            Serial.print(' ');
-            Serial.print(tNote, 10);
-            Serial.print(" (");
-            Serial.print(notes[(tScale - 4) * 12 + tNote], 10);
-            Serial.print(") ");
-            Serial.println(tDuration, 10);
-#endif
             tone(sPlayRtttlState.TonePin, notes[(tScale - 4) * 12 + tNote]);
         }
 #ifdef DEBUG
-        else {
-            Serial.print("Pausing: ");
-            Serial.println(tDuration, 10);
+        Serial.print("Playing: ");
+        Serial.print("NOTE_");
+        Serial.print(tNoteCharUppercase);
+        if (isSharp) {
+            Serial.print('#');
         }
+        Serial.print(tScale, 10);
+        Serial.print(", ");
+        Serial.print(tDurationNumber, 10);
+
+        Serial.print(" | ");
+        Serial.print(notes[(tScale - 4) * 12 + tNote], 10);
+        Serial.print("Hz for ");
+        Serial.print(tDuration, 10);
+        Serial.println("ms");
+
 #endif
         sPlayRtttlState.MillisOfNextAction = tMillis + tDuration;
         sPlayRtttlState.NextTonePointer = tRTTTLArrayPtr;
@@ -427,11 +437,11 @@ bool checkForRtttlToneUpdate(void) {
 }
 
 void getRtttlNamePGM(const char *aRTTTLArrayPtrPGM, char * aBuffer, uint8_t aBuffersize) {
-    char tPGMChar = pgm_read_byte_near(aRTTTLArrayPtrPGM++);
+    char tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM++);
     while (tPGMChar != ':' && aBuffersize > 1) {
         *aBuffer++ = tPGMChar;
         aBuffersize--;
-        tPGMChar = pgm_read_byte_near(aRTTTLArrayPtrPGM++);
+        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM++);
     }
     *aBuffer = '\0';
 }
@@ -456,6 +466,9 @@ void printNamePGM(const char *aRTTTLArrayPtrPGM) {
     Serial.println(StringBuffer);
 }
 
+/*
+ * not used yet
+ */
 void printName(char *aRTTTLArrayPtr) {
     char StringBuffer[16];
     Serial.print(F("Now playing: "));
@@ -467,16 +480,25 @@ void printName(char *aRTTTLArrayPtr) {
  * Plays one of the examples
  */
 void playRandomRtttlBlocking(uint8_t aTonePin) {
-    uint8_t tRandomIndex = random(0, 21);
-    printNamePGM(RTTTLsongs1[tRandomIndex]);
-    playRtttlBlockingPGM(aTonePin, RTTTLsongs1[tRandomIndex]);
+    uint8_t tRandomIndex = random(0, sizeof(RTTTLMelodies) / sizeof(char *) - 1);
+    printNamePGM(RTTTLMelodies[tRandomIndex]);
+    playRtttlBlockingPGM(aTonePin, RTTTLMelodies[tRandomIndex]);
 }
 
 /*
- * Plays one of the examples non blocking. Ie. you must call checkForRtttlToneUpdate() in your loop.
+ * Plays one of the songs in the array specified non blocking. Ie. you must call checkForRtttlToneUpdate() in your loop or use the callback function.
+ * aNumberOfEntriesInSongArrayPGM is (sizeof(<MyArrayName>) / sizeof(char *) - 1)
  */
-void startPlayRandomRtttl(uint8_t aTonePin, void (*aOnComplete)()) {
-    uint8_t tRandomIndex = random(0, 21);
-    startPlayRtttlPGM(aTonePin, RTTTLsongs1[tRandomIndex], aOnComplete);
-    printNamePGM(RTTTLsongs1[tRandomIndex]);
+void startPlayRandomRtttlFromArrayPGM(uint8_t aTonePin, const char * const aSongArrayPGM[], uint8_t aNumberOfEntriesInSongArrayPGM,
+        char* aBufferPointer, uint8_t aBufferPointerSize, void (*aOnComplete)()) {
+    uint8_t tRandomIndex = random(0, aNumberOfEntriesInSongArrayPGM - 1);
+    const char* tSongPtr = (char*) pgm_read_word(&aSongArrayPGM[tRandomIndex]);
+    startPlayRtttlPGM(aTonePin, tSongPtr, aOnComplete);
+    if (aBufferPointer != NULL) {
+// copy title to buffer
+        getRtttlNamePGM(tSongPtr, aBufferPointer, aBufferPointerSize);
+    } else {
+// print title
+        printNamePGM(tSongPtr);
+    }
 }
