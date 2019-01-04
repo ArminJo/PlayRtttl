@@ -5,6 +5,8 @@
  * As long as light intensity is below a threshold a random melody is played.
  * If a TEMT6000 module is attached, this value takes precedence over the LDR value.
  *
+ * More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/
+ *
  *  Copyright (C) 2018  Armin Joachimsmeyer
  *  armin.joachimsmeyer@gmail.com
  *
@@ -113,19 +115,27 @@ void loop() {
         if (tLightValue < LIGHT_THRESHOLD) {
             /*
              * Play random melody
+             * More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/
+             *
              */
             startPlayRandomRtttlFromArrayPGM(TONE_PIN, RTTTLMelodies, ARRAY_SIZE_MELODIES);
             int tThresholdCount = 0;
-            while (checkForRtttlToneUpdate()) {
+            while (updatePlayRtttl()) {
                 delay(10);
+                /*
+                 * Read new light value to decide if intensity is still low
+                 */
                 if (isTEMTConnected) {
                     tLightValue = analogRead(TEMT_6000_PIN);
                 } else {
                     tLightValue = sMaximum - analogRead(LDR_PIN);
                 }
+
                 if (tLightValue > LIGHT_THRESHOLD) {
+                    // wait for 10 consecutive times of intensity above threshold to avoid spikes
                     tThresholdCount++;
                     if (tThresholdCount > 10) {
+                        // stop playing melody
                         stopPlayRtttl();
                         break; // not really needed here, since the while condition will also change because of stopPlayRtttl.
                     }

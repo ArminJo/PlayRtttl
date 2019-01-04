@@ -52,20 +52,20 @@ NOTE_C7, NOTE_CS7, NOTE_D7, NOTE_DS7, NOTE_E7, NOTE_F7, NOTE_FS7, NOTE_G7, NOTE_
  */
 void playRtttlBlocking(uint8_t aTonePin, char *aRTTTLArrayPtr) {
     startPlayRtttl(aTonePin, aRTTTLArrayPtr, NULL);
-    while (checkForRtttlToneUpdate()) {
-        delay(1);
+    while (updatePlayRtttl()) {
+        delay(1); // this in turn calls yield();
     }
 }
 
 void playRtttlBlockingPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM) {
     startPlayRtttlPGM(aTonePin, aRTTTLArrayPtrPGM, NULL);
-    while (checkForRtttlToneUpdate()) {
-        delay(1);
+    while (updatePlayRtttl()) {
+        delay(1); // this in turn calls yield();
     }
 }
 
 /*
- * Non blocking version for RTTTL Data in FLASH. Ie. you must call checkForRtttlToneUpdate() in your loop.
+ * Non blocking version for RTTTL Data in FLASH. Ie. you must call updatePlayRtttl() in your loop.
  */
 void startPlayRtttlPGM(uint8_t aTonePin, const char * aRTTTLArrayPtrPGM, void (*aOnComplete)()) {
     sPlayRtttlState.IsPGMMemory = true;
@@ -172,11 +172,11 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char * aRTTTLArrayPtrPGM, void (*
     /*
      * Play first tone
      */
-    checkForRtttlToneUpdate();
+    updatePlayRtttl();
 }
 
 /*
- * Version for RTTTL Data in RAM. Ie. you must call checkForRtttlToneUpdate() in your loop.
+ * Version for RTTTL Data in RAM. Ie. you must call updatePlayRtttl() in your loop.
  * Since we do not need all the pgm_read_byte() calls this version is more simple and maybe better to understand.
  */
 void startPlayRtttl(uint8_t aTonePin, char * aRTTTLArrayPtr, void (*aOnComplete)()) {
@@ -268,7 +268,7 @@ void startPlayRtttl(uint8_t aTonePin, char * aRTTTLArrayPtr, void (*aOnComplete)
     /*
      * Play first tone
      */
-    checkForRtttlToneUpdate();
+    updatePlayRtttl();
 }
 
 void stopPlayRtttl(void) {
@@ -286,7 +286,7 @@ char getNextCharFromRTTLArray(const char* aRTTTLArrayPtr) {
 /*
  * Returns true if tone is playing, false if tone has ended or stopped
  */
-bool checkForRtttlToneUpdate(void) {
+bool updatePlayRtttl(void) {
 
     if (sPlayRtttlState.IsStopped) {
         return false;
@@ -319,7 +319,7 @@ bool checkForRtttlToneUpdate(void) {
         uint8_t tDurationNumber;
         long tDuration;
         uint8_t tNote;
-        uint8_t tScale;
+        uint8_t tOctave;
 
 // first, get note duration, if available
         tDurationNumber = 0;
@@ -391,16 +391,22 @@ bool checkForRtttlToneUpdate(void) {
             tChar = getNextCharFromRTTLArray(tRTTTLArrayPtr);
         }
 
-// now, get scale
+// now, get octave
         if (isdigit(tChar)) {
-            tScale = tChar - '0';
+            tOctave = tChar - '0';
             tRTTTLArrayPtr++;
             tChar = getNextCharFromRTTLArray(tRTTTLArrayPtr);
         } else {
-            tScale = sPlayRtttlState.DefaultOctave;
+            tOctave = sPlayRtttlState.DefaultOctave;
         }
 
-        tScale += OCTAVE_OFFSET;
+        tOctave += OCTAVE_OFFSET;
+
+        if (tChar == '.') { 	// believe me I have seen this (e.g. in SilentNight)
+        	tDuration += tDuration / 2;
+            tRTTTLArrayPtr++;
+            tChar = getNextCharFromRTTLArray(tRTTTLArrayPtr);
+        }
 
         if (tChar == ',') {
             tRTTTLArrayPtr++;       // skip comma for next note (or we may be at the end)
@@ -410,7 +416,7 @@ bool checkForRtttlToneUpdate(void) {
          * now play the note
          */
         if (tNote > 0) {
-            tone(sPlayRtttlState.TonePin, notes[(tScale - 4) * 12 + tNote]);
+            tone(sPlayRtttlState.TonePin, notes[(tOctave - 4) * 12 + tNote]);
         }
 #ifdef DEBUG
         Serial.print("Playing: ");
@@ -419,12 +425,12 @@ bool checkForRtttlToneUpdate(void) {
         if (isSharp) {
             Serial.print('#');
         }
-        Serial.print(tScale, 10);
+        Serial.print(tOctave, 10);
         Serial.print(", ");
         Serial.print(tDurationNumber, 10);
 
         Serial.print(" | ");
-        Serial.print(notes[(tScale - 4) * 12 + tNote], 10);
+        Serial.print(notes[(tOctave - 4) * 12 + tNote], 10);
         Serial.print("Hz for ");
         Serial.print(tDuration, 10);
         Serial.println("ms");
@@ -486,7 +492,7 @@ void playRandomRtttlBlocking(uint8_t aTonePin) {
 }
 
 /*
- * Plays one of the songs in the array specified non blocking. Ie. you must call checkForRtttlToneUpdate() in your loop or use the callback function.
+ * Plays one of the songs in the array specified non blocking. Ie. you must call updatePlayRtttl() in your loop or use the callback function.
  * aNumberOfEntriesInSongArrayPGM is (sizeof(<MyArrayName>) / sizeof(char *) - 1)
  */
 void startPlayRandomRtttlFromArrayPGM(uint8_t aTonePin, const char * const aSongArrayPGM[], uint8_t aNumberOfEntriesInSongArrayPGM,
