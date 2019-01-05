@@ -1,12 +1,18 @@
 # PlayRtttl
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Build Status](https://travis-ci.org/ArminJo/PlayRtttl.svg?branch=master)](https://travis-ci.org/ArminJo/PlayRtttl)
 
-Plays RTTTL melodies/ringtones from FLASH or RAM. Provides a non blocking version and a name output function.
-Includes 21 sample melodies.
+Improved Arduino library version of the RTTTL.pde example code written by Brett Hagman http://www.roguerobotics.com/  bhagman@roguerobotics.com
+ - Plays RTTTL melodies/ringtones from FLASH or RAM.
+ - Accepts even invalid specified rtttl files found in the wild. 
+ - Non blocking version.
+ - Name output function.
+ - Sample melodies.
+ - Random play of melodies array.
 
-## Download
-The actual version can be downloaded directly from GitHub [here](https://github.com/ArminJo/PlayRtttl/blob/master/extras/PlayRtttl.zip?raw=true)
+## More songs
+More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/ or ask Google.
 
-# Installation
+## Installation
 Download PlayRtttl.zip file or use the GitHub *clone or download -> Download ZIP* button, and add the .zip file with *Sketch -> Include Library -> add .ZIP Library...*.  
