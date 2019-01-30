@@ -21,6 +21,7 @@ stopPlayRtttl	KEYWORD2
 getRtttlNamePGM	KEYWORD2
 getRtttlName	KEYWORD2
 printNamePGM	KEYWORD2
+setTonePinIsInverted	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

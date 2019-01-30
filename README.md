@@ -10,9 +10,11 @@ Improved Arduino library version of the RTTTL.pde example code written by Brett 
  - Name output function.
  - Sample melodies.
  - Random play of melodies array.
+ - Supports inverted tone pin logic i.e. is tone active on low.
 
 ## More songs
 More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/ or ask Google.
+[C array of songs on GitHub](https://github.com/granadaxronos/120-SONG_NOKIA_RTTTL_RINGTONE_PLAYER_FOR_ARDUINO_UNO/blob/master/RTTTL_PLAYER/songs.h)
 
 ## Installation
 Download PlayRtttl.zip file or use the GitHub *clone or download -> Download ZIP* button, and add the .zip file with *Sketch -> Include Library -> add .ZIP Library...*.  

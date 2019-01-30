@@ -309,6 +309,7 @@ bool updatePlayRtttl(void) {
          * Check if end of string reached
          */
         if (tChar == '\0') {
+            noTone(sPlayRtttlState.TonePin);
             sPlayRtttlState.IsStopped = true;
             if (sPlayRtttlState.OnComplete != NULL) {
                 sPlayRtttlState.OnComplete();
@@ -403,7 +404,7 @@ bool updatePlayRtttl(void) {
         tOctave += OCTAVE_OFFSET;
 
         if (tChar == '.') { 	// believe me I have seen this (e.g. in SilentNight)
-        	tDuration += tDuration / 2;
+            tDuration += tDuration / 2;
             tRTTTLArrayPtr++;
             tChar = getNextCharFromRTTLArray(tRTTTLArrayPtr);
         }
@@ -417,6 +418,11 @@ bool updatePlayRtttl(void) {
          */
         if (tNote > 0) {
             tone(sPlayRtttlState.TonePin, notes[(tOctave - 4) * 12 + tNote]);
+        } else {
+            noTone(sPlayRtttlState.TonePin);
+            if (sPlayRtttlState.IsTonePinInverted) {
+                digitalWrite(sPlayRtttlState.TonePin, HIGH);
+            }
         }
 #ifdef DEBUG
         Serial.print("Playing: ");
@@ -507,4 +513,8 @@ void startPlayRandomRtttlFromArrayPGM(uint8_t aTonePin, const char * const aSong
 // print title
         printNamePGM(tSongPtr);
     }
+}
+
+void setTonePinIsInverted(bool aTonePinIsInverted) {
+    sPlayRtttlState.IsTonePinInverted = aTonePinIsInverted;
 }

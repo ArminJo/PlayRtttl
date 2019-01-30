@@ -84,6 +84,7 @@ ISR(INT0_vect) {
             sButton0State = tActualButtonState;
             sButton0StateHasChanged = true;
             if (tActualButtonState) {
+                // toggle on press, not on release
                 sButton0ToggleState = !sButton0ToggleState;
                 if (sButtonPressCallback != NULL) {
                     // call callback function

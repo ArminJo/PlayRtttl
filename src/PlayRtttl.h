@@ -41,6 +41,7 @@
 #define DEFAULT_OCTAVE 6
 #define DEFAULT_BPM 63
 
+void setTonePinIsInverted(bool aTonePinIsInverted);
 void startPlayRtttl(uint8_t aTonePin, char *aRTTTLArrayPtr, void (*aOnComplete)()=NULL);
 void playRtttlBlocking(uint8_t aTonePin, char *aRTTTLArrayPtr);
 
@@ -62,11 +63,12 @@ void getRtttlName(char *aRTTTLArrayPtr, char * aBuffer, uint8_t aBuffersize);
 void printNamePGM(const char *aRTTTLArrayPtrPGM);
 
 struct playRtttlState {
-    bool IsStopped;
-
     long MillisOfNextAction;
     const char * NextTonePointer;
+
+    bool IsStopped;
     bool IsPGMMemory;
+    bool IsTonePinInverted; // True if tone pin has inverted logic i.e. is active on low.
     // Tone pin to use for output
     uint8_t TonePin;
     // Callback on completion of tone
@@ -76,6 +78,7 @@ struct playRtttlState {
     uint8_t DefaultOctave;
     long TimeForWholeNoteMillis;
 };
+
 /*
  * RTTTL format:
  *  opt duration
@@ -150,7 +153,7 @@ static const char OhDennenboom[] PROGMEM
 static const char LetItSnow[] PROGMEM
         = "LetItSnow:d=4,o=5,b=125:8c,8c,8c6,8c6,a#,a,g,f,2c,8c,16c,g.,8f,g.,8f,e,2c,d,8d6,8d6,c6,a#,a,2g.,8e.6,16d6,c6,8c.6,16a#,a,8a#.,16a,2f.,c,8c6,8c6,a#,a,g,f,2c,8c.,16c,g.,8f,g.,8f,e,2c,d,8d6,8d6,c6,a#,a,2g.,8e.6,16d6,c6,8c.6,16a#,a,8a.,16g,2f.";
 static const char Frosty[] PROGMEM
-        = "Frosty:d=4,o=5,b=125:2g,e.,8f,g,2c6,8h,8c6,d6,c6,h,a,2g.,8h,8c6,d6,c6,h,8a,8a,g,c6,e,8g,8a,g,f,e,f,1g";
+= "Frosty:d=4,o=5,b=125:2g,e.,8f,g,2c6,8h,8c6,d6,c6,h,a,2g.,8h,8c6,d6,c6,h,8a,8a,g,c6,e,8g,8a,g,f,e,f,1g";
 static const char SilentNight[] PROGMEM
         = "SilentNight:d=4,o=5,b=112:g.,8a,g,2e.,g.,8a,g,2e.,2d6,d6,2b.,2c6,c6,2g.,2a,a,c6.,8b,a,g.,8a,g,2e.,2a,a,c6.,8b,a,g.,8a,g,2e.,2d6,d6,f6.,8d6,b,2c6.,2e6.,c6,g,e,g.,8f,d,2c.";
 static const char LastChristmas[] PROGMEM
@@ -161,8 +164,8 @@ static const char AmazingGrace[] PROGMEM = "AmazingGrace:d=8,o=5,b=80:c,f,2f,a,g
 /*
  * Array of Christmas songs. Useful for random melody
  */
-static const char * const RTTTLChristmasMelodies[] PROGMEM = { JingleBell, Rudolph, OhDennenboom, SilentNight, WeWishYou, WinterWonderland, LetItSnow,
-        Frosty, LastChristmas, AllIWant, AmazingGrace };
+static const char * const RTTTLChristmasMelodies[] PROGMEM = { JingleBell, Rudolph, OhDennenboom, SilentNight, WeWishYou,
+        WinterWonderland, LetItSnow, Frosty, LastChristmas, AllIWant, AmazingGrace };
 #define ARRAY_SIZE_CHRISTMAS_SONGS (sizeof(RTTTLChristmasMelodies)/sizeof(const char *))
 
 #endif /* SRC_PLAYRTTTL_H_ */

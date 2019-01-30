@@ -10,9 +10,11 @@ git:
 env:
   global:
      - PRETTYNAME="PlayRtttl Arduino Library"
-
 before_install:
    - source <(curl -SLs https://raw.githubusercontent.com/adafruit/travis-ci-arduino/master/install.sh)
-
 script:
    - build_platform uno
+notifications:
+  email:
+    on_success: always
+    on_failure: always
