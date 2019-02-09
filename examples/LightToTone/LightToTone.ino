@@ -37,24 +37,35 @@
 const int TONE_PIN = 11;
 
 const int LDR_PIN = A4; // LDR connected to Ground and 4700 Ohm connected to VCC (depends on the LDR type).
-#define LDR_DARK_VALUE 40 // since LDR Voltage can hardly drop to zero
+#define TEMT_6000_DARK_VALUE 10
 
 const int TEMT_6000_PIN = A3;
+#define TEMT_6000_DARK_VALUE 10
 bool isTEMTConnected = false;
 
-#define LIGHT_THRESHOLD 4 // If the analog reading is below this value, a random melody is played
+#define LIGHT_THRESHOLD 14 // If the TEMT_6000 reading is below this value, a random melody is played
 
 static int sMinimum = 1024, sMaximum;
+static int sLDRMaximum = 0; // only for LDR
+
+// Forward declarations
+void maintainMinAndMax(int aLightValue);
+int readLDRValue();
+int readLightValue();
 
 void setup() {
     Serial.begin(115200);
+    while (!Serial)
+        ; //delay for Leonardo
+    // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
 
     pinMode(LDR_PIN, INPUT);
     initINT0InterruptForButton0AtPin2();
 
     /*
-     * Check for TEMT_6000 connected - 10kOhm to GND
+     * Check if TEMT_6000 is connected - 10kOhm to GND
+     * do not cover the sensor otherwise the detection will fail
      */
     pinMode(TEMT_6000_PIN, INPUT_PULLUP); // 100kOhm to VCC
     delay(2);
@@ -66,42 +77,27 @@ void setup() {
         // assume TEMT6000 connected
         isTEMTConnected = true;
         Serial.println("Assume TEMT6000 connected");
+    } else {
+        Serial.println("Assume no TEMT6000 connected");
     }
-    sMinimum = analogRead(LDR_PIN);
-    sMaximum = sMinimum + LIGHT_THRESHOLD + 2;
+    Serial.println();
+
+    /*
+     * Initialize maximum and minimum values
+     */
+    int tLightValue = readLightValue();
+    sLDRMaximum += LIGHT_THRESHOLD + 2;
     randomSeed(analogRead(LDR_PIN));
+    Serial.println();
+    delay(500);
 }
 
 void loop() {
 
-    int tLightValue = analogRead(LDR_PIN);
+    int tLightValue = readLightValue();
 
-    if (tLightValue < sMinimum || tLightValue > sMaximum) {
-        if (tLightValue < sMinimum) {
-            sMinimum = tLightValue;
-        }
-        if (tLightValue > sMaximum) {
-            sMaximum = tLightValue;
-        }
-        Serial.print("Minimum=");
-        Serial.print(sMinimum);
-        Serial.print(" Maximum=");
-        Serial.println(sMaximum);
-    }
-
-    Serial.print("LDR=");
-    Serial.print(tLightValue);
-
-    tLightValue = sMaximum - tLightValue;
-    Serial.print(" / ");
-    Serial.print(tLightValue);
-    if (isTEMTConnected) {
-        tLightValue = analogRead(TEMT_6000_PIN);
-        Serial.print(" TEMT=");
-        Serial.print(tLightValue);
-    }
-    Serial.println();
     if (sButton0ToggleState) {
+
         /*
          * Play pentatonic notes
          */
@@ -113,6 +109,7 @@ void loop() {
         delay(200); // add an additional delay to make is easier to play a melody
     } else {
         if (tLightValue < LIGHT_THRESHOLD) {
+
             /*
              * Play random melody
              * More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/
@@ -125,13 +122,9 @@ void loop() {
                 /*
                  * Read new light value to decide if intensity is still low
                  */
-                if (isTEMTConnected) {
-                    tLightValue = analogRead(TEMT_6000_PIN);
-                } else {
-                    tLightValue = sMaximum - analogRead(LDR_PIN);
-                }
+                tLightValue = readLightValue();
 
-                if (tLightValue > LIGHT_THRESHOLD) {
+                if (tLightValue > (LIGHT_THRESHOLD * 4)) {
                     // wait for 10 consecutive times of intensity above threshold to avoid spikes
                     tThresholdCount++;
                     if (tThresholdCount > 10) {
@@ -145,12 +138,72 @@ void loop() {
             }
             delay(500);
         } else {
+
             /*
              * Play tone
              */
-            tone(TONE_PIN, tLightValue);
+            tone(TONE_PIN, tLightValue * 4);
             delay(50);
         }
     }
+}
+
+void maintainMinAndMax(int aLightValue) {
+    if (aLightValue < sMinimum || aLightValue > sMaximum) {
+        if (aLightValue < sMinimum) {
+            sMinimum = aLightValue;
+        }
+        if (aLightValue > sMaximum) {
+            sMaximum = aLightValue;
+        }
+        Serial.print("Minimum=");
+        Serial.print(sMinimum);
+        Serial.print(" Maximum=");
+        Serial.println(sMaximum);
+    }
+}
+
+int readLDRValue() {
+
+    /*
+     * Read LDR value and maintain maximum and minimum values for it.
+     */
+    int tLightValue = analogRead(LDR_PIN);
+    Serial.print("LDR raw=");
+    Serial.print(tLightValue);
+
+    if (tLightValue > sLDRMaximum) {
+        sLDRMaximum = tLightValue;
+    }
+
+    /*
+     * Convert LDR value to be comparable to the TEMT_6000
+     */
+    tLightValue = (sLDRMaximum - tLightValue) + TEMT_6000_DARK_VALUE;
+    Serial.print(" converted=");
+    Serial.print(tLightValue);
+    return tLightValue;
+}
+
+int readLightValue() {
+    int tLightValue;
+
+    /*
+     * Read TEMT_6000
+     */
+    if (isTEMTConnected) {
+        tLightValue = analogRead(TEMT_6000_PIN);
+        Serial.print("TEMT=");
+        Serial.print(tLightValue);
+        Serial.print(" - ");
+        // just for info
+        readLDRValue();
+    } else {
+        tLightValue = readLDRValue();
+    }
+    Serial.println();
+
+    maintainMinAndMax(tLightValue);
+    return tLightValue;
 }
 
