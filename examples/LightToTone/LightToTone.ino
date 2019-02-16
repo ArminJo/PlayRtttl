@@ -30,7 +30,12 @@
 #include <Arduino.h>
 
 #include <PlayRtttl.h>
-#include "Int0Button.h"
+
+#define USE_BUTTON_0
+#include "Int01ButtonClass.h"
+
+Int01Button Button0AtPin2(true);
+//#define DEBUG
 
 #define VERSION_EXAMPLE "1.1"
 
@@ -61,7 +66,6 @@ void setup() {
     Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
 
     pinMode(LDR_PIN, INPUT);
-    initINT0InterruptForButton0AtPin2();
 
     /*
      * Check if TEMT_6000 is connected - 10kOhm to GND
@@ -96,14 +100,16 @@ void loop() {
 
     int tLightValue = readLightValue();
 
-    if (sButton0ToggleState) {
+    if (Button0AtPin2.ButtonToggleState) {
 
         /*
          * Play pentatonic notes
          */
-        uint8_t tIndex = map(tLightValue, 0, sMaximum - sMinimum, 0, ARRAY_SIZE_NOTE_C5_TO_C7_PENTATONIC - 1);
+        uint8_t tIndex = map(tLightValue, sMinimum, sMaximum, 0, ARRAY_SIZE_NOTE_C5_TO_C7_PENTATONIC - 1);
+#ifdef DEBUG
         Serial.print("Index=");
         Serial.println(tIndex);
+#endif
         uint16_t tFrequency = NoteC5ToC7Pentatonic[tIndex];
         tone(TONE_PIN, tFrequency);
         delay(200); // add an additional delay to make is easier to play a melody
@@ -169,9 +175,10 @@ int readLDRValue() {
      * Read LDR value and maintain maximum and minimum values for it.
      */
     int tLightValue = analogRead(LDR_PIN);
+#ifdef DEBUG
     Serial.print("LDR raw=");
     Serial.print(tLightValue);
-
+#endif
     if (tLightValue > sLDRMaximum) {
         sLDRMaximum = tLightValue;
     }
@@ -180,8 +187,10 @@ int readLDRValue() {
      * Convert LDR value to be comparable to the TEMT_6000
      */
     tLightValue = (sLDRMaximum - tLightValue) + TEMT_6000_DARK_VALUE;
+#ifdef DEBUG
     Serial.print(" converted=");
     Serial.print(tLightValue);
+#endif
     return tLightValue;
 }
 
@@ -193,15 +202,19 @@ int readLightValue() {
      */
     if (isTEMTConnected) {
         tLightValue = analogRead(TEMT_6000_PIN);
+#ifdef DEBUG
         Serial.print("TEMT=");
         Serial.print(tLightValue);
         Serial.print(" - ");
-        // just for info
+        // just for serial output
         readLDRValue();
+#endif
     } else {
         tLightValue = readLDRValue();
     }
+#ifdef DEBUG
     Serial.println();
+#endif
 
     maintainMinAndMax(tLightValue);
     return tLightValue;
