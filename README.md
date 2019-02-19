@@ -12,6 +12,10 @@ Improved Arduino library version of the RTTTL.pde example code written by Brett 
  - Random play of melodies array.
  - Supports inverted tone pin logic i.e. is tone active on low.
 
+Youtube video of the RandomMelody example in action
+
+[![RandomMelody example](https://i.ytimg.com/vi/0n9_Fm3VP3w/hqdefault.jpg)](https://www.youtube.com/watch?v=0n9_Fm3VP3w)
+
 ## More songs
 More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/ or ask Google.
 [C array of songs on GitHub](https://github.com/granadaxronos/120-SONG_NOKIA_RTTTL_RINGTONE_PLAYER_FOR_ARDUINO_UNO/blob/master/RTTTL_PLAYER/songs.h)
