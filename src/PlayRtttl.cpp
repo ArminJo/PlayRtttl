@@ -68,7 +68,7 @@ void playRtttlBlockingPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM) {
  * Non blocking version for RTTTL Data in FLASH. Ie. you must call updatePlayRtttl() in your loop.
  */
 void startPlayRtttlPGM(uint8_t aTonePin, const char * aRTTTLArrayPtrPGM, void (*aOnComplete)()) {
-    sPlayRtttlState.IsPGMMemory = true;
+    sPlayRtttlState.Flags.IsPGMMemory = true;
     sPlayRtttlState.OnComplete = aOnComplete;
     sPlayRtttlState.TonePin = aTonePin;
     int tNumber;
@@ -167,7 +167,7 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char * aRTTTLArrayPtrPGM, void (*
 
     sPlayRtttlState.MillisOfNextAction = 0;
     sPlayRtttlState.NextTonePointer = aRTTTLArrayPtrPGM;
-    sPlayRtttlState.IsStopped = false;
+    sPlayRtttlState.Flags.IsStopped = false;
 
     /*
      * Play first tone
@@ -180,7 +180,7 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char * aRTTTLArrayPtrPGM, void (*
  * Since we do not need all the pgm_read_byte() calls this version is more simple and maybe better to understand.
  */
 void startPlayRtttl(uint8_t aTonePin, char * aRTTTLArrayPtr, void (*aOnComplete)()) {
-    sPlayRtttlState.IsPGMMemory = false;
+    sPlayRtttlState.Flags.IsPGMMemory = false;
     sPlayRtttlState.OnComplete = aOnComplete;
     sPlayRtttlState.TonePin = aTonePin;
     int tNumber;
@@ -263,7 +263,7 @@ void startPlayRtttl(uint8_t aTonePin, char * aRTTTLArrayPtr, void (*aOnComplete)
 
     sPlayRtttlState.MillisOfNextAction = 0;
     sPlayRtttlState.NextTonePointer = aRTTTLArrayPtr;
-    sPlayRtttlState.IsStopped = false;
+    sPlayRtttlState.Flags.IsStopped = false;
 
     /*
      * Play first tone
@@ -273,11 +273,11 @@ void startPlayRtttl(uint8_t aTonePin, char * aRTTTLArrayPtr, void (*aOnComplete)
 
 void stopPlayRtttl(void) {
     noTone(sPlayRtttlState.TonePin);
-    sPlayRtttlState.IsStopped = true;
+    sPlayRtttlState.Flags.IsStopped = true;
 }
 
 char getNextCharFromRTTLArray(const char* aRTTTLArrayPtr) {
-    if (sPlayRtttlState.IsPGMMemory) {
+    if (sPlayRtttlState.Flags.IsPGMMemory) {
         return pgm_read_byte(aRTTTLArrayPtr);
     }
     return *aRTTTLArrayPtr;
@@ -288,7 +288,7 @@ char getNextCharFromRTTLArray(const char* aRTTTLArrayPtr) {
  */
 bool updatePlayRtttl(void) {
 
-    if (sPlayRtttlState.IsStopped) {
+    if (sPlayRtttlState.Flags.IsStopped) {
         return false;
     }
 
@@ -310,7 +310,7 @@ bool updatePlayRtttl(void) {
          */
         if (tChar == '\0') {
             noTone(sPlayRtttlState.TonePin);
-            sPlayRtttlState.IsStopped = true;
+            sPlayRtttlState.Flags.IsStopped = true;
             if (sPlayRtttlState.OnComplete != NULL) {
                 sPlayRtttlState.OnComplete();
             }
@@ -420,7 +420,7 @@ bool updatePlayRtttl(void) {
             tone(sPlayRtttlState.TonePin, notes[(tOctave - 4) * 12 + tNote]);
         } else {
             noTone(sPlayRtttlState.TonePin);
-            if (sPlayRtttlState.IsTonePinInverted) {
+            if (sPlayRtttlState.Flags.IsTonePinInverted) {
                 digitalWrite(sPlayRtttlState.TonePin, HIGH);
             }
         }
@@ -484,7 +484,7 @@ void printNamePGM(const char *aRTTTLArrayPtrPGM) {
 void printName(char *aRTTTLArrayPtr) {
     char StringBuffer[16];
     Serial.print(F("Now playing: "));
-    getRtttlNamePGM(aRTTTLArrayPtr, StringBuffer, sizeof(StringBuffer));
+    getRtttlName(aRTTTLArrayPtr, StringBuffer, sizeof(StringBuffer));
     Serial.println(StringBuffer);
 }
 
@@ -516,5 +516,5 @@ void startPlayRandomRtttlFromArrayPGM(uint8_t aTonePin, const char * const aSong
 }
 
 void setTonePinIsInverted(bool aTonePinIsInverted) {
-    sPlayRtttlState.IsTonePinInverted = aTonePinIsInverted;
+    sPlayRtttlState.Flags.IsTonePinInverted = aTonePinIsInverted;
 }

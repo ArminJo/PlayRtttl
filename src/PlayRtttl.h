@@ -66,9 +66,12 @@ struct playRtttlState {
     long MillisOfNextAction;
     const char * NextTonePointer;
 
-    bool IsStopped;
-    bool IsPGMMemory;
-    bool IsTonePinInverted; // True if tone pin has inverted logic i.e. is active on low.
+    struct {
+        uint8_t IsStopped :1;
+        uint8_t IsPGMMemory :1;
+        uint8_t IsTonePinInverted :1; // True if tone pin has inverted logic i.e. is active on low.
+    } Flags;
+
     // Tone pin to use for output
     uint8_t TonePin;
     // Callback on completion of tone

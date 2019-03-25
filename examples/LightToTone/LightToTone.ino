@@ -32,9 +32,9 @@
 #include <PlayRtttl.h>
 
 #define USE_BUTTON_0
-#include "Int01ButtonClass.h"
+#include "EasyButtonAtInt01.h"
 
-Int01Button Button0AtPin2(true);
+EasyButton Button0AtPin2(true);
 //#define DEBUG
 
 #define VERSION_EXAMPLE "1.1"
