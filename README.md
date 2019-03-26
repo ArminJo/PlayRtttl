@@ -5,12 +5,12 @@
 
 Improved Arduino library version of the RTTTL.pde example code written by Brett Hagman http://www.roguerobotics.com/  bhagman@roguerobotics.com
  - Plays RTTTL melodies/ringtones from FLASH or RAM.
- - Accepts even invalid specified rtttl files found in the wild. 
  - Non blocking version.
  - Name output function.
  - Sample melodies.
  - Random play of melodies array.
- - Supports inverted tone pin logic i.e. is tone active on low.
+ - Supports inverted tone pin logic i.e. tone pin is HIGH at playing a pause.
+ - Accepts even invalid specified RTTTL files found in the wild. 
 
 Youtube video of the RandomMelody example in action
 
@@ -21,4 +21,4 @@ More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tu
 [C array of songs on GitHub](https://github.com/granadaxronos/120-SONG_NOKIA_RTTTL_RINGTONE_PLAYER_FOR_ARDUINO_UNO/blob/master/RTTTL_PLAYER/songs.h)
 
 ## Installation
-Download PlayRtttl.zip file or use the GitHub *clone or download -> Download ZIP* button, and add the .zip file with *Sketch -> Include Library -> add .ZIP Library...*.  
+Use the GitHub *clone or download -> Download ZIP* button, and add the .zip file with *Sketch -> Include Library -> add .ZIP Library...*.  
