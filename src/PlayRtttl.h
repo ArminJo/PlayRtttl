@@ -36,11 +36,35 @@
 #include <avr/pgmspace.h>
 #include "pitches.h"
 
+#define SUPPORT_EXTENSIONS // needs 200 bytes FLASH
+#define SUPPORT_RTX_FORMAT // needs 100 bytes FLASH
+
+#ifdef SUPPORT_RTX_FORMAT
+#define SUPPORT_EXTENSIONS
+#endif
+
 #define DEFAULT_DURATION 4
 #define DEFAULT_OCTAVE 6
 #define DEFAULT_BPM 63
 
+#define RTX_STYLE_CONTINUOUS 'C'  // Tone length = note length
+#define RTX_STYLE_NATURAL 'N'     // Tone length = note length - 1/16
+#define RTX_STYLE_STACCATO 'S'    // Tone length = note length - 1/2
+#define RTTTL_STYLE_CONTINUOUS 0  // Tone length = note length
+#define RTTTL_STYLE_NATURAL 16     // Tone length = note length - 1/16
+#define RTTTL_STYLE_STACCATO 2    // Tone length = note length - 1/2
+#define RTTTL_STYLE_4 4           // Tone length = note length - 1/4
+#define RTTTL_STYLE_8 8           // Tone length = note length - 1/8
+#define DEFAULT_STYLE RTTTL_STYLE_CONTINUOUS
+
 void setTonePinIsInverted(bool aTonePinIsInverted);
+
+#ifdef SUPPORT_EXTENSIONS
+void setNumberOfLoops(uint8_t aNumberOfLoops);
+void setDefaultStyle(uint8_t aDefaultStyleDivisorValue);
+uint8_t convertStyleCharacterToDivisorValue(char aStyleCharacter);
+#endif
+
 void startPlayRtttl(uint8_t aTonePin, char *aRTTTLArrayPtr, void (*aOnComplete)()=NULL);
 void playRtttlBlocking(uint8_t aTonePin, char *aRTTTLArrayPtr);
 
@@ -79,6 +103,13 @@ struct playRtttlState {
     uint8_t DefaultDuration;
     uint8_t DefaultOctave;
     long TimeForWholeNoteMillis;
+#ifdef SUPPORT_EXTENSIONS
+    const char * LastTonePointer; // used for loops
+    // The divisor for the formula: Tone length = note length - note length * (1 / divisor)
+    // If 0 then Tone length = note length;
+    uint8_t StyleDivisorValue;
+    uint8_t NumberOfLoops;  // 0 means forever, 1 means we are in the last loop
+#endif
 };
 
 /*
@@ -169,5 +200,10 @@ static const char AmazingGrace[] PROGMEM = "AmazingGrace:d=8,o=5,b=80:c,f,2f,a,g
 static const char * const RTTTLChristmasMelodies[] PROGMEM = { JingleBell, Rudolph, OhDennenboom, SilentNight, WeWishYou,
         WinterWonderland, LetItSnow, Frosty, LastChristmas, AllIWant, AmazingGrace };
 #define ARRAY_SIZE_CHRISTMAS_SONGS (sizeof(RTTTLChristmasMelodies)/sizeof(const char *))
+
+extern struct playRtttlState sPlayRtttlState;
+#ifdef SUPPORT_EXTENSIONS
+extern uint8_t sDefaultStyleDivisorValue;
+#endif
 
 #endif /* SRC_PLAYRTTTL_H_ */

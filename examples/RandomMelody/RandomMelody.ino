@@ -34,11 +34,12 @@
 const int TONE_PIN = 11;
 const int BUTTON_PIN = 2;
 
-char StringBuffer[16]; // for song title
+char StringBuffer[20]; // for song title
 
 void setup() {
     Serial.begin(115200);
-    while (!Serial); //delay for Leonardo
+    while (!Serial)
+        ; //delay for Leonardo
     // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
     pinMode(LED_BUILTIN, OUTPUT);
@@ -49,6 +50,7 @@ void setup() {
     // enable button press detection
     pinMode(BUTTON_PIN, INPUT_PULLUP);
 
+    setDefaultStyle(RTTTL_STYLE_NATURAL);
 }
 
 void toggleLED() {
@@ -67,7 +69,8 @@ void loop() {
      */
     startPlayRandomRtttlFromArrayPGM(TONE_PIN, RTTTLMelodies, ARRAY_SIZE_MELODIES, StringBuffer, sizeof(StringBuffer));
 // for Christmas
-//    startPlayRandomRtttlFromArrayPGM(TONE_PIN, RTTTLChristmasMelodies, ARRAY_SIZE_MELODIES);
+//    startPlayRandomRtttlFromArrayPGM(TONE_PIN, RTTTLChristmasMelodies, ARRAY_SIZE_CHRISTMAS_SONGS, StringBuffer, sizeof(StringBuffer));
+
     Serial.print(F("Now playing: "));
     Serial.println(StringBuffer);
 

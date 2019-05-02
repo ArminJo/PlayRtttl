@@ -47,6 +47,8 @@ NOTE_C7, NOTE_CS7, NOTE_D7, NOTE_DS7, NOTE_E7, NOTE_F7, NOTE_FS7, NOTE_G7, NOTE_
 #define OCTAVE_OFFSET 0
 #define isdigit(n) (n >= '0' && n <= '9')
 
+uint8_t sDefaultStyleDivisorValue = 0;
+
 /*
  * Blocking versions
  */
@@ -135,6 +137,47 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char * aRTTTLArrayPtrPGM, void (*
     }
     sPlayRtttlState.DefaultOctave = tNumber;
 
+#ifdef SUPPORT_EXTENSIONS
+    // get Style
+    tNumber = sDefaultStyleDivisorValue;
+#ifdef SUPPORT_RTX_FORMAT
+    if (tPGMChar == 's') {
+        aRTTTLArrayPtrPGM++;
+        aRTTTLArrayPtrPGM++;              // skip "s="
+        char tStyleChar = pgm_read_byte(aRTTTLArrayPtrPGM);
+        aRTTTLArrayPtrPGM++;
+        tNumber = convertStyleCharacterToDivisorValue(tStyleChar);
+
+        aRTTTLArrayPtrPGM++;// skip comma
+        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
+    }
+#endif
+    sPlayRtttlState.StyleDivisorValue = tNumber;
+
+    // get loops
+    tNumber = 1;
+#ifdef SUPPORT_RTX_FORMAT
+    if (tPGMChar == 'l') {
+        aRTTTLArrayPtrPGM++;
+        aRTTTLArrayPtrPGM++;              // skip "l="
+        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
+        tNumber = 0;
+        while (isdigit(tPGMChar)) {
+            tNumber = (tNumber * 10) + (tPGMChar - '0');
+            aRTTTLArrayPtrPGM++;
+            tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
+        }
+        if (tNumber == 15) {
+            tNumber = 0;
+        }
+
+        aRTTTLArrayPtrPGM++;                   // skip comma
+        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
+    }
+#endif
+    sPlayRtttlState.NumberOfLoops = tNumber;
+#endif
+
     // get BPM
     tNumber = DEFAULT_BPM;
     if (tPGMChar == 'b') {
@@ -162,11 +205,21 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char * aRTTTLArrayPtrPGM, void (*
     Serial.print(" DefaultOctave=");
     Serial.print(sPlayRtttlState.DefaultOctave);
     Serial.print(" BPM=");
-    Serial.println(tNumber);
+    Serial.print(tNumber);
+#ifdef SUPPORT_RTX_FORMAT
+    Serial.print(" Style=1/");
+    Serial.print(sPlayRtttlState.StyleDivisorValue);
+    Serial.print(" pause between notes, Loops=");
+    Serial.print(sPlayRtttlState.NumberOfLoops);
+#endif
+    Serial.println();
 #endif
 
     sPlayRtttlState.MillisOfNextAction = 0;
     sPlayRtttlState.NextTonePointer = aRTTTLArrayPtrPGM;
+#ifdef SUPPORT_EXTENSIONS
+    sPlayRtttlState.LastTonePointer = aRTTTLArrayPtrPGM;
+#endif
     sPlayRtttlState.Flags.IsStopped = false;
 
     /*
@@ -235,6 +288,38 @@ void startPlayRtttl(uint8_t aTonePin, char * aRTTTLArrayPtr, void (*aOnComplete)
     }
     sPlayRtttlState.DefaultOctave = tNumber;
 
+#ifdef SUPPORT_EXTENSIONS
+    // get Style
+    tNumber = sDefaultStyleDivisorValue;
+#ifdef SUPPORT_RTX_FORMAT
+    if (*aRTTTLArrayPtr == 's') {
+        aRTTTLArrayPtr++;
+        aRTTTLArrayPtr++;              // skip "s="
+        tNumber = convertStyleCharacterToDivisorValue(*aRTTTLArrayPtr++);
+
+        aRTTTLArrayPtr++;// skip comma
+    }
+#endif
+    sPlayRtttlState.StyleDivisorValue = tNumber;
+
+    // get loops
+    tNumber = 1;
+#ifdef SUPPORT_RTX_FORMAT
+    if (*aRTTTLArrayPtr == 'l') {
+        aRTTTLArrayPtr++;
+        aRTTTLArrayPtr++;              // skip "l="
+        while (isdigit(*aRTTTLArrayPtr)) {
+            tNumber = (tNumber * 10) + (*aRTTTLArrayPtr++ - '0');
+        }
+        if (tNumber == 15) {
+            tNumber = 0;
+        }
+        aRTTTLArrayPtr++;                   // skip comma
+    }
+#endif
+    sPlayRtttlState.NumberOfLoops = tNumber;
+#endif
+
     // get BPM
     tNumber = DEFAULT_BPM;
     if (*aRTTTLArrayPtr == 'b') {
@@ -258,11 +343,21 @@ void startPlayRtttl(uint8_t aTonePin, char * aRTTTLArrayPtr, void (*aOnComplete)
     Serial.print(" DefaultOctave=");
     Serial.print(sPlayRtttlState.DefaultOctave);
     Serial.print(" BPM=");
-    Serial.println(tNumber);
+    Serial.print(tNumber);
+#ifdef SUPPORT_RTX_FORMAT
+    Serial.print(" Style=1/");
+    Serial.print(sPlayRtttlState.StyleDivisorValue);
+    Serial.print(" pause between notes, Loops=");
+    Serial.print(sPlayRtttlState.NumberOfLoops);
+#endif
+    Serial.println();
 #endif
 
     sPlayRtttlState.MillisOfNextAction = 0;
     sPlayRtttlState.NextTonePointer = aRTTTLArrayPtr;
+#ifdef SUPPORT_EXTENSIONS
+    sPlayRtttlState.LastTonePointer = aRTTTLArrayPtr;
+#endif
     sPlayRtttlState.Flags.IsStopped = false;
 
     /*
@@ -309,16 +404,37 @@ bool updatePlayRtttl(void) {
          * Check if end of string reached
          */
         if (tChar == '\0') {
+#ifdef SUPPORT_EXTENSIONS
+            uint8_t tNumberOfLoops = sPlayRtttlState.NumberOfLoops;
+            if (tNumberOfLoops > 1) {
+                sPlayRtttlState.NumberOfLoops--;
+            }
+            if (tNumberOfLoops == 1) {
+#endif
+
+            // end song
             noTone(sPlayRtttlState.TonePin);
             sPlayRtttlState.Flags.IsStopped = true;
             if (sPlayRtttlState.OnComplete != NULL) {
                 sPlayRtttlState.OnComplete();
             }
             return false;
+#ifdef SUPPORT_EXTENSIONS
+        } else {
+            // loop again
+#ifdef DEBUG
+            Serial.print("Loop count=");
+            Serial.println(sPlayRtttlState.NumberOfLoops);
+#endif
+            sPlayRtttlState.MillisOfNextAction = 0;
+            sPlayRtttlState.NextTonePointer = sPlayRtttlState.LastTonePointer;
+            return updatePlayRtttl();
+        }
+#endif
         }
 
         uint8_t tDurationNumber;
-        long tDuration;
+        unsigned long tDuration;
         uint8_t tNote;
         uint8_t tOctave;
 
@@ -416,8 +532,22 @@ bool updatePlayRtttl(void) {
         /*
          * now play the note
          */
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+        unsigned long tDurationOfTone;
         if (tNote > 0) {
+#ifdef SUPPORT_EXTENSIONS
+            if (sPlayRtttlState.StyleDivisorValue != 0) {
+                /*
+                 * handle style parameter, compute duration of tone output for note and do rounding for integer division
+                 */
+                tDurationOfTone = tDuration - ((tDuration + (sPlayRtttlState.StyleDivisorValue / 2)) / sPlayRtttlState.StyleDivisorValue);
+                tone(sPlayRtttlState.TonePin, notes[(tOctave - 4) * 12 + tNote], tDurationOfTone);
+            } else {
+#endif
             tone(sPlayRtttlState.TonePin, notes[(tOctave - 4) * 12 + tNote]);
+#ifdef SUPPORT_EXTENSIONS
+        }
+#endif
         } else {
             noTone(sPlayRtttlState.TonePin);
             if (sPlayRtttlState.Flags.IsTonePinInverted) {
@@ -437,9 +567,13 @@ bool updatePlayRtttl(void) {
 
         Serial.print(" | ");
         Serial.print(notes[(tOctave - 4) * 12 + tNote], 10);
-        Serial.print("Hz for ");
+        Serial.print(" Hz for ");
+        if (sPlayRtttlState.StyleDivisorValue != 0 && tNote > 0) {
+            Serial.print(tDurationOfTone, 10);
+            Serial.print(" of ");
+        }
         Serial.print(tDuration, 10);
-        Serial.println("ms");
+        Serial.println(" ms");
 
 #endif
         sPlayRtttlState.MillisOfNextAction = tMillis + tDuration;
@@ -518,3 +652,33 @@ void startPlayRandomRtttlFromArrayPGM(uint8_t aTonePin, const char * const aSong
 void setTonePinIsInverted(bool aTonePinIsInverted) {
     sPlayRtttlState.Flags.IsTonePinInverted = aTonePinIsInverted;
 }
+
+#ifdef SUPPORT_EXTENSIONS
+/*
+ * 0 means forever
+ */
+void setNumberOfLoops(uint8_t aNumberOfLoops) {
+    sPlayRtttlState.NumberOfLoops = aNumberOfLoops;
+#ifdef DEBUG
+    Serial.print("Set NumberOfLoops to ");
+    Serial.println(sPlayRtttlState.NumberOfLoops);
+#endif
+}
+
+/*
+ * set the divisor for formula: Tone length = note length - note length * (1 / divisor)
+ */
+void setDefaultStyle(uint8_t aDefaultStyleDivisorValue) {
+    sDefaultStyleDivisorValue = aDefaultStyleDivisorValue;
+}
+
+uint8_t convertStyleCharacterToDivisorValue(char aStyleCharacter) {
+    if (aStyleCharacter == RTX_STYLE_STACCATO) {
+        return 2;
+    }
+    if (aStyleCharacter == RTX_STYLE_NATURAL) {
+        return 16;
+    }
+    return 0; // RTX_STYLE_CONTINUOUS
+}
+#endif // SUPPORT_EXTENSIONS
