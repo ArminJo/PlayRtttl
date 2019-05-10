@@ -43,5 +43,15 @@ const int TONE_PIN = 11;
 More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/ or ask Google.
 [C array of songs on GitHub](https://github.com/granadaxronos/120-SONG_NOKIA_RTTTL_RINGTONE_PLAYER_FOR_ARDUINO_UNO/blob/master/RTTTL_PLAYER/songs.h)
 
-## Installation
-Use the GitHub *clone or download -> Download ZIP* button, and add the .zip file with *Sketch -> Include Library -> add .ZIP Library...*.  
+# Revision History
+
+### Version 1.1.0
+- RTX song format support.
+- new setNumberOfLoops() and setDefaultStyle() functions.
+
+### Version 1.0.0
+Initial Arduino library version
+
+
+## Requests for modifications / extensions
+Please write me a PM including your motivation/problem if you need a modification or an extension.

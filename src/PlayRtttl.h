@@ -36,6 +36,13 @@
 #include <avr/pgmspace.h>
 #include "pitches.h"
 
+#define VERSION_SERVO_EASING 1.2.0
+/*
+ * Version 1.1
+ * - new setNumberOfLoops() and setDefaultStyle() functions.
+ */
+
+
 #define SUPPORT_EXTENSIONS // needs 200 bytes FLASH
 #define SUPPORT_RTX_FORMAT // needs 100 bytes FLASH
 
