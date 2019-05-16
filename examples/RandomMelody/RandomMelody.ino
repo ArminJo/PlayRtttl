@@ -34,8 +34,6 @@
 const int TONE_PIN = 11;
 const int BUTTON_PIN = 2;
 
-char StringBuffer[20]; // for song title
-
 void setup() {
     Serial.begin(115200);
     while (!Serial)
@@ -67,12 +65,9 @@ void loop() {
      * Play random melody
      * If you here the same melody twice and miss some melodies, than you get an idea of pseudo random.
      */
-    startPlayRandomRtttlFromArrayPGM(TONE_PIN, RTTTLMelodies, ARRAY_SIZE_MELODIES, StringBuffer, sizeof(StringBuffer));
+    startPlayRandomRtttlFromArrayPGMAndPrintName(TONE_PIN, RTTTLMelodies, ARRAY_SIZE_MELODIES, &Serial);
 // for Christmas
-//    startPlayRandomRtttlFromArrayPGM(TONE_PIN, RTTTLChristmasMelodies, ARRAY_SIZE_CHRISTMAS_SONGS, StringBuffer, sizeof(StringBuffer));
-
-    Serial.print(F("Now playing: "));
-    Serial.println(StringBuffer);
+//    startPlayRandomRtttlFromArrayPGMAndPrintName(TONE_PIN, RTTTLChristmasMelodies, ARRAY_SIZE_CHRISTMAS_SONGS, &Serial);
 
     while (updatePlayRtttl()) {
         /*

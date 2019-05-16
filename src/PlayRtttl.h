@@ -36,12 +36,16 @@
 #include <avr/pgmspace.h>
 #include "pitches.h"
 
-#define VERSION_SERVO_EASING 1.2.0
+#define VERSION_PLAY_RTTTL 1.2.0
 /*
+ * Version 1.2.0
+ * No Serial.print statements in this library anymore, to avoid problems with different Serial implementations.
+ * - Function playRandomRtttlBlocking() + startPlayRandomRtttlFromArrayPGM() do not print name now. If needed, use new functions playRandomRtttlSampleBlockingAndPrintName() + startPlayRandomRtttlFromArrayPGMAndPrintName().
+ * - Printing functions have parameter (..., Stream * aSerial) to print to any serial. Call it (..., &Serial) to use standard Serial;
+ * - playRandomRtttlBlocking() renamed to playRandomRtttlSampleBlocking() and bug fixing.
  * Version 1.1
  * - new setNumberOfLoops() and setDefaultStyle() functions.
  */
-
 
 #define SUPPORT_EXTENSIONS // needs 200 bytes FLASH
 #define SUPPORT_RTX_FORMAT // needs 100 bytes FLASH
@@ -62,7 +66,7 @@
 #define RTTTL_STYLE_STACCATO 2    // Tone length = note length - 1/2
 #define RTTTL_STYLE_4 4           // Tone length = note length - 1/4
 #define RTTTL_STYLE_8 8           // Tone length = note length - 1/8
-#define DEFAULT_STYLE RTTTL_STYLE_CONTINUOUS
+#define RTX_STYLE_DEFAULT RTX_STYLE_CONTINUOUS
 
 void setTonePinIsInverted(bool aTonePinIsInverted);
 
@@ -79,8 +83,12 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
 void playRtttlBlockingPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM);
 
 void startPlayRandomRtttlFromArrayPGM(uint8_t aTonePin, const char* const aSongArrayPGM[], uint8_t aNumberOfEntriesInSongArrayPGM,
-        char* aBufferPointer = NULL, uint8_t aBufferPointerSize = 0, void (*aOnComplete)()=NULL);
-void playRandomRtttlBlocking(uint8_t aTonePin);
+        char* aBufferPointer = NULL, uint8_t aBufferSize = 0, void (*aOnComplete)()=NULL);
+void startPlayRandomRtttlFromArrayPGMAndPrintName(uint8_t aTonePin, const char* const aSongArrayPGM[],
+        uint8_t aNumberOfEntriesInSongArrayPGM, Stream * aSerial, void (*aOnComplete)()=NULL);
+
+void playRandomRtttlSampleBlocking(uint8_t aTonePin);
+void playRandomRtttlSampleBlockingAndPrintName(uint8_t aTonePin, Stream * aSerial);
 
 // To be called from loop. - Returns true if tone is playing, false if tone has ended or stopped
 bool updatePlayRtttl(void);
@@ -90,7 +98,8 @@ void stopPlayRtttl(void);
 void getRtttlNamePGM(const char *aRTTTLArrayPtrPGM, char * aBuffer, uint8_t aBuffersize);
 void getRtttlName(char *aRTTTLArrayPtr, char * aBuffer, uint8_t aBuffersize);
 
-void printNamePGM(const char *aRTTTLArrayPtrPGM);
+void printNamePGM(const char *aRTTTLArrayPtrPGM, Stream * aSerial);
+void printName(char *aRTTTLArrayPtr, Stream * aSerial);
 
 struct playRtttlState {
     long MillisOfNextAction;

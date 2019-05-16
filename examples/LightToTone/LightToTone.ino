@@ -3,6 +3,7 @@
  *
  * Plays a pitch based on the light intensity.
  * As long as light intensity is below a threshold a random melody is played.
+ * The button switches between continuous pitch and pentatonic scale.
  * If a TEMT6000 module is attached, this value takes precedence over the LDR value.
  *
  * More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/
@@ -37,7 +38,16 @@
 EasyButton Button0AtPin2(true);
 //#define DEBUG
 
-#define VERSION_EXAMPLE "1.1"
+#define VERSION_EXAMPLE "1.2"
+
+/*
+ * Output inverted frequency signal to increase volume
+ */
+//#define ENABLE_INVERTED_OUTPUT
+#ifdef ENABLE_INVERTED_OUTPUT
+#include "digitalWriteFast.h"
+const int INVERTED_TONE_PIN = 3;
+#endif
 
 const int TONE_PIN = 11;
 
@@ -59,6 +69,8 @@ int readLDRValue();
 int readLightValue();
 
 void setup() {
+    pinMode(LED_BUILTIN, OUTPUT);
+
     Serial.begin(115200);
     while (!Serial)
         ; //delay for Leonardo
@@ -66,6 +78,12 @@ void setup() {
     Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
 
     pinMode(LDR_PIN, INPUT);
+
+#ifdef ENABLE_INVERTED_OUTPUT
+    pinMode(INVERTED_TONE_PIN, OUTPUT);
+    OCR2B = 0;
+    bitWrite(TIMSK2, OCIE2B, 1);
+#endif
 
     /*
      * Check if TEMT_6000 is connected - 10kOhm to GND
@@ -121,7 +139,7 @@ void loop() {
              * More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/
              *
              */
-            startPlayRandomRtttlFromArrayPGM(TONE_PIN, RTTTLMelodies, ARRAY_SIZE_MELODIES);
+            startPlayRandomRtttlFromArrayPGMAndPrintName(TONE_PIN, RTTTLMelodies, ARRAY_SIZE_MELODIES, &Serial);
             int tThresholdCount = 0;
             while (updatePlayRtttl()) {
                 delay(10);
@@ -220,3 +238,10 @@ int readLightValue() {
     return tLightValue;
 }
 
+#ifdef ENABLE_INVERTED_OUTPUT
+ISR(TIMER2_COMPB_vect) {
+    digitalToggleFast(LED_BUILTIN);
+    // set INVERTED_TONE_PIN to inverse value of TONE_PIN
+    digitalWriteFast(INVERTED_TONE_PIN, !digitalReadFast(TONE_PIN));
+}
+#endif

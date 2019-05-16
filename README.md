@@ -11,8 +11,8 @@ Improved Arduino library version of the RTTTL.pde example code written by Brett 
  - Random play of melodies from array.
  - Supports inverted tone pin logic i.e. tone pin is HIGH at playing a pause.
  - Accepts even invalid specified RTTTL files found in the wild.
- - Suports RTX format.
- - Tone style (relation of tone output to note lenght) and loop count can be set for a melody.
+ - Supports RTX format.
+ - Tone style (relation of tone output to note length) and loop count can be set for a melody.
 
 Youtube video of the RandomMelody example in action
 
@@ -45,6 +45,11 @@ More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tu
 
 # Revision History
 
+### Version 1.2.0
+No Serial.print statements in this library anymore, to avoid problems with different Serial implementations.
+ - Function playRandomRtttlBlocking() + startPlayRandomRtttlFromArrayPGM() do not print name now. If needed, use new functions playRandomRtttlSampleBlockingAndPrintName() + startPlayRandomRtttlFromArrayPGMAndPrintName().
+- Printing functions have parameter (..., Stream * aSerial) to print to any serial. Call it (..., &Serial) to use standard Serial;
+- playRandomRtttlBlocking() renamed to playRandomRtttlSampleBlocking() and bug fixing.
 ### Version 1.1.0
 - RTX song format support.
 - new setNumberOfLoops() and setDefaultStyle() functions.
