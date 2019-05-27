@@ -34,7 +34,7 @@
 #include "PlayRtttl.h"
 
 //uncomment next line to see debug output, which shows the note played, on serial.
-//#define DEBUG
+#define DEBUG
 
 struct playRtttlState sPlayRtttlState;
 
@@ -47,7 +47,7 @@ NOTE_C7, NOTE_CS7, NOTE_D7, NOTE_DS7, NOTE_E7, NOTE_F7, NOTE_FS7, NOTE_G7, NOTE_
 #define OCTAVE_OFFSET 0
 #define isdigit(n) (n >= '0' && n <= '9')
 
-uint8_t sDefaultStyleDivisorValue = 0;
+uint8_t sDefaultStyleDivisorValue = RTTTL_STYLE_DEFAULT; // Natural
 
 /*
  * Blocking versions
@@ -83,125 +83,124 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char * aRTTTLArrayPtrPGM, void (*
 #endif
     char tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
     while (tPGMChar != ':') {
+        /*
+         * Read title
+         */
 #ifdef DEBUG
         Serial.print(tPGMChar);
 #endif
         aRTTTLArrayPtrPGM++;
         tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
     }
-    aRTTTLArrayPtrPGM++;
-    tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
 
-    /*
-     * Read song info with format: d=N(N),o=N,b=NNN:
-     */
+    sPlayRtttlState.DefaultDuration = DEFAULT_DURATION;
+    sPlayRtttlState.DefaultOctave = DEFAULT_OCTAVE;
+    sPlayRtttlState.TimeForWholeNoteMillis = (60 * 1000L / DEFAULT_BPM) * 4;
+    sPlayRtttlState.NumberOfLoops = 1;
+    sPlayRtttlState.StyleDivisorValue = sDefaultStyleDivisorValue;
 
-    /*
-     * get default duration
-     */
-    tNumber = DEFAULT_DURATION;
-    if (tPGMChar == 'd') {
-        aRTTTLArrayPtrPGM++;
-        aRTTTLArrayPtrPGM++;              // skip "d="
-        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
-        tNumber = 0;
-        while (isdigit(tPGMChar)) {
-            tNumber = (tNumber * 10) + (tPGMChar - '0');
-            aRTTTLArrayPtrPGM++;
-            tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
-        }
-        if (tNumber == 0) {
-            tNumber = DEFAULT_DURATION;
-        }
-        aRTTTLArrayPtrPGM++;                   // skip comma
-        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
-    }
-    sPlayRtttlState.DefaultDuration = tNumber;
-
-    /*
-     * get default octave
-     */
-    tNumber = DEFAULT_OCTAVE;
-    if (tPGMChar == 'o') {
-        aRTTTLArrayPtrPGM++;
-        aRTTTLArrayPtrPGM++;              // skip "o="
-        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
-        aRTTTLArrayPtrPGM++;
-        tNumber = tPGMChar - '0';
-        if (tNumber < 3 && tNumber > 7) {
-            tNumber = DEFAULT_OCTAVE;
-        }
-
-        aRTTTLArrayPtrPGM++;                   // skip comma
-        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
-    }
-    sPlayRtttlState.DefaultOctave = tNumber;
-
-#ifdef SUPPORT_EXTENSIONS
-    // get Style
-    tNumber = sDefaultStyleDivisorValue;
 #ifdef SUPPORT_RTX_FORMAT
 #ifdef DEBUG
     char tStyleChar = RTX_STYLE_DEFAULT;
 #else
     char tStyleChar;
 #endif
-    if (tPGMChar == 's') {
-        aRTTTLArrayPtrPGM++;
-        aRTTTLArrayPtrPGM++;              // skip "s="
-        tStyleChar = pgm_read_byte(aRTTTLArrayPtrPGM);
-        tNumber = convertStyleCharacterToDivisorValue(tStyleChar);
-        aRTTTLArrayPtrPGM++;
-        aRTTTLArrayPtrPGM++;              // skip comma
-        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
-    }
 #endif
-    sPlayRtttlState.StyleDivisorValue = tNumber;
+    int tBPM;
 
-    // get loops
-    tNumber = 1;
-#ifdef SUPPORT_RTX_FORMAT
-    if (tPGMChar == 'l') {
+    do {
+        /*
+         * Get character after separator (comma or colon)
+         */
         aRTTTLArrayPtrPGM++;
-        aRTTTLArrayPtrPGM++;              // skip "l="
         tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
-        tNumber = 0;
-        while (isdigit(tPGMChar)) {
-            tNumber = (tNumber * 10) + (tPGMChar - '0');
+        /*
+         * Read song info with format: d=N(N),o=N,b=NNN:
+         */
+        if (tPGMChar == 'd') {
+            /*
+             * get default duration
+             */
             aRTTTLArrayPtrPGM++;
+            aRTTTLArrayPtrPGM++;              // skip "d="
             tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
-        }
-        if (tNumber == 15) {
             tNumber = 0;
-        }
-
-        aRTTTLArrayPtrPGM++;                   // skip comma
-        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
-    }
-#endif
-    sPlayRtttlState.NumberOfLoops = tNumber;
-#endif
-
-    // get BPM
-    tNumber = DEFAULT_BPM;
-    if (tPGMChar == 'b') {
-        aRTTTLArrayPtrPGM++;
-        aRTTTLArrayPtrPGM++;              // skip "b="
-        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
-        tNumber = 0;
-        while (isdigit(tPGMChar)) {
-            tNumber = (tNumber * 10) + (tPGMChar - '0');
+            while (isdigit(tPGMChar)) {
+                tNumber = (tNumber * 10) + (tPGMChar - '0');
+                aRTTTLArrayPtrPGM++;
+                tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
+            }
+            if (tNumber == 0) {
+                tNumber = DEFAULT_DURATION;
+            }
+            sPlayRtttlState.DefaultDuration = tNumber;
+        } else if (tPGMChar == 'o') {
+            /*
+             * get default octave
+             */
+            aRTTTLArrayPtrPGM++;
+            aRTTTLArrayPtrPGM++;              // skip "o="
+            tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
+            tNumber = tPGMChar - '0';
+            if (tNumber < 3 && tNumber > 7) {
+                tNumber = DEFAULT_OCTAVE;
+            }
+            sPlayRtttlState.DefaultOctave = tNumber;
+            //get comma or colon
             aRTTTLArrayPtrPGM++;
             tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
+        } else
+
+#ifdef SUPPORT_RTX_FORMAT
+        if (tPGMChar == 's') {
+            // get Style
+            aRTTTLArrayPtrPGM++;
+            aRTTTLArrayPtrPGM++;              // skip "s="
+            tStyleChar = pgm_read_byte(aRTTTLArrayPtrPGM);
+            tNumber = convertStyleCharacterToDivisorValue(tStyleChar);
+            sPlayRtttlState.StyleDivisorValue = tNumber;
+            //get comma or colon
+            aRTTTLArrayPtrPGM++;
+            tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
+        } else if (tPGMChar == 'l') {
+            // get loops
+            aRTTTLArrayPtrPGM++;
+            aRTTTLArrayPtrPGM++;              // skip "l="
+            tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
+            tNumber = 0;
+            while (isdigit(tPGMChar)) {
+                tNumber = (tNumber * 10) + (tPGMChar - '0');
+                aRTTTLArrayPtrPGM++;
+                tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
+            }
+            if (tNumber == 15) {
+                tNumber = 0;
+            }
+            sPlayRtttlState.NumberOfLoops = tNumber;
+        } else
+#endif
+
+        // get BPM
+        if (tPGMChar == 'b') {
+            aRTTTLArrayPtrPGM++;
+            aRTTTLArrayPtrPGM++;              // skip "b="
+            tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
+            tBPM = 0;
+            while (isdigit(tPGMChar)) {
+                tBPM = (tBPM * 10) + (tPGMChar - '0');
+                aRTTTLArrayPtrPGM++;
+                tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
+            }
+            if (tBPM == 0) {
+                tBPM = DEFAULT_BPM;
+            }
+            // BPM usually expresses the number of quarter notes per minute
+            sPlayRtttlState.TimeForWholeNoteMillis = (60 * 1000L / tBPM) * 4;
         }
-        if (tNumber == 0) {
-            tNumber = DEFAULT_BPM;
-        }
-        aRTTTLArrayPtrPGM++;                   // skip colon
-        tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
-    }
-    // BPM usually expresses the number of quarter notes per minute
-    sPlayRtttlState.TimeForWholeNoteMillis = (60 * 1000L / tNumber) * 4;
+
+    } while (tPGMChar != ':');
+
+    aRTTTLArrayPtrPGM++; // skip colon
 
 #ifdef DEBUG
     Serial.print(" DefaultDuration=");
@@ -209,7 +208,7 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char * aRTTTLArrayPtrPGM, void (*
     Serial.print(" DefaultOctave=");
     Serial.print(sPlayRtttlState.DefaultOctave);
     Serial.print(" BPM=");
-    Serial.print(tNumber);
+    Serial.print(tBPM);
 #ifdef SUPPORT_RTX_FORMAT
     Serial.print(" Style=");
     Serial.print(tStyleChar);
@@ -253,98 +252,111 @@ void startPlayRtttl(uint8_t aTonePin, char * aRTTTLArrayPtr, void (*aOnComplete)
     Serial.print("Title=");
 #endif
     while (*aRTTTLArrayPtr != ':') {
+        /*
+         * Read title
+         */
 #ifdef DEBUG
         Serial.print(*aRTTTLArrayPtr);
 #endif
         aRTTTLArrayPtr++;
     }
-    aRTTTLArrayPtr++;
 
-    /*
-     * Read song info with format: d=N,o=N,b=NNN:
-     */
+    sPlayRtttlState.DefaultDuration = DEFAULT_DURATION;
+    sPlayRtttlState.DefaultOctave = DEFAULT_OCTAVE;
+    sPlayRtttlState.TimeForWholeNoteMillis = (60 * 1000L / DEFAULT_BPM) * 4;
+    sPlayRtttlState.NumberOfLoops = 1;
+    sPlayRtttlState.StyleDivisorValue = sDefaultStyleDivisorValue;
 
-    /*
-     * get default duration
-     */
-    tNumber = DEFAULT_DURATION;
-    if (*aRTTTLArrayPtr == 'd') {
-        aRTTTLArrayPtr++;
-        aRTTTLArrayPtr++;              // skip "d="
-        tNumber = 0;
-        while (isdigit(*aRTTTLArrayPtr)) {
-            tNumber = (tNumber * 10) + (*aRTTTLArrayPtr++ - '0');
-        }
-        if (tNumber == 0) {
-            tNumber = DEFAULT_DURATION;
-        }
-        aRTTTLArrayPtr++;                   // skip comma
-    }
-    sPlayRtttlState.DefaultDuration = tNumber;
-
-    /*
-     * get default octave
-     */
-    tNumber = DEFAULT_OCTAVE;
-    if (*aRTTTLArrayPtr == 'o') {
-        aRTTTLArrayPtr++;
-        aRTTTLArrayPtr++;              // skip "o="
-        tNumber = *aRTTTLArrayPtr++ - '0';
-        if (tNumber < 3 && tNumber > 7) {
-            tNumber = DEFAULT_OCTAVE;
-        }
-        aRTTTLArrayPtr++;                   // skip comma
-    }
-    sPlayRtttlState.DefaultOctave = tNumber;
-
-#ifdef SUPPORT_EXTENSIONS
-    // get Style
-    tNumber = sDefaultStyleDivisorValue;
 #ifdef SUPPORT_RTX_FORMAT
-    if (*aRTTTLArrayPtr == 's') {
-        aRTTTLArrayPtr++;
-        aRTTTLArrayPtr++;              // skip "s="
-        tNumber = convertStyleCharacterToDivisorValue(*aRTTTLArrayPtr++);
-
-        aRTTTLArrayPtr++;              // skip comma
-    }
+#ifdef DEBUG
+    char tStyleChar = RTX_STYLE_DEFAULT;
+#else
+    char tStyleChar;
 #endif
-    sPlayRtttlState.StyleDivisorValue = tNumber;
+#endif
+    int tBPM;
 
-    // get loops
-    tNumber = 1;
-#ifdef SUPPORT_RTX_FORMAT
-    if (*aRTTTLArrayPtr == 'l') {
+    do {
+        /*
+         * Get character after separator (comma or colon)
+         */
         aRTTTLArrayPtr++;
-        aRTTTLArrayPtr++;              // skip "l="
-        while (isdigit(*aRTTTLArrayPtr)) {
-            tNumber = (tNumber * 10) + (*aRTTTLArrayPtr++ - '0');
-        }
-        if (tNumber == 15) {
+
+        /*
+         * Read song info with format: d=N(N),o=N,b=NNN:
+         */
+        if (*aRTTTLArrayPtr == 'd') {
+            /*
+             * get default duration
+             */
+            aRTTTLArrayPtr++;
+            aRTTTLArrayPtr++;              // skip "d="
             tNumber = 0;
+            while (isdigit(*aRTTTLArrayPtr)) {
+                tNumber = (tNumber * 10) + (*aRTTTLArrayPtr++ - '0');
+            }
+            if (tNumber == 0) {
+                tNumber = DEFAULT_DURATION;
+            }
+            sPlayRtttlState.DefaultDuration = tNumber;
         }
-        aRTTTLArrayPtr++;                   // skip comma
-    }
-#endif
-    sPlayRtttlState.NumberOfLoops = tNumber;
+
+        /*
+         * get default octave
+         */
+        if (*aRTTTLArrayPtr == 'o') {
+            aRTTTLArrayPtr++;
+            aRTTTLArrayPtr++;              // skip "o="
+            tNumber = *aRTTTLArrayPtr++ - '0';
+            if (tNumber < 3 && tNumber > 7) {
+                tNumber = DEFAULT_OCTAVE;
+            }
+            sPlayRtttlState.DefaultOctave = tNumber;
+        }
+
+#ifdef SUPPORT_RTX_FORMAT
+        if (*aRTTTLArrayPtr == 's') {
+            // get Style
+            aRTTTLArrayPtr++;
+            aRTTTLArrayPtr++;           // skip "s="
+            tStyleChar = *aRTTTLArrayPtr++;
+            tNumber = convertStyleCharacterToDivisorValue(tStyleChar);
+            sPlayRtttlState.StyleDivisorValue = tNumber;
+        }
+
+        // get loops
+        if (*aRTTTLArrayPtr == 'l') {
+            tNumber = 0;
+            aRTTTLArrayPtr++;
+            aRTTTLArrayPtr++;              // skip "l="
+            while (isdigit(*aRTTTLArrayPtr)) {
+                tNumber = (tNumber * 10) + (*aRTTTLArrayPtr++ - '0');
+            }
+            if (tNumber == 15) {
+                tNumber = 0;
+            }
+            sPlayRtttlState.NumberOfLoops = tNumber;
+        }
 #endif
 
-    // get BPM
-    tNumber = DEFAULT_BPM;
-    if (*aRTTTLArrayPtr == 'b') {
-        aRTTTLArrayPtr++;
-        aRTTTLArrayPtr++;              // skip "b="
-        tNumber = 0;
-        while (isdigit(*aRTTTLArrayPtr)) {
-            tNumber = (tNumber * 10) + (*aRTTTLArrayPtr++ - '0');
+        if (*aRTTTLArrayPtr == 'b') {
+            // get BPM
+            aRTTTLArrayPtr++;
+            aRTTTLArrayPtr++;              // skip "b="
+            tBPM = 0;
+            while (isdigit(*aRTTTLArrayPtr)) {
+                tBPM = (tBPM * 10) + (*aRTTTLArrayPtr++ - '0');
+            }
+            if (tBPM == 0) {
+                tBPM = DEFAULT_BPM;
+            }
+            // BPM usually expresses the number of quarter notes per minute
+            sPlayRtttlState.TimeForWholeNoteMillis = (60 * 1000L / tBPM) * 4;
         }
-        if (tNumber == 0) {
-            tNumber = DEFAULT_BPM;
-        }
-        aRTTTLArrayPtr++;                   // skip colon
-    }
-    // BPM usually expresses the number of quarter notes per minute
-    sPlayRtttlState.TimeForWholeNoteMillis = (60 * 1000L / tNumber) * 4;
+
+    } while (*aRTTTLArrayPtr != ':');
+
+    aRTTTLArrayPtr++; // skip colon
 
 #ifdef DEBUG
     Serial.print(" DefaultDuration=");
@@ -352,11 +364,16 @@ void startPlayRtttl(uint8_t aTonePin, char * aRTTTLArrayPtr, void (*aOnComplete)
     Serial.print(" DefaultOctave=");
     Serial.print(sPlayRtttlState.DefaultOctave);
     Serial.print(" BPM=");
-    Serial.print(tNumber);
+    Serial.print(tBPM);
 #ifdef SUPPORT_RTX_FORMAT
-    Serial.print(" Style=1/");
-    Serial.print(sPlayRtttlState.StyleDivisorValue);
-    Serial.print(" pause between notes, Loops=");
+    Serial.print(" Style=");
+    Serial.print(tStyleChar);
+    if (sPlayRtttlState.StyleDivisorValue != 0) {
+        Serial.print(" -> 1/");
+        Serial.print(sPlayRtttlState.StyleDivisorValue);
+        Serial.print(" pause between notes,");
+    }
+    Serial.print(" Loops=");
     Serial.print(sPlayRtttlState.NumberOfLoops);
 #endif
     Serial.println();
@@ -577,7 +594,9 @@ bool updatePlayRtttl(void) {
         if (isSharp) {
             Serial.print('#');
         }
-        Serial.print(tOctave, 10);
+        if (tNote) {
+            Serial.print(tOctave, 10);
+        }
         Serial.print(", ");
         Serial.print(tDurationNumber, 10);
 

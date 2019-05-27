@@ -33,29 +33,37 @@
 
 const int TONE_PIN = 11;
 
+char StarWarsInRam[] =
+        "StarWars:d=32,o=5,b=45,l=2,s=N:p,f#,f#,f#,8b.,8f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,e6,8c#6";
+
 void setup() {
     Serial.begin(115200);
-    while (!Serial); //delay for Leonardo
+    while (!Serial)
+        ; //delay for Leonardo
     // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
 
     /*
      * Play one melody
      */
-    playRtttlBlockingPGM(TONE_PIN, Bond);
+    playRtttlBlocking(TONE_PIN, StarWarsInRam);
     delay(5000);
 }
 
 void loop() {
     /*
-     * And another one, but use non blocking functions
+     * And all the others, but use non blocking functions
      */
-    startPlayRtttlPGM(TONE_PIN, TakeOnMe);
-    while (updatePlayRtttl()) {
-        /*
-         * your own code here...
-         */
-        delay(1);
+    for (uint8_t i = 1; i < ARRAY_SIZE_MELODIES; ++i) {
+        const char* tSongPtr = (char*) pgm_read_word(&RTTTLMelodies[i]);
+        startPlayRtttlPGM(TONE_PIN, tSongPtr);
+        while (updatePlayRtttl()) {
+            /*
+             * your own code here...
+             */
+            delay(1);
+        }
+        delay(2000);
     }
     delay(20000);
 }
