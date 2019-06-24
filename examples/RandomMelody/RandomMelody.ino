@@ -48,7 +48,7 @@ void setup() {
     // enable button press detection
     pinMode(BUTTON_PIN, INPUT_PULLUP);
 
-    setDefaultStyle(RTTTL_STYLE_NATURAL);
+    setDefaultStyle(RTTTL_STYLE_CONTINUOUS);
 }
 
 void toggleLED() {

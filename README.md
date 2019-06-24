@@ -39,12 +39,17 @@ const int TONE_PIN = 11;
     }
 ...
 ```
+
+## Running with 1MHz
+If running with 1MHz, e.g on an ATtiny, the millis() interrupt needs so much time, that it disturbes the tone() generation by interrupt. You can avoid this by using a tone pin, which is directly supported by hardware. Look at the appropriate pins_arduino.h, find `digital_pin_to_timer_PGM[]` and choose pins with TIMER1x entries.
+
 ## More songs
 More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/ or ask Google.
 [C array of songs on GitHub](https://github.com/granadaxronos/120-SONG_NOKIA_RTTTL_RINGTONE_PLAYER_FOR_ARDUINO_UNO/blob/master/RTTTL_PLAYER/songs.h)
 
 # Revision History
-
+### Version 1.2.2
+ - Tested with ATtiny85 and 167
 ### Version 1.2.1
  - Natural is the new default style.
  - New RTTTLMelodiesSmall sample array with less entries.

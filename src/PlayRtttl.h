@@ -36,8 +36,10 @@
 #include <avr/pgmspace.h>
 #include "pitches.h"
 
-#define VERSION_PLAY_RTTTL 1.2.1
+#define VERSION_PLAY_RTTTL 1.2.2
 /*
+ * Version 1.2.2
+ *
  * Version 1.2.1
  * - Natural is the new default style.
  * - New RTTTLMelodiesSmall sample array with less entries.
@@ -200,6 +202,10 @@ static const char * const RTTTLMelodies[] PROGMEM = { StarWars, MahnaMahna, Leis
 static const char * const RTTTLMelodiesSmall[] PROGMEM = { StarWars, MahnaMahna, LeisureSuit, MissionImp, Indiana, TakeOnMe,
         Muppets, _20thCenFox, Bond, GoodBad, PinkPanther };
 #define ARRAY_SIZE_MELODIES_SMALL (sizeof(RTTTLMelodiesSmall)/sizeof(const char *))
+
+// e.g. for ATtiny85
+static const char * const RTTTLMelodiesTiny[] PROGMEM = { StarWars, MahnaMahna, LeisureSuit, TakeOnMe, Muppets, GoodBad };
+#define ARRAY_SIZE_MELODIES_TINY (sizeof(RTTTLMelodiesTiny)/sizeof(const char *))
 
 static const char JingleBell[] PROGMEM
         = "JingleBell:d=8,o=5,b=112:a,a,4a,a,a,4a,a,c6,f.,16g,2a,a#,a#,a#.,16a#,a#,a,a.,16a,a,g,g,a,4g,4c6,16p,a,a,4a,a,a,4a,a,c6,f.,16g,2a,a#,a#,a#.,16a#,a#,a,a.,16a,c6,c6,a#,g,2f";
