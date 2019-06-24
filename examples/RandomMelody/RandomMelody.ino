@@ -29,6 +29,10 @@
 
 #include <PlayRtttl.h>
 
+#if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
+#include "TinySerialOut.h"
+#endif
+
 #define VERSION_EXAMPLE "1.0"
 
 const int TONE_PIN = 11;
@@ -36,14 +40,16 @@ const int BUTTON_PIN = 2;
 
 void setup() {
     Serial.begin(115200);
+#if defined(__AVR_ATmega32U4__)
     while (!Serial)
         ; //delay for Leonardo
+#endif
     // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
     pinMode(LED_BUILTIN, OUTPUT);
 
     // get "true" random
-    randomSeed(analogRead(A0));
+    randomSeed(analogRead(0));
 
     // enable button press detection
     pinMode(BUTTON_PIN, INPUT_PULLUP);
@@ -65,7 +71,16 @@ void loop() {
      * Play random melody
      * If you here the same melody twice and miss some melodies, than you get an idea of pseudo random.
      */
+#if defined(__AVR__)
+#if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
+    // use smaller array to fit into FLASH
+    startPlayRandomRtttlFromArrayPGM(TONE_PIN, RTTTLMelodiesTiny, ARRAY_SIZE_MELODIES_TINY);
+#else
     startPlayRandomRtttlFromArrayPGMAndPrintName(TONE_PIN, RTTTLMelodies, ARRAY_SIZE_MELODIES, &Serial);
+#endif
+#else
+    startPlayRandomRtttlFromArrayAndPrintName(TONE_PIN, RTTTLMelodies, ARRAY_SIZE_MELODIES, &Serial);
+#endif
 // for Christmas
 //    startPlayRandomRtttlFromArrayPGMAndPrintName(TONE_PIN, RTTTLChristmasMelodies, ARRAY_SIZE_CHRISTMAS_SONGS, &Serial);
 

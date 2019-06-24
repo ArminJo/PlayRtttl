@@ -29,6 +29,10 @@
 
 #include <PlayRtttl.h>
 
+#if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
+#include "TinySerialOut.h"
+#endif
+
 #define VERSION_EXAMPLE "1.0"
 
 const int TONE_PIN = 11;
@@ -38,8 +42,10 @@ char StarWarsInRam[] =
 
 void setup() {
     Serial.begin(115200);
+#if defined(__AVR_ATmega32U4__)
     while (!Serial)
         ; //delay for Leonardo
+#endif
     // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
 
@@ -54,9 +60,14 @@ void loop() {
     /*
      * And all the others, but use non blocking functions
      */
-    for (uint8_t i = 1; i < ARRAY_SIZE_MELODIES; ++i) {
-        const char* tSongPtr = (char*) pgm_read_word(&RTTTLMelodies[i]);
+    for (uint8_t i = 1; i < ARRAY_SIZE_MELODIES_SMALL; ++i) {
+#if defined(__AVR__)
+        const char* tSongPtr = (char*) pgm_read_word(&RTTTLMelodiesSmall[i]);
         startPlayRtttlPGM(TONE_PIN, tSongPtr);
+#else
+        char* tSongPtr = (char*) RTTTLMelodiesSmall[i];
+        startPlayRtttl(TONE_PIN, tSongPtr);
+#endif
         while (updatePlayRtttl()) {
             /*
              * your own code here...

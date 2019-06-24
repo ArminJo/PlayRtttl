@@ -33,13 +33,18 @@
 #ifndef SRC_PLAYRTTTL_H_
 #define SRC_PLAYRTTTL_H_
 
+#if defined(__SAM3X8E__)
+#error "Sorry no tone library for Arduino Due"
+#endif
+#if defined(__AVR__)
 #include <avr/pgmspace.h>
+#endif
 #include "pitches.h"
 
 #define VERSION_PLAY_RTTTL 1.2.2
 /*
  * Version 1.2.2
- *
+ * - Porting to non AVR architectures
  * Version 1.2.1
  * - Natural is the new default style.
  * - New RTTTLMelodiesSmall sample array with less entries.
@@ -84,8 +89,23 @@ void setDefaultStyle(uint8_t aDefaultStyleDivisorValue);
 uint8_t convertStyleCharacterToDivisorValue(char aStyleCharacter);
 #endif
 
+void getRtttlName(char *aRTTTLArrayPtr, char * aBuffer, uint8_t aBuffersize);
+void printName(char *aRTTTLArrayPtr, Stream * aSerial);
+
 void startPlayRtttl(uint8_t aTonePin, char *aRTTTLArrayPtr, void (*aOnComplete)()=NULL);
 void playRtttlBlocking(uint8_t aTonePin, char *aRTTTLArrayPtr);
+
+void startPlayRandomRtttlFromArray(uint8_t aTonePin, const char* const aSongArray[], uint8_t aNumberOfEntriesInSongArray,
+        char* aBufferPointer = NULL, uint8_t aBufferSize = 0, void (*aOnComplete)()=NULL);
+void startPlayRandomRtttlFromArrayAndPrintName(uint8_t aTonePin, const char* const aSongArray[],
+        uint8_t aNumberOfEntriesInSongArray, Stream * aSerial, void (*aOnComplete)()=NULL);
+
+void playRandomRtttlSampleBlocking(uint8_t aTonePin);
+void playRandomRtttlSampleBlockingAndPrintName(uint8_t aTonePin, Stream * aSerial);
+
+#if defined(__AVR__)
+void getRtttlNamePGM(const char *aRTTTLArrayPtrPGM, char * aBuffer, uint8_t aBuffersize);
+void printNamePGM(const char *aRTTTLArrayPtrPGM, Stream * aSerial);
 
 void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*aOnComplete)()=NULL);
 void playRtttlBlockingPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM);
@@ -95,19 +115,14 @@ void startPlayRandomRtttlFromArrayPGM(uint8_t aTonePin, const char* const aSongA
 void startPlayRandomRtttlFromArrayPGMAndPrintName(uint8_t aTonePin, const char* const aSongArrayPGM[],
         uint8_t aNumberOfEntriesInSongArrayPGM, Stream * aSerial, void (*aOnComplete)()=NULL);
 
-void playRandomRtttlSampleBlocking(uint8_t aTonePin);
-void playRandomRtttlSampleBlockingAndPrintName(uint8_t aTonePin, Stream * aSerial);
+void playRandomRtttlSampleBlockingPGM(uint8_t aTonePin);
+void playRandomRtttlSampleBlockingPGMAndPrintName(uint8_t aTonePin, Stream * aSerial);
+#endif
 
 // To be called from loop. - Returns true if tone is playing, false if tone has ended or stopped
 bool updatePlayRtttl(void);
 
 void stopPlayRtttl(void);
-
-void getRtttlNamePGM(const char *aRTTTLArrayPtrPGM, char * aBuffer, uint8_t aBuffersize);
-void getRtttlName(char *aRTTTLArrayPtr, char * aBuffer, uint8_t aBuffersize);
-
-void printNamePGM(const char *aRTTTLArrayPtrPGM, Stream * aSerial);
-void printName(char *aRTTTLArrayPtr, Stream * aSerial);
 
 struct playRtttlState {
     long MillisOfNextAction;
@@ -147,6 +162,10 @@ struct playRtttlState {
 /*
  * Disclaimer: These ringtone melodies are for personal enjoyment only. All copyright belongs to its respective author.
  */
+#if !defined(__AVR__) && ! defined(PROGMEM)
+#define PROGMEM void
+#endif
+
 // Use rtx format to save space
 static const char StarWars[] PROGMEM
 = "StarWars:d=32,o=5,b=45,l=2:p,f#,f#,f#,8b.,8f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,e6,8c#6";

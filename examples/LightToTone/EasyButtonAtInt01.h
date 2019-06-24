@@ -107,7 +107,7 @@
 #define INT1_DDR_PORT (DDRA)
 #define INT1_IN_PORT  (PINA)
 #define INT1_OUT_PORT (PORTA)
-#elif defined (__AVR_ATmega328P__)
+#else
 #define INT0_PIN (2)
 #define INT0_DDR_PORT (DDRD)
 #define INT0_IN_PORT  (PIND)
@@ -164,6 +164,11 @@ public:
         init();
     }
 
+#if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
+#define EICRA  MCUCR
+#define EIFR   GIFR
+#define EIMSK  GIMSK
+#endif
     /*
      * Sets pin 2 mode to INPUT_PULLUP and enables INT0 Interrupt on any logical change.
      */

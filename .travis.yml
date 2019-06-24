@@ -11,9 +11,17 @@ env:
   global:
      - PRETTYNAME="PlayRtttl Arduino Library"
 before_install:
-   - source <(curl -SLs https://raw.githubusercontent.com/adafruit/travis-ci-arduino/master/install.sh)
+# Workaround for avoiding "fork/exec /bin/xtensa-lx106-elf-g++: no such file or directory"
+- echo "Removing ESP8266 cache"
+- rm -rf ~/.arduino15/packages/esp8266
+- source <(curl -SLs https://raw.githubusercontent.com/adafruit/travis-ci-arduino/master/install.sh)
 script:
-   - build_platform uno
+- build_platform uno
+- build_platform leonardo
+- build_platform mega2560
+- build_platform esp32
+- build_platform esp8266
+- build_platform cplayClassic
 notifications:
   email:
     on_success: always

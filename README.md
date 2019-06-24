@@ -50,6 +50,7 @@ More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tu
 # Revision History
 ### Version 1.2.2
  - Tested with ATtiny85 and 167
+ - Ported to non AVR architectures
 ### Version 1.2.1
  - Natural is the new default style.
  - New RTTTLMelodiesSmall sample array with less entries.
@@ -67,6 +68,12 @@ No Serial.print statements in this library anymore, to avoid problems with diffe
 ### Version 1.0.0
 Initial Arduino library version
 
+# Travis CI
+The ServoEasing library examples are built on Travis CI for the following boards:
+
+- Arduino Uno, Leonardo, mega2560, esp32, esp8266, Adafruit cplayClassic
 
 ## Requests for modifications / extensions
 Please write me a PM including your motivation/problem if you need a modification or an extension.
+
+#### If you find this library useful, please give it a star.
