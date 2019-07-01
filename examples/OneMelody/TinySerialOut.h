@@ -72,7 +72,7 @@
  */
 //#define USE_ALWAYS_CLI_SEI_GUARD_FOR_OUTPUT
 extern bool sUseCliSeiForWrite; // default is true
-void useCliSeiForStrings(bool aUseCliSeiForWrite);
+void useCliSeiForStrings(bool aUseCliSeiForWrite); // might be useful to set to false if output is done from ISR, to avoid to call unwanted sei().
 
 inline void initTXPin() {
     // TX_PIN is active LOW, so set it to HIGH initially
@@ -83,9 +83,10 @@ inline void initTXPin() {
 
 void write1Start8Data1StopNoParity(uint8_t aValue);
 inline void write1Start8Data1StopNoParityWithCliSei(uint8_t aValue) {
+    uint8_t oldSREG = SREG;
     cli();
     write1Start8Data1StopNoParity(aValue);
-    sei();
+    SREG = oldSREG;
 }
 
 inline void writeValue(uint8_t aValue) {

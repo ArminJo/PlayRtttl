@@ -224,7 +224,7 @@ static const char * const RTTTLMelodiesSmall[] PROGMEM = { StarWars, MahnaMahna,
 
 // e.g. for ATtiny85
 static const char * const RTTTLMelodiesTiny[] PROGMEM = { StarWars, MahnaMahna, LeisureSuit, TakeOnMe, Muppets, GoodBad };
-#define ARRAY_SIZE_MELODIES_TINY (sizeof(RTTTLMelodiesTiny)/sizeof(const char *))
+#define ARRAY_SIZE_MELODIES_TINY (sizeof(RTTTLMelodiesTiny)/sizeof(const char *)) // 6
 
 static const char JingleBell[] PROGMEM
         = "JingleBell:d=8,o=5,b=112:a,a,4a,a,a,4a,a,c6,f.,16g,2a,a#,a#,a#.,16a#,a#,a,a.,16a,a,g,g,a,4g,4c6,16p,a,a,4a,a,a,4a,a,c6,f.,16g,2a,a#,a#,a#.,16a#,a#,a,a.,16a,c6,c6,a#,g,2f";
