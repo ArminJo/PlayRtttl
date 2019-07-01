@@ -54,13 +54,13 @@ const int TONE_PIN = 11;
 const int LDR_PIN = A4; // LDR connected to Ground and 4700 Ohm connected to VCC (depends on the LDR type).
 #define TEMT_6000_DARK_VALUE 10
 
-const int TEMT_6000_PIN = A3;
+const int TEMT_6000_PIN = A5;
 #define TEMT_6000_DARK_VALUE 10
 bool isTEMTConnected = false;
 
-#define LIGHT_THRESHOLD 14 // If the TEMT_6000 reading is below this value, a random melody is played
+#define LIGHT_LOW_THRESHOLD (2 * TEMT_6000_DARK_VALUE) // If the reading is below this value, a random melody can be played
 
-static int sMinimum = 1024, sMaximum;
+static int sMinimum = 1024, sMaximum = 0;
 static int sLDRMaximum = 0; // only for LDR
 
 // Forward declarations
@@ -108,7 +108,8 @@ void setup() {
      * Initialize maximum and minimum values
      */
     int tLightValue = readLightValue();
-    sLDRMaximum += LIGHT_THRESHOLD + 2;
+    // to avoid playing melody directly
+    sLDRMaximum += LIGHT_LOW_THRESHOLD + 2;
     randomSeed(analogRead(LDR_PIN));
     Serial.println();
     delay(500);
@@ -118,7 +119,7 @@ void loop() {
 
     int tLightValue = readLightValue();
 
-    if (Button0AtPin2.ButtonToggleState) {
+    if (!Button0AtPin2.ButtonToggleState) {
 
         /*
          * Play pentatonic notes
@@ -132,7 +133,7 @@ void loop() {
         tone(TONE_PIN, tFrequency);
         delay(200); // add an additional delay to make is easier to play a melody
     } else {
-        if (tLightValue < LIGHT_THRESHOLD) {
+        if (tLightValue < LIGHT_LOW_THRESHOLD && tLightValue < sMinimum + 2) {
 
             /*
              * Play random melody
@@ -148,7 +149,7 @@ void loop() {
                  */
                 tLightValue = readLightValue();
 
-                if (tLightValue > (LIGHT_THRESHOLD * 4)) {
+                if (tLightValue > (LIGHT_LOW_THRESHOLD * 2)) {
                     // wait for 10 consecutive times of intensity above threshold to avoid spikes
                     tThresholdCount++;
                     if (tThresholdCount > 10) {
@@ -187,17 +188,18 @@ void maintainMinAndMax(int aLightValue) {
     }
 }
 
+/*
+ * Read LDR value, maintain maximum and convert to TEMT value = Maximum - Value + TEMT_6000_DARK_VALUE
+ */
 int readLDRValue() {
-
-    /*
-     * Read LDR value and maintain maximum and minimum values for it.
-     */
     int tLightValue = analogRead(LDR_PIN);
 #ifdef DEBUG
     Serial.print("LDR raw=");
     Serial.print(tLightValue);
 #endif
     if (tLightValue > sLDRMaximum) {
+        Serial.print("LDR max=");
+        Serial.print(tLightValue);
         sLDRMaximum = tLightValue;
     }
 
