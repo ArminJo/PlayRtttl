@@ -60,7 +60,7 @@
 #define TX_DDR DDRB
 #endif // defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
 /*
- * @1MHz use bigger (+120 bytes for unrolled loop) but faster code. Otherwise only 38400 baud is possible.
+ * @1 MHz use bigger (+120 bytes for unrolled loop) but faster code. Otherwise only 38400 baud is possible.
  * @8/16 MHz use 115200 baud instead of 230400 baud.
  */
 #ifndef TINY_SERIAL_DO_NOT_USE_115200BAUD  // define this to force using other baud rates
