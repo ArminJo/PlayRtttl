@@ -43,6 +43,8 @@
 
 #define VERSION_PLAY_RTTTL 1.2.2
 /*
+ * Version 1.3.1
+ * - Improved non-AVR compatibility
  * Version 1.3.0
  * - Support all octaves below 8
  * - New styles '1' to '9' in addition to RTX styles 'C', 'N', 'S'
@@ -95,11 +97,11 @@ void setDefaultStyle(uint8_t aDefaultStyleDivisorValue);
 uint8_t convertStyleCharacterToDivisorValue(char aStyleCharacter);
 #endif
 
-void getRtttlName(char *aRTTTLArrayPtr, char * aBuffer, uint8_t aBuffersize);
-void printName(char *aRTTTLArrayPtr, Stream * aSerial);
+void getRtttlName(const char *aRTTTLArrayPtr, char * aBuffer, uint8_t aBuffersize);
+void printName(const char *aRTTTLArrayPtr, Stream * aSerial);
 
-void startPlayRtttl(uint8_t aTonePin, char *aRTTTLArrayPtr, void (*aOnComplete)()=NULL);
-void playRtttlBlocking(uint8_t aTonePin, char *aRTTTLArrayPtr);
+void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComplete)()=NULL);
+void playRtttlBlocking(uint8_t aTonePin, const char *aRTTTLArrayPtr);
 
 void startPlayRandomRtttlFromArray(uint8_t aTonePin, const char* const aSongArray[], uint8_t aNumberOfEntriesInSongArray,
         char* aBufferPointer = NULL, uint8_t aBufferSize = 0, void (*aOnComplete)()=NULL);
@@ -109,7 +111,7 @@ void startPlayRandomRtttlFromArrayAndPrintName(uint8_t aTonePin, const char* con
 void playRandomRtttlSampleBlocking(uint8_t aTonePin);
 void playRandomRtttlSampleBlockingAndPrintName(uint8_t aTonePin, Stream * aSerial);
 
-#if defined(__AVR__)
+
 void getRtttlNamePGM(const char *aRTTTLArrayPtrPGM, char * aBuffer, uint8_t aBuffersize);
 void printNamePGM(const char *aRTTTLArrayPtrPGM, Stream * aSerial);
 
@@ -123,7 +125,7 @@ void startPlayRandomRtttlFromArrayPGMAndPrintName(uint8_t aTonePin, const char* 
 
 void playRandomRtttlSampleBlockingPGM(uint8_t aTonePin);
 void playRandomRtttlSampleBlockingPGMAndPrintName(uint8_t aTonePin, Stream * aSerial);
-#endif
+
 
 // To be called from loop. - Returns true if tone is playing, false if tone has ended or stopped
 bool updatePlayRtttl(void);

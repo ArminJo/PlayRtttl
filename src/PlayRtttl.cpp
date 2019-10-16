@@ -48,7 +48,7 @@ uint8_t sDefaultStyleDivisorValue = RTTTL_STYLE_DEFAULT; // Natural (16)
 /*
  * Blocking versions
  */
-void playRtttlBlocking(uint8_t aTonePin, char *aRTTTLArrayPtr) {
+void playRtttlBlocking(uint8_t aTonePin, const char *aRTTTLArrayPtr) {
     startPlayRtttl(aTonePin, aRTTTLArrayPtr, NULL);
     while (updatePlayRtttl()) {
         delay(1); // this in turn calls yield();
@@ -59,7 +59,7 @@ void playRtttlBlocking(uint8_t aTonePin, char *aRTTTLArrayPtr) {
  * Version for RTTTL Data in RAM. Ie. you must call updatePlayRtttl() in your loop.
  * Since we do not need all the pgm_read_byte() calls this version is more simple and maybe better to understand.
  */
-void startPlayRtttl(uint8_t aTonePin, char * aRTTTLArrayPtr, void (*aOnComplete)()) {
+void startPlayRtttl(uint8_t aTonePin, const char * aRTTTLArrayPtr, void (*aOnComplete)()) {
     sPlayRtttlState.Flags.IsPGMMemory = false;
     sPlayRtttlState.OnComplete = aOnComplete;
     sPlayRtttlState.TonePin = aTonePin;
@@ -268,12 +268,12 @@ bool updatePlayRtttl(void) {
             }
             if (tNumberOfLoops == 1) {
 #endif
-            // end song
-            stopPlayRtttl();
-            if (sPlayRtttlState.OnComplete != NULL) {
-                sPlayRtttlState.OnComplete();
-            }
-            return false;
+                // end song
+                stopPlayRtttl();
+                if (sPlayRtttlState.OnComplete != NULL) {
+                    sPlayRtttlState.OnComplete();
+                }
+                return false;
 #ifdef SUPPORT_RTX_EXTENSIONS
             } else {
                 // loop again
@@ -461,7 +461,7 @@ bool updatePlayRtttl(void) {
     return true;
 }
 
-void getRtttlName(char *aRTTTLArrayPtr, char * aBuffer, uint8_t aBuffersize) {
+void getRtttlName(const char *aRTTTLArrayPtr, char * aBuffer, uint8_t aBuffersize) {
     char tChar = *aRTTTLArrayPtr++;
     while (tChar != ':' && aBuffersize > 1) {
         *aBuffer++ = tChar;
@@ -475,7 +475,7 @@ void getRtttlName(char *aRTTTLArrayPtr, char * aBuffer, uint8_t aBuffersize) {
  * Prints text "Now playing: Song xy"
  * call it e.g. printNamePGM(RTTTLMelodies[tRandomIndex], &Serial);
  */
-void printName(char *aRTTTLArrayPtr, Stream * aSerial) {
+void printName(const char *aRTTTLArrayPtr, Stream * aSerial) {
     char StringBuffer[16];
     aSerial->print(F("Now playing: "));
     getRtttlName(aRTTTLArrayPtr, StringBuffer, sizeof(StringBuffer));
@@ -523,7 +523,6 @@ void playRandomRtttlSampleBlockingAndPrintName(uint8_t aTonePin, Stream * aSeria
     playRtttlBlocking(aTonePin, tSongPtr);
 }
 
-#if defined(__AVR__)
 void playRtttlBlockingPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM) {
     startPlayRtttlPGM(aTonePin, aRTTTLArrayPtrPGM, NULL);
     while (updatePlayRtttl()) {
@@ -705,6 +704,9 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char * aRTTTLArrayPtrPGM, void (*
 }
 
 void getRtttlNamePGM(const char *aRTTTLArrayPtrPGM, char * aBuffer, uint8_t aBuffersize) {
+#if !defined(__AVR__) // Let the function work for non AVR platforms
+    getRtttlName(aRTTTLArrayPtrPGM, aBuffer, aBuffersize);
+#else
     char tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM++);
     while (tPGMChar != ':' && aBuffersize > 1) {
         *aBuffer++ = tPGMChar;
@@ -712,13 +714,18 @@ void getRtttlNamePGM(const char *aRTTTLArrayPtrPGM, char * aBuffer, uint8_t aBuf
         tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM++);
     }
     *aBuffer = '\0';
+#endif
 }
 
 void printNamePGM(const char *aRTTTLArrayPtrPGM, Stream * aSerial) {
+#if !defined(__AVR__) // Let the function work for non AVR platforms
+    printName(aRTTTLArrayPtrPGM, aSerial);
+#else
     char StringBuffer[16];
     aSerial->print(F("Now playing: "));
     getRtttlNamePGM(aRTTTLArrayPtrPGM, StringBuffer, sizeof(StringBuffer));
     aSerial->println(StringBuffer);
+#endif
 }
 
 /*
@@ -729,6 +736,9 @@ void printNamePGM(const char *aRTTTLArrayPtrPGM, Stream * aSerial) {
  */
 void startPlayRandomRtttlFromArrayPGM(uint8_t aTonePin, const char * const aSongArrayPGM[], uint8_t aNumberOfEntriesInSongArrayPGM,
         char* aBufferPointer, uint8_t aBufferSize, void (*aOnComplete)()) {
+#if !defined(__AVR__) // Let the function work for non AVR platforms
+    startPlayRandomRtttlFromArray(aTonePin, aSongArrayPGM, aNumberOfEntriesInSongArrayPGM, aBufferPointer, aBufferSize, aOnComplete);
+#else
     uint8_t tRandomIndex = random(0, aNumberOfEntriesInSongArrayPGM - 1);
     const char* tSongPtr = (char*) pgm_read_word(&aSongArrayPGM[tRandomIndex]);
     startPlayRtttlPGM(aTonePin, tSongPtr, aOnComplete);
@@ -736,6 +746,7 @@ void startPlayRandomRtttlFromArrayPGM(uint8_t aTonePin, const char * const aSong
 // copy title to buffer
         getRtttlNamePGM(tSongPtr, aBufferPointer, aBufferSize);
     }
+#endif
 }
 
 /*
@@ -743,30 +754,40 @@ void startPlayRandomRtttlFromArrayPGM(uint8_t aTonePin, const char * const aSong
  */
 void startPlayRandomRtttlFromArrayPGMAndPrintName(uint8_t aTonePin, const char * const aSongArrayPGM[],
         uint8_t aNumberOfEntriesInSongArrayPGM, Stream * aSerial, void (*aOnComplete)()) {
+#if !defined(__AVR__) // Let the function work for non AVR platforms
+    startPlayRandomRtttlFromArrayAndPrintName(aTonePin, aSongArrayPGM, aNumberOfEntriesInSongArrayPGM, aSerial, aOnComplete);
+#else
     uint8_t tRandomIndex = random(0, aNumberOfEntriesInSongArrayPGM - 1);
     const char* tSongPtr = (char*) pgm_read_word(&aSongArrayPGM[tRandomIndex]);
     startPlayRtttlPGM(aTonePin, tSongPtr, aOnComplete);
 // print title
     printNamePGM(tSongPtr, aSerial);
+#endif
 }
 
 /*
  * Plays one of the samples from RTTTLMelodies array
  */
 void playRandomRtttlSampleBlockingPGM(uint8_t aTonePin) {
+#if !defined(__AVR__) // Let the function work for non AVR platforms
+    playRandomRtttlSampleBlocking(aTonePin);
+#else
     uint8_t tRandomIndex = random(0, sizeof(RTTTLMelodies) / sizeof(char *) - 1);
     const char* tSongPtr = (char*) pgm_read_word(&RTTTLMelodies[tRandomIndex]);
     playRtttlBlockingPGM(aTonePin, tSongPtr);
+#endif
 }
 
 void playRandomRtttlSampleBlockingPGMAndPrintName(uint8_t aTonePin, Stream * aSerial) {
+#if !defined(__AVR__) // Let the function work for non AVR platforms
+    playRandomRtttlSampleBlockingAndPrintName(aTonePin, aSerial);
+#else
     uint8_t tRandomIndex = random(0, sizeof(RTTTLMelodies) / sizeof(char *) - 1);
     const char* tSongPtr = (char*) pgm_read_word(&RTTTLMelodies[tRandomIndex]);
     printNamePGM(tSongPtr, aSerial);
     playRtttlBlockingPGM(aTonePin, tSongPtr);
-}
-
 #endif
+}
 
 void setTonePinIsInverted(bool aTonePinIsInverted) {
     sPlayRtttlState.Flags.IsTonePinInverted = aTonePinIsInverted;
