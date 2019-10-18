@@ -41,9 +41,12 @@ char StarWarsInRam[] =
         "StarWars:d=32,o=5,b=45,l=2,s=N:p,f#,f#,f#,8b.,8f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,e6,8c#6";
 
 void setup() {
+    pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(115200);
+#if defined(__AVR_ATmega32U4__)
     while (!Serial)
-        ; //delay for Leonardo
+        ; //delay for Leonardo, but this loops forever for Maple Serial
+#endif
     // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
 
