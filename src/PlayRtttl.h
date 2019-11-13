@@ -41,26 +41,31 @@
 #endif
 #include "pitches.h"
 
-#define VERSION_PLAY_RTTTL 1.2.2
+#define VERSION_PLAY_RTTTL 1.3.1
 /*
- * Version 1.3.1
- * - Improved non-AVR compatibility
- * Version 1.3.0
- * - Support all octaves below 8
- * - New styles '1' to '9' in addition to RTX styles 'C', 'N', 'S'
- * Version 1.2.2
- * - Porting to non AVR architectures
- * Version 1.2.1
+ * Version 1.3.1 - 11/2019
+ * - Improved non-AVR compatibility.
+ *
+ * Version 1.3.0 - 10/2019
+ * - Support all octaves below 8.
+ * - New styles '1' to '9' in addition to RTX styles 'C', 'N', 'S'.
+ *
+ * Version 1.2.2 - 6/2019
+ * - Porting to non AVR architectures.
+ *
+ * Version 1.2.1 - 5/2019
  * - Natural is the new default style.
  * - New RTTTLMelodiesSmall sample array with less entries.
  * - Parameter now order independent.
  * - Modified oneMelody example.
- * Version 1.2.0
- * No Serial.print statements in this library anymore, to avoid problems with different Serial implementations.
+ *
+ * Version 1.2.0 - 5/2019
+ * - No Serial.print statements in this library anymore, to avoid problems with different Serial implementations.
  * - Function playRandomRtttlBlocking() + startPlayRandomRtttlFromArrayPGM() do not print name now. If needed, use new functions playRandomRtttlSampleBlockingAndPrintName() + startPlayRandomRtttlFromArrayPGMAndPrintName().
  * - Printing functions have parameter (..., Stream * aSerial) to print to any serial. Call it (..., &Serial) to use standard Serial;
  * - playRandomRtttlBlocking() renamed to playRandomRtttlSampleBlocking() and bug fixing.
- * Version 1.1
+ *
+ * Version 1.1 - 5/2019
  * - new setNumberOfLoops() and setDefaultStyle() functions.
  */
 

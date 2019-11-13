@@ -1,9 +1,7 @@
 /*
  * PlayChristmasMelodyUSDistance.cpp
  *
- * Plays a random Christmas melody if US Sensor value is a defined range.
- *
- * More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/
+ * Plays a random Christmas melody if US sensor value is in a defined range.
  *
  *  Copyright (C) 2019  Armin Joachimsmeyer
  *  armin.joachimsmeyer@gmail.com
@@ -22,7 +20,6 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/gpl.html>.
- *
  */
 
 #include <Arduino.h>
@@ -31,16 +28,41 @@
 #include "BlinkLed.h"
 #include <PlayRtttl.h>
 
-#define VERSION_EXAMPLE "1.0"
+#define TALKIE_FEEDBACK
+#if defined(TALKIE_FEEDBACK)
+/*
+ * You need to install "Talkie" and "EasyButtonAtInt01" libraries under "Tools -> Manage Libraries..." or "Ctrl+Shift+I" -> use the names as filter string
+ */
+#include <TalkieUtils.h>
+Talkie Voice;
+
+#define USE_BUTTON_0
+#include <EasyButtonAtInt01.h>
+EasyButton Button0AtPin2(true);
+#endif
+
+#define VERSION_EXAMPLE "2.0"
+
+/*
+ * The range for the melody to start
+ */
+#define MINIMUM_DISTANCE_CENTIMETER 40
+#define MAXIMUM_DISTANCE_CENTIMETER 120
+
+#define NUMBER_OF_CONSECUTIVE_IN_RANGE_READINGS 1
+#define DELAY_MILLIS_FOR_IN_RANGE_READING 100
+
+#define NUMBER_OF_CONSECUTIVE_OUT_RANGE_READINGS 5
+#define DELAY_MILLIS_FOR_OUT_RANGE_READING 200
 
 #define PIN_SPEAKER         3
 
-#define PIN_TRIGGER_OUT     4
-#define PIN_ECHO_IN         5
+#define PIN_ECHO_IN         4
+#define PIN_TRIGGER_OUT     5
 
-#define PIN_GREEN_LED       6
-#define PIN_YELLOW_LED      7
-#define PIN_RED_LED         8
+#define PIN_GREEN_LED       A0
+#define PIN_YELLOW_LED      A2
+#define PIN_RED_LED         A4
 
 BlinkLed RedLed(PIN_RED_LED);
 BlinkLed YellowLed(PIN_YELLOW_LED);
@@ -61,48 +83,79 @@ void setup() {
     initUSDistancePins(PIN_TRIGGER_OUT, PIN_ECHO_IN);
 
     randomSeed(getUSDistance());
-    /*
-     * Play first song
-     */
-    playRandomSongAndBlink();
+
     YellowLed.off(); // switch it manually off here
 }
 
 void loop() {
+    static uint8_t sInRangeCounter = 0;
+
     unsigned int tCentimeter = getUSDistanceAsCentiMeter();
     Serial.print("Distance=");
-    Serial.println(tCentimeter);
-    delay(100);
-    if (tCentimeter > 40 && tCentimeter < 120) {
-        playRandomSongAndBlink();
+    Serial.print(tCentimeter);
+    Serial.println("cm.");
 
-        // wait for distance to be out of range for 4 consecutive readings
-        uint8_t tCounter = 0;
-        tCentimeter = getUSDistanceAsCentiMeter();
-        while (tCounter < 4) {
-            Serial.print("Distance=");
-            Serial.print(tCentimeter);
-            if (tCentimeter < 40 || tCentimeter > 120) {
-                tCounter++;
-                Serial.print(" counter=");
-                Serial.print(tCounter);
-                Serial.println();
-            } else {
-                tCounter = 0; // reset to start condition
-                Serial.print(" still in range. Wait for ");
-                Serial.print(4 - tCounter);
-                Serial.println(" distances out of range.");
-            }
-            YellowLed.update();
-            tCentimeter = getUSDistanceAsCentiMeter();
-            delay(200);
-        }
+#if defined(TALKIE_FEEDBACK)
+    if (Button0AtPin2.ButtonToggleState) {
+        /*
+         * Output distance with talkie
+         */
+        sayQNumber(&Voice, tCentimeter);
+        Voice.wait();
     }
-    YellowLed.off();
+#endif
+
+    if (tCentimeter > MINIMUM_DISTANCE_CENTIMETER && tCentimeter < MAXIMUM_DISTANCE_CENTIMETER) {
+        sInRangeCounter++;
+        if (sInRangeCounter >= NUMBER_OF_CONSECUTIVE_IN_RANGE_READINGS) {
+            /*
+             * Now an object is for longer in the right range.
+             * Play one song and wait for the object to leave the range
+             * As long as the object is in range, the red LED is active
+             */
+            playRandomSongAndBlink();
+            sInRangeCounter = 0;
+
+            // wait for distance to be out of range for NUMBER_OF_CONSECUTIVE_OUT_RANGE_READINGS consecutive readings
+            uint8_t tCounter = 0;
+            while (tCounter < NUMBER_OF_CONSECUTIVE_OUT_RANGE_READINGS) {
+                tCentimeter = getUSDistanceAsCentiMeter();
+                Serial.print("Distance=");
+                Serial.print(tCentimeter);
+                Serial.print("cm.");
+
+#if defined(TALKIE_FEEDBACK)
+                if (Button0AtPin2.ButtonToggleState) {
+                    /*
+                     * Output distance with talkie
+                     */
+                    sayQNumber(&Voice, tCentimeter);
+                    Voice.wait();
+                }
+#endif
+
+                if (tCentimeter < MINIMUM_DISTANCE_CENTIMETER || tCentimeter > MAXIMUM_DISTANCE_CENTIMETER) {
+                    tCounter++;
+                } else {
+                    tCounter = 0; // reset to start condition
+                    Serial.print(" Still in range.");
+                }
+                Serial.print(" Wait for ");
+                Serial.print(NUMBER_OF_CONSECUTIVE_OUT_RANGE_READINGS - tCounter);
+                Serial.println(" distances out of range.");
+                delay(DELAY_MILLIS_FOR_OUT_RANGE_READING);
+            }
+        }
+    } else {
+        sInRangeCounter = 0;
+    }
+    RedLed.off();
+
+    delay(DELAY_MILLIS_FOR_IN_RANGE_READING);
 }
 
 /*
- * Leaves yellow led blinking
+ * Leaves red LED on
  */
 void playRandomSongAndBlink() {
     char StringBuffer[16];
@@ -126,8 +179,9 @@ void playRandomSongAndBlink() {
         GreenLed.update();
         delay(1);
     }
-// switch off only 2 leds, the third will blink until the "thing in the right distance" is gone
-    RedLed.off();
+// switch off only 2 LEDs, the red one will be on until the "object in the right distance" is gone
+    YellowLed.off();
     GreenLed.off();
+    RedLed.on();
     delay(2000);
 }
