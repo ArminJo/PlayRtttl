@@ -49,11 +49,11 @@ EasyButton Button0AtPin2(true);
 #define MINIMUM_DISTANCE_CENTIMETER 40
 #define MAXIMUM_DISTANCE_CENTIMETER 120
 
-#define NUMBER_OF_CONSECUTIVE_IN_RANGE_READINGS 1
-#define DELAY_MILLIS_FOR_IN_RANGE_READING 100
+#define NUMBER_OF_CONSECUTIVE_IN_RANGE_READINGS 5
+#define DELAY_MILLIS_FOR_IN_RANGE_READING 200
 
 #define NUMBER_OF_CONSECUTIVE_OUT_RANGE_READINGS 5
-#define DELAY_MILLIS_FOR_OUT_RANGE_READING 200
+#define DELAY_MILLIS_FOR_OUT_RANGE_READING 1000
 
 #define PIN_SPEAKER         3
 
@@ -83,8 +83,13 @@ void setup() {
     initUSDistancePins(PIN_TRIGGER_OUT, PIN_ECHO_IN);
 
     randomSeed(getUSDistance());
+    delay(500); // to avoid sound directly at power up
 
-    YellowLed.off(); // switch it manually off here
+    /*
+     * Play first song
+     */
+    playRandomSongAndBlink();
+    RedLed.off(); // switch it manually off here
 }
 
 void loop() {
@@ -109,7 +114,7 @@ void loop() {
         sInRangeCounter++;
         if (sInRangeCounter >= NUMBER_OF_CONSECUTIVE_IN_RANGE_READINGS) {
             /*
-             * Now an object is for longer in the right range.
+             * Now an object is for a longer time in the right range.
              * Play one song and wait for the object to leave the range
              * As long as the object is in range, the red LED is active
              */
@@ -149,8 +154,8 @@ void loop() {
     } else {
         sInRangeCounter = 0;
     }
-    RedLed.off();
 
+    RedLed.off();
     delay(DELAY_MILLIS_FOR_IN_RANGE_READING);
 }
 

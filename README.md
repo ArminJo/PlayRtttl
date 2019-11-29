@@ -1,5 +1,5 @@
-# PlayRtttl
-
+# [PlayRtttl](https://github.com/ArminJo/PlayRtttl)
+### Version 1.3.1
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Installation instructions](https://www.ardu-badge.com/badge/PlayRtttl.svg?)](https://www.ardu-badge.com/PlayRtttl)
 [![Commits since latest](https://img.shields.io/github/commits-since/ArminJo/PlayRtttl/latest)](https://github.com/ArminJo/PlayRtttl/commits/master)
@@ -44,7 +44,7 @@ const int TONE_PIN = 11;
 ```
 
 ## Running with 1 MHz
-If running with 1 MHz, e.g on an ATtiny, the millis() interrupt needs so much time, that it disturbes the tone() generation by interrupt. You can avoid this by using a tone pin, which is directly supported by hardware. Look at the appropriate pins_arduino.h, find `digital_pin_to_timer_PGM[]` and choose pins with TIMER1x entries.
+If running with 1 MHz, e.g on an ATtiny, the millis() interrupt needs so much time, that it disturbes the tone() generation by interrupt. You can avoid this by using a tone pin, which is directly supported by hardware. Look at the appropriate *pins_arduino.h*, find `digital_pin_to_timer_PGM[]` and choose pins with TIMER1x entries.
 
 ## More songs
 More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/ or ask Google.
@@ -62,17 +62,17 @@ More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tu
 - Ported to non AVR architectures
 ### Version 1.2.1
 - Natural is the new default style.
-- New RTTTLMelodiesSmall sample array with less entries.
+- New `RTTTLMelodiesSmall` sample array with less entries.
 - Parameter now order independent.
-- Modified oneMelody example.
+- Modified `OneMelody` example.
 ### Version 1.2.0
 - No Serial.print statements in this library anymore, to avoid problems with different Serial implementations.
-- Function playRandomRtttlBlocking() + startPlayRandomRtttlFromArrayPGM() do not print name now. If needed, use new functions playRandomRtttlSampleBlockingAndPrintName() + startPlayRandomRtttlFromArrayPGMAndPrintName().
+- Function `playRandomRtttlBlocking()` + `startPlayRandomRtttlFromArrayPGM()` do not print name now. If needed, use new functions `playRandomRtttlSampleBlockingAndPrintName()` + `startPlayRandomRtttlFromArrayPGMAndPrintName()`.
 - Printing functions have parameter (..., Stream * aSerial) to print to any serial. Call it (..., &Serial) to use standard Serial;
-- playRandomRtttlBlocking() renamed to playRandomRtttlSampleBlocking() and bug fixing.
+- `playRandomRtttlBlocking()` renamed to `playRandomRtttlSampleBlocking()` and bug fixing.
 ### Version 1.1.0
 - RTX song format support.
-- new setNumberOfLoops() and setDefaultStyle() functions.
+- new `setNumberOfLoops()` and `setDefaultStyle()` functions.
 
 ### Version 1.0.0
 Initial Arduino library version
