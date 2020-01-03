@@ -34,11 +34,12 @@
  * You need to install "Talkie" and "EasyButtonAtInt01" libraries under "Tools -> Manage Libraries..." or "Ctrl+Shift+I" -> use the names as filter string
  */
 #include <TalkieUtils.h>
+#include <Vocab_US_Large.h>
 Talkie Voice;
 
 #define USE_BUTTON_0
 #include <EasyButtonAtInt01.h>
-EasyButton Button0AtPin2(true);
+EasyButton Button0AtPB6(true);
 #endif
 
 #define VERSION_EXAMPLE "2.0"
@@ -82,42 +83,52 @@ void setup() {
 
     initUSDistancePins(PIN_TRIGGER_OUT, PIN_ECHO_IN);
 
-    randomSeed(getUSDistance());
     delay(500); // to avoid sound directly at power up
-
-    /*
-     * Play first song
-     */
-    playRandomSongAndBlink();
+    uint16_t tDistance = getUSDistance();
+    if (tDistance < US_DISTANCE_DEFAULT_TIMEOUT_CENTIMETER) {
+        randomSeed(tDistance);
+        /*
+         * Play first song
+         */
+        playRandomSongAndBlink();
+    }
     RedLed.off(); // switch it manually off here
 }
 
 void loop() {
     static uint8_t sInRangeCounter = 0;
+    static uint16_t tRandomSeed;
 
-    unsigned int tCentimeter = getUSDistanceAsCentiMeter();
+    unsigned int tCentimeter = getUSDistanceAsCentiMeterWithCentimeterTimeout(300);
     Serial.print("Distance=");
     Serial.print(tCentimeter);
     Serial.println("cm.");
 
 #if defined(TALKIE_FEEDBACK)
-    if (Button0AtPin2.ButtonToggleState) {
+    if (Button0AtPB6.ButtonToggleState) {
         /*
          * Output distance with talkie
          */
-        sayQNumber(&Voice, tCentimeter);
+        if (tCentimeter < 300) {
+            sayQNumber(&Voice, tCentimeter);
+        } else {
+            Voice.sayQ(sp2_TIME);
+            Voice.sayQ(sp2_OUT);
+        }
         Voice.wait();
     }
 #endif
 
     if (tCentimeter > MINIMUM_DISTANCE_CENTIMETER && tCentimeter < MAXIMUM_DISTANCE_CENTIMETER) {
         sInRangeCounter++;
+        tRandomSeed +=tCentimeter;
         if (sInRangeCounter >= NUMBER_OF_CONSECUTIVE_IN_RANGE_READINGS) {
             /*
              * Now an object is for a longer time in the right range.
              * Play one song and wait for the object to leave the range
              * As long as the object is in range, the red LED is active
              */
+            randomSeed(tRandomSeed);
             playRandomSongAndBlink();
             sInRangeCounter = 0;
 
@@ -130,7 +141,7 @@ void loop() {
                 Serial.print("cm.");
 
 #if defined(TALKIE_FEEDBACK)
-                if (Button0AtPin2.ButtonToggleState) {
+                if (Button0AtPB6.ButtonToggleState) {
                     /*
                      * Output distance with talkie
                      */
@@ -150,6 +161,10 @@ void loop() {
                 Serial.println(" distances out of range.");
                 delay(DELAY_MILLIS_FOR_OUT_RANGE_READING);
             }
+        } else {
+            GreenLed.on();
+            delay(5);
+            GreenLed.off();
         }
     } else {
         sInRangeCounter = 0;
@@ -166,7 +181,7 @@ void playRandomSongAndBlink() {
     char StringBuffer[16];
     Serial.println();
     Serial.print("Now playing: ");
-    startPlayRandomRtttlFromArrayPGM(PIN_SPEAKER, RTTTLChristmasMelodies, ARRAY_SIZE_CHRISTMAS_SONGS, StringBuffer,
+    startPlayRandomRtttlFromArrayPGM(PIN_SPEAKER, RTTTLChristmasMelodies, ARRAY_SIZE_CHRISTMAS_MELODIES, StringBuffer,
             sizeof(StringBuffer));
     Serial.println(StringBuffer);
 

@@ -71,6 +71,7 @@ unsigned int getCentimeterFromUSMicroSeconds(unsigned int aDistanceMicros) {
  *          aTimeoutMicros/58.5 if timeout happens
  *          0 if pins are not initialized
  *          timeout of 5850 micros is equivalent to 1m
+ *          Default timeout of 20000L is 3.41 meter
  */
 unsigned int getUSDistanceAsCentiMeter(unsigned int aTimeoutMicros) {
     unsigned int tDistanceMicros = getUSDistance(aTimeoutMicros);

@@ -93,14 +93,14 @@ void setup() {
     delay(2);
     int tTEMTValue = analogRead(TEMT_6000_PIN);
     pinMode(TEMT_6000_PIN, INPUT);
-    Serial.print("TEMT test value=");
+    Serial.print(F("TEMT test value="));
     Serial.println(tTEMTValue);
     if (tTEMTValue < 950) {
         // assume TEMT6000 connected
         isTEMTConnected = true;
-        Serial.println("Assume TEMT6000 connected");
+        Serial.println(F("Assume TEMT6000 connected"));
     } else {
-        Serial.println("Assume no TEMT6000 connected");
+        Serial.println(F("Assume no TEMT6000 connected"));
     }
     Serial.println();
 
@@ -126,7 +126,7 @@ void loop() {
          */
         uint8_t tIndex = map(tLightValue, sMinimum, sMaximum, 0, ARRAY_SIZE_NOTE_C5_TO_C7_PENTATONIC - 1);
 #ifdef DEBUG
-        Serial.print("Index=");
+        Serial.print(F("Index="));
         Serial.println(tIndex);
 #endif
         uint16_t tFrequency = NoteC5ToC7Pentatonic[tIndex];
@@ -181,9 +181,9 @@ void maintainMinAndMax(int aLightValue) {
         if (aLightValue > sMaximum) {
             sMaximum = aLightValue;
         }
-        Serial.print("Minimum=");
+        Serial.print(F("Minimum="));
         Serial.print(sMinimum);
-        Serial.print(" Maximum=");
+        Serial.print(F(" Maximum="));
         Serial.println(sMaximum);
     }
 }
@@ -194,11 +194,11 @@ void maintainMinAndMax(int aLightValue) {
 int readLDRValue() {
     int tLightValue = analogRead(LDR_PIN);
 #ifdef DEBUG
-    Serial.print("LDR raw=");
+    Serial.print(F("LDR raw="));
     Serial.print(tLightValue);
 #endif
     if (tLightValue > sLDRMaximum) {
-        Serial.print("LDR max=");
+        Serial.print(F("LDR max="));
         Serial.print(tLightValue);
         sLDRMaximum = tLightValue;
     }
@@ -208,7 +208,7 @@ int readLDRValue() {
      */
     tLightValue = (sLDRMaximum - tLightValue) + TEMT_6000_DARK_VALUE;
 #ifdef DEBUG
-    Serial.print(" converted=");
+    Serial.print(F(" converted="));
     Serial.print(tLightValue);
 #endif
     return tLightValue;
@@ -223,9 +223,9 @@ int readLightValue() {
     if (isTEMTConnected) {
         tLightValue = analogRead(TEMT_6000_PIN);
 #ifdef DEBUG
-        Serial.print("TEMT=");
+        Serial.print(F("TEMT="));
         Serial.print(tLightValue);
-        Serial.print(" - ");
+        Serial.print(F(" - "));
         // just for serial output
         readLDRValue();
 #endif

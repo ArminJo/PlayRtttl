@@ -12,7 +12,8 @@
 #define HCSR04_H_
 
 #define US_DISTANCE_DEFAULT_TIMEOUT 20000
-// Timeout of 20000L is 3.4 meter
+#define US_DISTANCE_DEFAULT_TIMEOUT_CENTIMETER 341
+// Timeout of 20000L is 3.41 meter
 void initUSDistancePins(uint8_t aTriggerOutPin, uint8_t aEchoInPin);
 unsigned int getUSDistance(unsigned int aTimeoutMicros = US_DISTANCE_DEFAULT_TIMEOUT);
 unsigned int getCentimeterFromUSMicroSeconds(unsigned int aDistanceMicros);
