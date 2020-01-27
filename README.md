@@ -1,5 +1,5 @@
 # [PlayRtttl](https://github.com/ArminJo/PlayRtttl)
-### Version 1.3.1
+### Version 1.3.2
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Installation instructions](https://www.ardu-badge.com/badge/PlayRtttl.svg?)](https://www.ardu-badge.com/PlayRtttl)
 [![Commits since latest](https://img.shields.io/github/commits-since/ArminJo/PlayRtttl/latest)](https://github.com/ArminJo/PlayRtttl/commits/master)
@@ -52,6 +52,9 @@ More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tu
 
 # Revision History
 
+### Version 1.3.2
+- supporting direct tone output at pin 11 for ATmega328. Can be used with interrupt blocking libraries for NeoPixel etc.
+ 
 ### Version 1.3.1
 - defining `USE_NON_STANDARD_SERIAL_FOR_DEBUG` needs serial class for debugging purposes to be set by `setSerialForPlayRtttlDebug()`.
 - Use Print * instead of Stream *.

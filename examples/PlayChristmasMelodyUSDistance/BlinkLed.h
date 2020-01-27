@@ -4,9 +4,9 @@
  *  Copyright (C) 2018-2019  Armin Joachimsmeyer
  *  armin.joachimsmeyer@gmail.com
  *
- *  This file is part of PlayRttl https://github.com/ArminJo/PlayRttl.
+ *  This file is part of Arduino-Utils https://github.com/ArminJo/Arduino-Utils.
  *
- *  PlayRttl is free software: you can redistribute it and/or modify
+ *  Arduino-Utils is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
@@ -70,3 +70,5 @@ public:
 };
 
 #endif /* BLINK_LED_H_ */
+
+#pragma once

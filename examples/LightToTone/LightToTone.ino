@@ -33,7 +33,7 @@
 #include <PlayRtttl.h>
 
 #define USE_BUTTON_0
-#include "EasyButtonAtInt01.h"
+#include "EasyButtonAtInt01.cpp.h"
 
 EasyButton Button0AtPin2(true);
 //#define DEBUG

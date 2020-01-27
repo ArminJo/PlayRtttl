@@ -32,7 +32,7 @@
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
 #include "ATtinySerialOut.h"
 #include "ATtinyUtils.h" // for changeDigisparkClock()
-#include "ArduinoUtils.h"   // for delayMilliseconds()
+#include "MillisUtils.h"   // for delayMilliseconds()
 #undef LED_BUILTIN
 #define LED_BUILTIN PB1  // on my digispark board
 /*
