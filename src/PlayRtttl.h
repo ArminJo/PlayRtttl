@@ -41,8 +41,12 @@
 #endif
 #include "pitches.h"
 
-#define VERSION_PLAY_RTTTL 1.3.1
-/* Version 1.3.1 - 1/2020
+#define VERSION_PLAY_RTTTL 1.3.2
+/*
+ * Version 1.3.2 - 1/2020
+ * - supporting direct tone output at pin 11 for ATmega328. Can be used with interrupt blocking libraries for NeoPixel etc.
+ *
+ * Version 1.3.1 - 1/2020
  * - defining USE_NON_STANDARD_SERIAL_FOR_DEBUG needs serial class for debugging purposes to be set by setSerialForPlayRtttlDebug().
  * - Use Print * instead of Stream *.
  * - Improved non-AVR compatibility.
@@ -191,7 +195,7 @@ extern const int Notes[] PROGMEM; // The frequencies of notes of the highest oct
  *  o=Default octave
  *  b=Beats per minutes (of quarter note)
  *  opt l=Number of loops
- *  opt s=Style - see line 73 above
+ *  opt s=Style - see "#define RTX_STYLE_CONTINUOUS 'C'" and following above
  *  Colon
  *
  * Note:

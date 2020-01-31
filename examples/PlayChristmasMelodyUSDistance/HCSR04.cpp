@@ -27,23 +27,25 @@
 #include <Arduino.h>
 #include "HCSR04.h"
 
+#define DEBUG
+
 uint8_t sTriggerOutPin;
 uint8_t sEchoInPin;
-bool isInitialized = false;
+bool sHCSR04PinsAreInitialized = false;
 
 void initUSDistancePins(uint8_t aTriggerOutPin, uint8_t aEchoInPin) {
     sTriggerOutPin = aTriggerOutPin;
     sEchoInPin = aEchoInPin;
     pinMode(aTriggerOutPin, OUTPUT);
     pinMode(sEchoInPin, INPUT);
-    isInitialized = true;
+    sHCSR04PinsAreInitialized = true;
 }
 
 /*
  * Start of standard blocking implementation using pulseInLong() since PulseIn gives wrong (too small) results :-(
  */
 unsigned int getUSDistance(unsigned int aTimeoutMicros) {
-    if (!isInitialized) {
+    if (!sHCSR04PinsAreInitialized) {
         return 0;
     }
 
@@ -95,7 +97,7 @@ unsigned int getUSDistanceAsCentiMeter(unsigned int aTimeoutMicros) {
 // 58,23 us per centimeter (forth and back)
 unsigned int getUSDistanceAsCentiMeterWithCentimeterTimeout(unsigned int aTimeoutCentimeter) {
 // The reciprocal of formula in getCentimeterFromUSMicroSeconds()
-    unsigned int tTimeoutMicros = ((aTimeoutCentimeter * 233) + 2) / 4; // = * 58.25 (rounded by using +1)
+    unsigned int tTimeoutMicros = ((aTimeoutCentimeter * 233L) + 2) / 4; // = * 58.25 (rounded by using +1)
     return getUSDistanceAsCentiMeter(tTimeoutMicros);
 }
 

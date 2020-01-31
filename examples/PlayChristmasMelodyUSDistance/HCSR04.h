@@ -27,6 +27,8 @@
 #define HCSR04_H_
 
 #define US_DISTANCE_DEFAULT_TIMEOUT 20000
+#define US_DISTANCE_TIMEOUT_1_METER 5825 // Timeout of 5825 is 1 meter
+#define US_DISTANCE_TIMEOUT_2_METER 11650 // Timeout of 5825 is 1 meter
 #define US_DISTANCE_DEFAULT_TIMEOUT_CENTIMETER 343 // Timeout of 20000L is 3.43 meter
 
 void initUSDistancePins(uint8_t aTriggerOutPin, uint8_t aEchoInPin);
