@@ -107,7 +107,7 @@ void setup() {
     /*
      * Initialize maximum and minimum values
      */
-    int tLightValue = readLightValue();
+    readLightValue();
     // to avoid playing melody directly
     sLDRMaximum += LIGHT_LOW_THRESHOLD + 2;
     randomSeed(analogRead(LDR_PIN));
@@ -168,7 +168,6 @@ void loop() {
              * Play tone
              */
             tone(TONE_PIN, tLightValue * 4);
-            delay(50);
         }
     }
 }

@@ -1,9 +1,9 @@
 # [PlayRtttl](https://github.com/ArminJo/PlayRtttl)
-### Version 1.3.2
+### [Version 1.3.2](https://github.com/ArminJo/PlayRtttl/releases)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Installation instructions](https://www.ardu-badge.com/badge/PlayRtttl.svg?)](https://www.ardu-badge.com/PlayRtttl)
 [![Commits since latest](https://img.shields.io/github/commits-since/ArminJo/PlayRtttl/latest)](https://github.com/ArminJo/PlayRtttl/commits/master)
-[![Build Status](https://travis-ci.org/ArminJo/PlayRtttl.svg?branch=master)](https://travis-ci.org/ArminJo/PlayRtttl)
+[![Build Status](https://github.com/ArminJo/PlayRtttl/workflows/LibraryBuild/badge.svg)](https://github.com/ArminJo/PlayRtttl/actions)
 [![Hit Counter](https://hitcounter.pythonanywhere.com/count/tag.svg?url=https%3A%2F%2Fgithub.com%2FArminJo%2FPlayRtttl)](https://github.com/brentvollebregt/hit-counter)
 
 Improved Arduino library version of the RTTTL.pde example code written by Brett Hagman http://www.roguerobotics.com/  bhagman@roguerobotics.com
@@ -88,10 +88,15 @@ More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tu
 ### Version 1.0.0
 Initial Arduino library version
 
-# Travis CI
-The ServoEasing library examples are built on Travis CI for the following boards:
+# CI
+Since Travis CI is unreliable and slow, the library examples are now tested with GitHub Actions for the following boards:
 
-- Arduino Uno, Leonardo, mega2560, esp32, esp8266, Adafruit cplayClassic
+- arduino:avr:uno
+- arduino:avr:leonardo
+- arduino:avr:mega
+- esp8266:esp8266:huzzah:eesz=4M3M,xtal=80
+- esp32:esp32:featheresp32:FlashFreq=80
+- STM32:stm32:GenF1:pnum=BLUEPILL_F103C8
 
 ## Requests for modifications / extensions
 Please write me a PM including your motivation/problem if you need a modification or an extension.
