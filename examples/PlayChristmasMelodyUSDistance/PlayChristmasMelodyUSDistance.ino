@@ -38,7 +38,7 @@
 Talkie Voice;
 
 #define USE_BUTTON_0
-#include <EasyButtonAtInt01.h>
+#include <EasyButtonAtInt01.cpp.h>
 EasyButton Button0AtPB6(true);
 #endif
 
