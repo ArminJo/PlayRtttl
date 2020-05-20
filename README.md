@@ -1,5 +1,8 @@
 # [PlayRtttl](https://github.com/ArminJo/PlayRtttl)
+Available as Arduino library "PlayRtttl"
+
 ### [Version 1.3.2](https://github.com/ArminJo/PlayRtttl/releases)
+
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Installation instructions](https://www.ardu-badge.com/badge/PlayRtttl.svg?)](https://www.ardu-badge.com/PlayRtttl)
 [![Commits since latest](https://img.shields.io/github/commits-since/ArminJo/PlayRtttl/latest)](https://github.com/ArminJo/PlayRtttl/commits/master)

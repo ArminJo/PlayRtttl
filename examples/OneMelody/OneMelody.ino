@@ -31,7 +31,6 @@
 
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
 #include "ATtinySerialOut.h"
-#include "ATtinyUtils.h" // for changeDigisparkClock()
 #include "MillisUtils.h"   // for delayMilliseconds()
 #undef LED_BUILTIN
 #define LED_BUILTIN PB1  // on my digispark board
@@ -58,7 +57,6 @@ void setup() {
 #endif
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
     MCUSR = 0;
-    changeDigisparkClock();
 #endif
     // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));

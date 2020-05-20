@@ -7,19 +7,25 @@
 
 # This is the name of the workflow, visible on GitHub UI.
 name: LibraryBuild
-on: [push, pull_request] # see: https://help.github.com/en/actions/reference/events-that-trigger-workflows#pull-request-event-pull_request
+
+on:  
+  push: # see: https://help.github.com/en/actions/reference/events-that-trigger-workflows#pull-request-event-pull_request
+    paths:
+    - '**.ino'
+    - '**.cpp'
+    - '**.h'
+    - '**LibraryBuildWithAction.yml'
+  pull_request:
 
 jobs:
   build:
     name: ${{ matrix.arduino-boards-fqbn }} - test compiling examples
 
-    runs-on: ubuntu-latest # I picked Ubuntu to use shell scripts.
+    runs-on: ubuntu-18.04 # I picked Ubuntu to use shell scripts.
 
     env:
-      # Space separated list without double quotes around the list. 
-      # If you need a library with a space in its name, like Adafruit NeoPixel or Adafruit INA219, you must use double quotes
-      # around the name and have at least 2 entries, where the first must be without double quotes! You may use Servo as dummy entry.
-      REQUIRED_LIBRARIES: Talkie EasyButtonAtInt01
+      # Comma separated list without double quotes around the list. 
+      REQUIRED_LIBRARIES: Talkie,EasyButtonAtInt01
 
     strategy:
       matrix:
@@ -38,6 +44,7 @@ jobs:
           - arduino:avr:uno|CompilerSwitches
           - arduino:avr:leonardo
           - arduino:avr:mega
+          - digistump:avr:digispark-tiny1
           - esp8266:esp8266:huzzah:eesz=4M3M,xtal=80
           - esp32:esp32:featheresp32:FlashFreq=80
           - STM32:stm32:GenF1:pnum=BLUEPILL_F103C8
@@ -57,8 +64,12 @@ jobs:
                 -DDEBUG
                 -DUSE_NON_STANDARD_SERIAL_FOR_DEBUG
 
+          - arduino-boards-fqbn: digistump:avr:digispark-tiny1  # ATtiny85 board @1 MHz
+            platform-url: https://raw.githubusercontent.com/ArminJo/DigistumpArduino/master/package_digistump_index.json
+            examples-exclude: LightToTone PlayChristmasMelodyUSDistance RandomMelody # Only OneMelody example
+
           - arduino-boards-fqbn: esp8266:esp8266:huzzah:eesz=4M3M,xtal=80
-            platform-url: http://arduino.esp8266.com/stable/package_esp8266com_index.json
+            platform-url: https://arduino.esp8266.com/stable/package_esp8266com_index.json
             examples-exclude: LightToTone PlayChristmasMelodyUSDistance # EasyButton and Talkie library not available
 
           - arduino-boards-fqbn: esp32:esp32:featheresp32:FlashFreq=80
@@ -81,6 +92,6 @@ jobs:
         with:
           arduino-board-fqbn: ${{ matrix.arduino-boards-fqbn }}
           platform-url: ${{ matrix.platform-url }}
-          libraries: ${{ env.REQUIRED_LIBRARIES }}
+          required-libraries: ${{ env.REQUIRED_LIBRARIES }}
           examples-exclude: ${{ matrix.examples-exclude }}
           examples-build-properties: ${{ toJson(matrix.examples-build-properties) }}
