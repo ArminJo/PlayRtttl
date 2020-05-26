@@ -420,8 +420,10 @@ bool updatePlayRtttl(void) {
         /*
          * now play the note
          */
+#  if defined (SUPPORT_RTX_EXTENSIONS)
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
         unsigned long tDurationOfTone;
+#endif
         if (tNote <= 12) {
 #if defined(__AVR__)
             uint16_t tFrequency = pgm_read_word(&Notes[tNote]) >> (NOTES_OCTAVE - tOctave);
