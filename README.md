@@ -1,7 +1,7 @@
 # [PlayRtttl](https://github.com/ArminJo/PlayRtttl)
 Available as Arduino library "PlayRtttl"
 
-### [Version 1.3.2](https://github.com/ArminJo/PlayRtttl/releases)
+### [Version 1.4.0](https://github.com/ArminJo/PlayRtttl/releases)
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Installation instructions](https://www.ardu-badge.com/badge/PlayRtttl.svg?)](https://www.ardu-badge.com/PlayRtttl)
@@ -55,13 +55,10 @@ More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tu
 
 # Revision History
 
-### Version 1.3.2
-- supporting direct tone output at pin 11 for ATmega328. Can be used with interrupt blocking libraries for NeoPixel etc.
- 
-### Version 1.3.1
-- defining `USE_NON_STANDARD_SERIAL_FOR_DEBUG` needs serial class for debugging purposes to be set by `setSerialForPlayRtttlDebug()`.
+### Version 1.4.0
+- Supporting direct tone output at pin 11 for ATmega328. Can be used with interrupt blocking libraries for NeoPixel etc.
 - Use Print * instead of Stream *.
-- improved non-AVR compatibility.
+- Improved non-AVR compatibility.
 - New Christmas songs example.
 
 ### Version 1.3.0

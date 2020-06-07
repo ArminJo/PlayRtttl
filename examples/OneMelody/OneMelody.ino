@@ -31,7 +31,6 @@
 
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
 #include "ATtinySerialOut.h"
-#include "MillisUtils.h"   // for delayMilliseconds()
 #undef LED_BUILTIN
 #define LED_BUILTIN PB1  // on my digispark board
 /*
@@ -42,8 +41,6 @@ const int TONE_PIN = 1; // use pin 1 (also used for internal LED :-( ) since pin
 #else
 const int TONE_PIN = 11;
 #endif
-
-#define VERSION_EXAMPLE "1.0"
 
 char StarWarsInRam[] =
         "StarWars:d=32,o=5,b=45,l=2,s=N:p,f#,f#,f#,8b.,8f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,e6,8c#6";
@@ -59,11 +56,10 @@ void setup() {
     MCUSR = 0;
 #endif
     // Just to know which program is running on my Arduino
-    Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
-
+    Serial.println(F("START " __FILE__ " from " __DATE__ "\r\nUsing library version " VERSION_PLAY_RTTTL));
 
 #ifdef DEBUG
-    setSerialForPlayRtttlDebug(&Serial);
+//    setSerialForPlayRtttlDebug(&Serial);
 #endif
 
 

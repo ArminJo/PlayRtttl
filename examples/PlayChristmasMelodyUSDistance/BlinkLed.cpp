@@ -26,6 +26,19 @@
 
 #include "BlinkLed.h"
 
+/*
+ * The simple blocking variant
+ */
+void blinkLEDBlocking(uint8_t aLedPin, uint16_t aDelay, uint8_t aRepetitions) {
+    for (int i = 0; i < aRepetitions; ++i) {
+        digitalWrite(aLedPin, HIGH);
+        delay(aDelay);
+        digitalWrite(aLedPin, LOW);
+        delay(aDelay);
+    }
+}
+
+
 BlinkLed::BlinkLed(uint8_t aLedPin) {
     init(aLedPin, false);
     setOnOffTime(1000, 1000);

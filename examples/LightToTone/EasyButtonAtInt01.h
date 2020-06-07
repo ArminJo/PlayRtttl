@@ -31,9 +31,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/gpl.html>.
  */
 
+#ifndef EASY_BUTTON_AT_INT01_H_
+#define EASY_BUTTON_AT_INT01_H_
+
+#define VERSION_EASY_BUTTON "3.0.0"
+#define VERSION_EASY_BUTTON_MAJOR 3
+#define VERSION_EASY_BUTTON_MINOR 0
+
 /*
- *  * Version 2.2.0 - 5/2020
+ * Version 3.0.0 - 5/2020
+ * - Added button release handler and adapted examples.
+ * - Revoke change for "only one true result per press for checkForLongPressBlocking()". It is superseded by button release handler.
  * - Support buttons which are active high by defining BUTTON_IS_ACTIVE_HIGH.
+ * - Improved detection of maximum bouncing period used in DebounceTest.
  *
  * Version 2.1.0 - 5/2020
  * - Avoid 1 ms delay for checkForLongPressBlocking() if button is not pressed.
@@ -46,9 +56,6 @@
  * - Double press detection support.
  * - Renamed to EasyButtonAtInt01.cpp.h
  */
-
-#ifndef EASY_BUTTON_AT_INT01_H_
-#define EASY_BUTTON_AT_INT01_H_
 
 #include <Arduino.h>
 
@@ -84,7 +91,7 @@
  *
  * Test your own new value with the DebounceTest example
  *
- * Analyze the current button debounce value with defining ANALYZE_MAX_BOUNCING_PERIOD and looking at MaxBouncingPeriodMillis.
+ * Analyze the button actual debounce value with defining ANALYZE_MAX_BOUNCING_PERIOD and looking at MaxBouncingPeriodMillis.
  * Defining ANALYZE_MAX_BOUNCING_PERIOD computes the maximum bouncing period.
  * this is the time between first level change and last bouncing level change during BUTTON_DEBOUNCING_MILLIS
  */
@@ -235,28 +242,30 @@ public:
     EasyButton(bool aIsButtonAtINT0, void (*aButtonPressCallback)(bool aButtonToggleState));
 #if ! defined(NO_BUTTON_RELEASE_CALLBACK)
     EasyButton(bool aIsButtonAtINT0, void (*aButtonPressCallback)(bool aButtonToggleState),
-            void (*aButtonReleaseCallback)(uint16_t aButtonPressDurationMillis));
+            void (*aButtonReleaseCallback)(bool aButtonToggleState, uint16_t aButtonPressDurationMillis));
 #endif
 
     void init(bool aIsButtonAtINT0);
 
+    /*
+     * !!! checkForDoublePress() works only reliable if called in button press callback function !!!
+     */
+    bool checkForDoublePress(uint16_t aDoublePressDelayMillis = EASY_BUTTON_DOUBLE_PRESS_DEFAULT_MILLIS);
+
     bool readButtonState();
     bool readDebouncedButtonState();
     bool updateButtonState();
+    uint16_t updateButtonPressDuration(); // Updates the ButtonPressDurationMillis by polling, since this cannot be done by interrupt.
 
-    /*
-     * Updates the ButtonPressDurationMillis by polling, since this cannot be done by interrupt.
-     */
-    uint16_t updateButtonPressDuration();
-    uint8_t checkForLongPress(uint16_t aLongPressThresholdMillis = EASY_BUTTON_LONG_PRESS_DEFAULT_MILLIS);
-    bool checkForLongPressBlocking(uint16_t aLongPressThresholdMillis = EASY_BUTTON_LONG_PRESS_DEFAULT_MILLIS);
-    bool checkForDoublePress(uint16_t aDoublePressDelayMillis = EASY_BUTTON_DOUBLE_PRESS_DEFAULT_MILLIS); // !!!Works only reliable if called in callback function!!!
-    bool checkForDoublePressBlocking(uint16_t aDoublePressDelayMillis = EASY_BUTTON_DOUBLE_PRESS_DEFAULT_MILLIS); // !!!Works only reliable if called in callback function!!!
     bool checkForForButtonNotPressedTime(uint16_t aTimeoutMillis);
 
-    void handleINT01Interrupts();
+    //!!! Consider to use button release callback handler and check the ButtonPressDurationMillis
+    uint8_t checkForLongPress(uint16_t aLongPressThresholdMillis = EASY_BUTTON_LONG_PRESS_DEFAULT_MILLIS);
+    bool checkForLongPressBlocking(uint16_t aLongPressThresholdMillis = EASY_BUTTON_LONG_PRESS_DEFAULT_MILLIS);
 
-    bool LastChangeWasBouncingToInactive; // Internal state, reflects actual reading with spikes and bouncing. Negative logic: true / active means button pin is LOW
+    void handleINT01Interrupts(); // internal use only
+
+    bool LastBounceWasChangeToInactive; // Internal state, reflects actual reading with spikes and bouncing. Negative logic: true / active means button pin is LOW
     volatile bool ButtonStateIsActive; // Negative logic: true / active means button pin is LOW. If last press duration < BUTTON_DEBOUNCING_MILLIS it holds wrong value (true instead of false) :-(
     volatile bool ButtonToggleState;      // Toggle is on press, not on release - initial value is false
 
@@ -274,17 +283,15 @@ public:
     volatile unsigned long ButtonLastChangeMillis;        // For debouncing
 
     volatile unsigned long ButtonReleaseMillis;           // for double press recognition
-    volatile bool ButtonLongPressJustDetected;            // Lock flag for long button press detection
 
 #if defined(ANALYZE_MAX_BOUNCING_PERIOD)
     volatile unsigned int MaxBouncingPeriodMillis = 0; // Maximum bouncing period. Time between first level change and last bouncing level change during BUTTON_DEBOUNCING_MILLIS
-    volatile bool MaxBouncingPeriodMillisHasJustChanged;
 #endif
 
     volatile bool isButtonAtINT0;
     void (*ButtonPressCallback)(bool aButtonToggleState) = NULL; // If not null, is called on every button press with ButtonToggleState as parameter
 #if ! defined(NO_BUTTON_RELEASE_CALLBACK)
-    void (*ButtonReleaseCallback)(uint16_t aButtonPressDurationMillis) = NULL; // If not null, is called on every button release with ButtonPressDurationMillis as parameter
+    void (*ButtonReleaseCallback)(bool aButtonToggleState, uint16_t aButtonPressDurationMillis) = NULL; // If not null, is called on every button release with ButtonPressDurationMillis as parameter
 #endif
 
 #if defined(USE_BUTTON_0)

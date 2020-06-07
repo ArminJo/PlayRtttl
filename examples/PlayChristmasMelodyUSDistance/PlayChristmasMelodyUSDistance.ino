@@ -42,8 +42,6 @@ Talkie Voice;
 EasyButton Button0AtPB6(true);
 #endif
 
-#define VERSION_EXAMPLE "2.0"
-
 /*
  * The range for the melody to start
  */
@@ -79,7 +77,7 @@ void setup() {
     while (!Serial); //delay for Leonardo, but this loops forever for Maple Serial
 #endif
     // Just to know which program is running on my Arduino
-    Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
+    Serial.println(F("START " __FILE__ " from " __DATE__ "\r\nUsing library version " VERSION_PLAY_RTTTL));
 
     initUSDistancePins(PIN_TRIGGER_OUT, PIN_ECHO_IN);
 

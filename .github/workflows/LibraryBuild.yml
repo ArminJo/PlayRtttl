@@ -8,7 +8,7 @@
 # This is the name of the workflow, visible on GitHub UI.
 name: LibraryBuild
 
-on:  
+on:
   push: # see: https://help.github.com/en/actions/reference/events-that-trigger-workflows#pull-request-event-pull_request
     paths:
     - '**.ino'
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-18.04 # I picked Ubuntu to use shell scripts.
 
     env:
-      # Comma separated list without double quotes around the list. 
+      # Comma separated list without double quotes around the list.
       REQUIRED_LIBRARIES: Talkie,EasyButtonAtInt01
 
     strategy:
@@ -50,7 +50,6 @@ jobs:
           - STM32:stm32:GenF1:pnum=BLUEPILL_F103C8
 
         # Specify parameters for each board.
-        # Parameters can be: examples-exclude and examples-build-properties
         #############################################################################################################
         include:
           - arduino-boards-fqbn: arduino:avr:uno|CompilerSwitches
@@ -67,6 +66,9 @@ jobs:
           - arduino-boards-fqbn: digistump:avr:digispark-tiny1  # ATtiny85 board @1 MHz
             platform-url: https://raw.githubusercontent.com/ArminJo/DigistumpArduino/master/package_digistump_index.json
             examples-exclude: LightToTone PlayChristmasMelodyUSDistance RandomMelody # Only OneMelody example
+            examples-build-properties: # the flags were put in compiler.cpp.extra_flags
+              OneMelody:
+                -DDEBUG
 
           - arduino-boards-fqbn: esp8266:esp8266:huzzah:eesz=4M3M,xtal=80
             platform-url: https://arduino.esp8266.com/stable/package_esp8266com_index.json
@@ -77,7 +79,7 @@ jobs:
             examples-exclude: LightToTone PlayChristmasMelodyUSDistance # EasyButton and Talkie library not available
 
           - arduino-boards-fqbn: STM32:stm32:GenF1:pnum=BLUEPILL_F103C8
-            platform-url: https://github.com/stm32duino/BoardManagerFiles/raw/dev/STM32/package_stm_index.json
+            platform-url: https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json
             examples-exclude: LightToTone PlayChristmasMelodyUSDistance # EasyButton and Talkie library not available
 
       # Do not cancel all jobs / architectures if one job fails

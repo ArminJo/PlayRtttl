@@ -38,8 +38,6 @@
 EasyButton Button0AtPin2(true);
 //#define DEBUG
 
-#define VERSION_EXAMPLE "1.2"
-
 /*
  * Output inverted frequency signal to increase volume
  */
@@ -75,8 +73,7 @@ void setup() {
     while (!Serial); //delay for Leonardo, but this loops forever for Maple Serial
 #endif
     // Just to know which program is running on my Arduino
-    Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
-
+    Serial.println(F("START " __FILE__ " from " __DATE__ "\r\nUsing library version " VERSION_PLAY_RTTTL));
     pinMode(LDR_PIN, INPUT);
 
 #ifdef ENABLE_INVERTED_OUTPUT

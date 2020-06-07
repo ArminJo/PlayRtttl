@@ -26,6 +26,9 @@
 #ifndef BLINK_LED_H_
 #define BLINK_LED_H_
 
+// The simple blocking variant
+void blinkLEDBlocking(uint8_t aLedPin, uint16_t aDelay, uint8_t aRepetitions);
+
 #define BLINK_LED_FOREVER -1
 class BlinkLed {
 public:

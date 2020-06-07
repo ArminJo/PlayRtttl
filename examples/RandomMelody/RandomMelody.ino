@@ -33,8 +33,6 @@
 #include "ATtinySerialOut.h"
 #endif
 
-#define VERSION_EXAMPLE "1.0"
-
 const int TONE_PIN = 11;
 const int BUTTON_PIN = 2;
 
@@ -45,7 +43,7 @@ void setup() {
     while (!Serial); //delay for Leonardo, but this loops forever for Maple Serial
 #endif
     // Just to know which program is running on my Arduino
-    Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
+    Serial.println(F("START " __FILE__ " from " __DATE__ "\r\nUsing library version " VERSION_PLAY_RTTTL));
 
     // get "true" random
     randomSeed(analogRead(0));
