@@ -11,7 +11,7 @@
  *  Copyright (C) 2018  Armin Joachimsmeyer
  *  armin.joachimsmeyer@gmail.com
  *
- *  This file is part of PlayRttl https://github.com/ArminJo/PlayRttl.
+ *  This file is part of PlayRttl https://github.com/ArminJo/PlayRtttl.
  *
  *  PlayRttl is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -152,7 +152,7 @@ void loop() {
                     if (tThresholdCount > 10) {
                         // stop playing melody
                         stopPlayRtttl();
-                        break; // not really needed here, since the while condition will also change because of stopPlayRtttl.
+                        break; // not really required here, since the while condition will also change because of stopPlayRtttl.
                     }
                 } else {
                     tThresholdCount = 0;

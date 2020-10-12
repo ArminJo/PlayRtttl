@@ -6,7 +6,7 @@
  *  Copyright (C) 2019  Armin Joachimsmeyer
  *  armin.joachimsmeyer@gmail.com
  *
- *  This file is part of PlayRttl https://github.com/ArminJo/PlayRttl.
+ *  This file is part of PlayRttl https://github.com/ArminJo/PlayRtttl.
  *
  *  PlayRttl is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ EasyButton Button0AtPB6;
 #define NUMBER_OF_CONSECUTIVE_OUT_RANGE_READINGS 5
 #define DELAY_MILLIS_FOR_OUT_RANGE_READING 1000
 
-#define PIN_SPEAKER         3
+#define PIN_BUZZER          3
 
 #define PIN_ECHO_IN         4
 #define PIN_TRIGGER_OUT     5
@@ -107,11 +107,11 @@ void loop() {
         /*
          * Output distance with talkie
          */
-        if (tCentimeter < 300) {
-            sayQNumber(&Voice, tCentimeter);
-        } else {
+        if (tCentimeter == 0) {
             Voice.sayQ(sp2_TIME);
             Voice.sayQ(sp2_OUT);
+        } else {
+            sayQNumber(&Voice, tCentimeter);
         }
         Voice.wait();
     }
@@ -119,7 +119,7 @@ void loop() {
 
     if (tCentimeter > MINIMUM_DISTANCE_CENTIMETER && tCentimeter < MAXIMUM_DISTANCE_CENTIMETER) {
         sInRangeCounter++;
-        tRandomSeed +=tCentimeter;
+        tRandomSeed += tCentimeter;
         if (sInRangeCounter >= NUMBER_OF_CONSECUTIVE_IN_RANGE_READINGS) {
             /*
              * Now an object is for a longer time in the right range.
@@ -143,7 +143,12 @@ void loop() {
                     /*
                      * Output distance with talkie
                      */
-                    sayQNumber(&Voice, tCentimeter);
+                    if (tCentimeter > 0) {
+                        sayQNumber(&Voice, tCentimeter);
+                    } else {
+                        Voice.sayQ(sp2_TIME);
+                        Voice.sayQ(sp2_OUT);
+                    }
                     Voice.wait();
                 }
 #endif
@@ -179,7 +184,7 @@ void playRandomSongAndBlink() {
     char StringBuffer[16];
     Serial.println();
     Serial.print("Now playing: ");
-    startPlayRandomRtttlFromArrayPGM(PIN_SPEAKER, RTTTLChristmasMelodies, ARRAY_SIZE_CHRISTMAS_MELODIES, StringBuffer,
+    startPlayRandomRtttlFromArrayPGM(PIN_BUZZER, RTTTLChristmasMelodies, ARRAY_SIZE_CHRISTMAS_MELODIES, StringBuffer,
             sizeof(StringBuffer));
     Serial.println(StringBuffer);
 

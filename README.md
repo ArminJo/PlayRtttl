@@ -1,7 +1,7 @@
 # [PlayRtttl](https://github.com/ArminJo/PlayRtttl)
 Available as Arduino library "PlayRtttl"
 
-### [Version 1.4.1](https://github.com/ArminJo/PlayRtttl/releases)
+### [Version 1.4.2](https://github.com/ArminJo/PlayRtttl/releases)
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Installation instructions](https://www.ardu-badge.com/badge/PlayRtttl.svg?)](https://www.ardu-badge.com/PlayRtttl)
@@ -48,13 +48,23 @@ const int TONE_PIN = 11;
 
 # Compile options / macros for this library
 To customize the library to different requirements, there are some compile options / makros available.<br/>
-Modify it by commenting them out or in, or change the values if applicable. Or define the macro with the -D compiler option for gobal compile (the latter is not possible with the Arduino IDE, so consider to use [sloeber](https://eclipse.baeyens.it).
+Modify it by commenting them out or in, or change the values if applicable. Or define the macro with the -D compiler option for gobal compile (the latter is not possible with the Arduino IDE, so consider to use [Sloeber](https://eclipse.baeyens.it).
 Some options which are enabed by default can be disabled also by defining a *inhibit* macro like `USE_NO_RTX_EXTENSIONS`.
 | Macro | Default | File | Disable macro | Description |
 |-|-|-|-|-|
 | `SUPPORT_RTX_EXTENSIONS` | enabled | PlayRtttl.h | `USE_NO_RTX_EXTENSIONS` | Support loop and style.<br/>Even without `SUPPORT_RTX_EXTENSIONS` the default style is natural (Tone length = note length - 1/16).<br/>Requires around 182 additional bytes FLASH. |
 | `SUPPORT_RTX_FORMAT` | enabled | PlayRtttl.h | `USE_NO_RTX_EXTENSIONS` | Enables evaluating RTX format definitions `'s'` and `'l'`. |
 | `RTX_STYLE_DEFAULT` | 'N' | PlayRtttl.h |  | (Natural) Tone length = note length - 1/16. |
+
+### Modifying compile options with Arduino IDE
+First use *Sketch > Show Sketch Folder (Ctrl+K)*.<br/>
+If you did not yet stored the example as your own sketch, then you are instantly in the right library folder.<br/>
+Otherwise you have to navigate to the parallel `libraries` folder and select the library you want to access.<br/>
+In both cases the library files itself are located in the `src` directory.<br/>
+
+### Modifying compile options with Sloeber IDE
+If you are using Sloeber as your IDE, you can easily define global symbols with *Properties > Arduino > CompileOptions*.<br/>
+![Sloeber settings](https://github.com/ArminJo/ServoEasing/blob/master/pictures/SloeberDefineSymbols.png)
 
 # Running with 1 MHz
 If running with 1 MHz, e.g on an ATtiny, the millis() interrupt needs so much time, that it disturbes the tone() generation by interrupt. You can avoid this by using a tone pin, which is directly supported by hardware. Look at the appropriate *pins_arduino.h*, find `digital_pin_to_timer_PGM[]` and choose pins with TIMER1x entries.
@@ -64,6 +74,8 @@ More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tu
 [C array of songs on GitHub](https://github.com/granadaxronos/120-SONG_NOKIA_RTTTL_RINGTONE_PLAYER_FOR_ARDUINO_UNO/blob/master/RTTTL_PLAYER/songs.h)
 
 # Revision History
+### Version 1.4.2
+- New example ReactionTimeTestGame.
 
 ### Version 1.4.1
 - Removed blocking wait for ATmega32U4 Serial in examples.
@@ -91,7 +103,7 @@ More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tu
 ### Version 1.2.0
 - No Serial.print statements in this library anymore, to avoid problems with different Serial implementations.
 - Function `playRandomRtttlBlocking()` + `startPlayRandomRtttlFromArrayPGM()` do not print name now. If needed, use new functions `playRandomRtttlSampleBlockingAndPrintName()` + `startPlayRandomRtttlFromArrayPGMAndPrintName()`.
-- Printing functions have parameter (..., Stream * aSerial) to print to any serial. Call it (..., &Serial) to use standard Serial;
+- Printing functions have parameter (..., Stream *aSerial) to print to any serial. Call it (..., &Serial) to use standard Serial;
 - `playRandomRtttlBlocking()` renamed to `playRandomRtttlSampleBlocking()` and bug fixing.
 
 ### Version 1.1.0
