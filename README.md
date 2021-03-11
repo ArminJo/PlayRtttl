@@ -48,7 +48,7 @@ const int TONE_PIN = 11;
 
 # Compile options / macros for this library
 To customize the library to different requirements, there are some compile options / makros available.<br/>
-Modify it by commenting them out or in, or change the values if applicable. Or define the macro with the -D compiler option for gobal compile (the latter is not possible with the Arduino IDE, so consider to use [Sloeber](https://eclipse.baeyens.it).
+Modify it by commenting them out or in, or change the values if applicable. Or define the macro with the -D compiler option for global compile (the latter is not possible with the Arduino IDE, so consider using [Sloeber](https://eclipse.baeyens.it).
 Some options which are enabed by default can be disabled also by defining a *inhibit* macro like `USE_NO_RTX_EXTENSIONS`.
 | Macro | Default | File | Disable macro | Description |
 |-|-|-|-|-|
@@ -72,6 +72,9 @@ If running with 1 MHz, e.g on an ATtiny, the millis() interrupt needs so much ti
 # More songs
 More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/ or ask Google.
 [C array of songs on GitHub](https://github.com/granadaxronos/120-SONG_NOKIA_RTTTL_RINGTONE_PLAYER_FOR_ARDUINO_UNO/blob/master/RTTTL_PLAYER/songs.h)
+
+# Compiling for ATtinies
+In order to fit the examples to the 8K flash of ATtiny85 and ATtiny88, the [Arduino library ATtinySerialOut](https://github.com/ArminJo/ATtinySerialOut) is required for this CPU's.
 
 # Revision History
 ### Version 1.4.2
@@ -103,7 +106,7 @@ More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tu
 ### Version 1.2.0
 - No Serial.print statements in this library anymore, to avoid problems with different Serial implementations.
 - Function `playRandomRtttlBlocking()` + `startPlayRandomRtttlFromArrayPGM()` do not print name now. If needed, use new functions `playRandomRtttlSampleBlockingAndPrintName()` + `startPlayRandomRtttlFromArrayPGMAndPrintName()`.
-- Printing functions have parameter (..., Stream *aSerial) to print to any serial. Call it (..., &Serial) to use standard Serial;
+- Printing functions have parameter (..., Stream *aSerial) to print to any serial. Call it (..., &Serial) using [Sloeber]tandard Serial;
 - `playRandomRtttlBlocking()` renamed to `playRandomRtttlSampleBlocking()` and bug fixing.
 
 ### Version 1.1.0

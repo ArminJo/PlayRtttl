@@ -64,7 +64,8 @@ public:
     void setEnabled(bool aIsEnabled);
 
     uint8_t pin; // Pin number connected to LED anode
-    volatile bool state; // LED state (volatile so that the compiler doesn't optimize this variable into some constant)
+    // uint8_t to enable more states like PinStatus of TinyCore
+    volatile uint8_t state; // LED state (volatile so that the compiler doesn't optimize this variable into some constant)
     signed int numberOfBlinks; // Negative values mean forever
     unsigned int onDelayMillis; // On time in milliseconds
     unsigned int offDelayMillis; // Off time in milliseconds
