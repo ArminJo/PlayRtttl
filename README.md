@@ -24,6 +24,10 @@ YouTube video of the RandomMelody example in action
 
 [![RandomMelody example](https://i.ytimg.com/vi/0n9_Fm3VP3w/hqdefault.jpg)](https://www.youtube.com/watch?v=0n9_Fm3VP3w)
 
+WOKWI online simulation of the RandomMelody example
+
+[![WOKWI online simulation of the RandomMelody example](https://github.com/ArminJo/PlayRtttl/blob/master/pictures/Wokwi_PlayRandowMelody.png)](https://wokwi.com/arduino/projects/299510184400650762).
+
 # Sample code
 ## Blocking play melody from FLASH
 ```
@@ -57,7 +61,7 @@ Some options which are enabed by default can be disabled also by defining a *inh
 | `RTX_STYLE_DEFAULT` | 'N' | PlayRtttl.h |  | (Natural) Tone length = note length - 1/16. |
 
 ### Modifying compile options with Arduino IDE
-First use *Sketch > Show Sketch Folder (Ctrl+K)*.<br/>
+First, use *Sketch > Show Sketch Folder (Ctrl+K)*.<br/>
 If you did not yet stored the example as your own sketch, then you are instantly in the right library folder.<br/>
 Otherwise you have to navigate to the parallel `libraries` folder and select the library you want to access.<br/>
 In both cases the library files itself are located in the `src` directory.<br/>
