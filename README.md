@@ -20,12 +20,10 @@ Improved Arduino library version of the RTTTL.pde example code written by Brett 
  - Supports RTX format - 2 additional parameters: 1. l=<number_of_loops> 2.s=<Style[N|S|C]>).
  - Tone style (relation of tone output to note length) and loop count can be set for a melody.
 
-YouTube video of the RandomMelody example in action
-
+YouTube video of the RandomMelody example in action.<br/>
 [![RandomMelody example](https://i.ytimg.com/vi/0n9_Fm3VP3w/hqdefault.jpg)](https://www.youtube.com/watch?v=0n9_Fm3VP3w)
 
-WOKWI online simulation of the RandomMelody example
-
+WOKWI online simulation of the RandomMelody example.<br/>
 [![WOKWI online simulation of the RandomMelody example](https://github.com/ArminJo/PlayRtttl/blob/master/pictures/Wokwi_PlayRandowMelody.png)](https://wokwi.com/arduino/projects/299510184400650762).
 
 # Sample code
@@ -53,7 +51,7 @@ const int TONE_PIN = 11;
 # Compile options / macros for this library
 To customize the library to different requirements, there are some compile options / makros available.<br/>
 Modify it by commenting them out or in, or change the values if applicable. Or define the macro with the -D compiler option for global compile (the latter is not possible with the Arduino IDE, so consider using [Sloeber](https://eclipse.baeyens.it).
-Some options which are enabed by default can be disabled also by defining a *inhibit* macro like `USE_NO_RTX_EXTENSIONS`.
+Some options which are enabled by default can be disabled also by defining a *inhibit* macro like `USE_NO_RTX_EXTENSIONS`.
 | Macro | Default | File | Disable macro | Description |
 |-|-|-|-|-|
 | `SUPPORT_RTX_EXTENSIONS` | enabled | PlayRtttl.h | `USE_NO_RTX_EXTENSIONS` | Support loop and style.<br/>Even without `SUPPORT_RTX_EXTENSIONS` the default style is natural (Tone length = note length - 1/16).<br/>Requires around 182 additional bytes FLASH. |

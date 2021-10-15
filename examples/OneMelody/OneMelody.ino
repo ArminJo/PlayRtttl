@@ -30,7 +30,8 @@
 #include <PlayRtttl.h>
 
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
-#include "ATtinySerialOut.h"
+#define TINY_SERIAL_INHERIT_FROM_PRINT
+#include "ATtinySerialOut.hpp" // Available as Arduino library "ATtinySerialOut"
 #undef LED_BUILTIN
 #define LED_BUILTIN PB1  // on my digispark board
 /*
@@ -60,25 +61,35 @@ void setup() {
     /*
      * Play one melody
      */
+    Serial.println(F("Play StarWars"));
     playRtttlBlocking(TONE_PIN, StarWarsInRam);
-    delay(5000);
+    delay(10000);
 }
 
 void loop() {
     /*
      * And all the other melodies, but use now the non blocking functions
      */
+    const char * const*tSongPtr;
+    /*
+     * Regular -> 21 melodies
+     * Tiny -> 6 melodies
+     * Small -> 11 melodies
+     */
+#if defined(__AVR_ATtiny85__)
 //    for (uint8_t i = 1; i < ARRAY_SIZE_MELODIES_SMALL; ++i) {
-        for (uint8_t i = 1; i < ARRAY_SIZE_MELODIES_TINY; ++i) {
-        const char* tSongPtr;
-#if defined(__AVR__)
-//        tSongPtr = (char*) pgm_read_word(&RTTTLMelodiesSmall[i]);
-        tSongPtr = (char*) pgm_read_word(&RTTTLMelodiesTiny[i]);
+    for (uint8_t i = 1; i < ARRAY_SIZE_MELODIES_TINY; ++i) {
+//        tSongPtr = &RTTTLMelodiesSmall[i];
+        tSongPtr = &RTTTLMelodiesTiny[i];
 #else
-        tSongPtr = (char*) RTTTLMelodiesSmall[i];
+    for (uint8_t i = 0; i < ARRAY_SIZE_MELODIES; ++i) {
+        tSongPtr = &RTTTLMelodies[i];
 #endif
-        Serial.println(F("Play next melody"));
-        startPlayRtttlPGM(TONE_PIN, tSongPtr);
+        printNamePGMPGM(tSongPtr, &Serial);
+        Serial.print(F("Index="));
+        Serial.println(i);
+
+        startPlayRtttlPGMPGM(TONE_PIN, tSongPtr);
         while (updatePlayRtttl()) {
             /*
              * your own code here...

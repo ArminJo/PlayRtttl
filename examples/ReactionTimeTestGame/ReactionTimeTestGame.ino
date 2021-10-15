@@ -1,6 +1,16 @@
 /*
  * Game to measure reaction time with 2 buttons, 3 LEDs and a buzzer
  *
+ * It supports 3 board layouts:
+ *  1. The "Simon Says" layout (default):
+ *       https://learn.sparkfun.com/tutorials/sparkfun-inventors-kit-experiment-guide---v40/circuit-2c-simon-says-game
+ *       https://dingfluence.dingfabrik.de/pages/viewpage.action?pageId=31653962
+ *  2. Arduino Multifunction Shield:
+ *       https://www.electroschematics.com/getting-started-with-the-arduino-multifunction-shield/
+ *  3. Breadboard layout for school lessons:
+ *       https://github.com/ArminJo/Arduino-Lessons-for-School#universal-breadboard-layout-for-all-lessons
+ *
+ *
  * Aufgaben:
  * 1. Warte bis ein Button gedrückt wird und gebe die Reaktionszeit aus. Schalte die LED des Spielers an und erhöhe die Punkte des Spielers.
  *      Benutze digitalRead() und z.B. "sRightPlayerScore++".
@@ -34,12 +44,12 @@
 #define VERSION_EXAMPLE "2.1"
 
 /*
- * Comment the next line out if you want to run this program on an Arduino Multifunction Shield
+ * Activate the next line if you want to run this program on an Arduino Multifunction Shield
  * https://www.electroschematics.com/getting-started-with-the-arduino-multifunction-shield/
  */
 //#define MULTI_FUNCTION_SHIELD
 /*
- * Comment the next line out, if you use the breadboard layout for school lessons
+ * Activate the next line, if you use the breadboard layout for school lessons
  * https://github.com/ArminJo/Arduino-Lessons-for-School#universal-breadboard-layout-for-all-lessons
  */
 //#define BREADBOARD_LAYOUT

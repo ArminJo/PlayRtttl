@@ -30,7 +30,7 @@
 #include <PlayRtttl.h>
 
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
-#include "ATtinySerialOut.h"
+#include "ATtinySerialOut.hpp" // Available as Arduino library "ATtinySerialOut"
 #endif
 
 const int TONE_PIN = 11;
@@ -55,13 +55,15 @@ void setup() {
     setDefaultStyle(RTTTL_STYLE_CONTINUOUS);
 }
 
-void toggleLED() {
-    static int tCount = 0; // to enable little delays but slow blink
+/*
+ * Enable low delays for slow blink
+ */
+void toggleLED_BUILTIN_Every10thCall() {
+    static int tCount = 0;
     if (++tCount == 10) {
         tCount = 0;
         digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
     }
-    delay(10);
 }
 
 void loop() {
@@ -82,7 +84,7 @@ void loop() {
         /*
          * Blink LED
          */
-        toggleLED();
+        toggleLED_BUILTIN_Every10thCall();
         /*
          * Check if button is pressed.
          * If yes stop melody wait and start with next loop
@@ -92,6 +94,7 @@ void loop() {
             stopPlayRtttl();
             break;
         }
+        delay(10);
     }
     // wait after playing
     delay(1000);
