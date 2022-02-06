@@ -49,7 +49,7 @@ char StarWarsInRam[] =
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(115200);
-#if defined(__AVR_ATmega32U4__) || defined(SERIAL_USB) || defined(SERIAL_PORT_USBVIRTUAL)  || defined(ARDUINO_attiny3217)
+#if defined(__AVR_ATmega32U4__) || defined(SERIAL_PORT_USBVIRTUAL) || defined(SERIAL_USB) || defined(SERIALUSB_PID) || defined(ARDUINO_attiny3217)
     delay(4000); // To be able to connect Serial monitor after reset or power up and before first print out. Do not wait for an attached Serial Monitor!
 #endif
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
@@ -77,12 +77,12 @@ void loop() {
      * Small -> 11 melodies
      */
 #if defined(__AVR_ATtiny85__)
-//    for (uint8_t i = 1; i < ARRAY_SIZE_MELODIES_SMALL; ++i) {
-    for (uint8_t i = 1; i < ARRAY_SIZE_MELODIES_TINY; ++i) {
+//    for (uint_fast8_t i = 1; i < ARRAY_SIZE_MELODIES_SMALL; ++i) {
+    for (uint_fast8_t i = 1; i < ARRAY_SIZE_MELODIES_TINY; ++i) {
 //        tSongPtr = &RTTTLMelodiesSmall[i];
         tSongPtr = &RTTTLMelodiesTiny[i];
 #else
-    for (uint8_t i = 0; i < ARRAY_SIZE_MELODIES; ++i) {
+    for (uint_fast8_t i = 0; i < ARRAY_SIZE_MELODIES; ++i) {
         tSongPtr = &RTTTLMelodies[i];
 #endif
         printNamePGMPGM(tSongPtr, &Serial);

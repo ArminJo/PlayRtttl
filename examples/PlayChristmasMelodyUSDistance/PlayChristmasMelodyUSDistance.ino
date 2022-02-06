@@ -73,7 +73,7 @@ void playRandomSongAndBlink();
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(115200);
-#if defined(__AVR_ATmega32U4__) || defined(SERIAL_USB) || defined(SERIAL_PORT_USBVIRTUAL)  || defined(ARDUINO_attiny3217)
+#if defined(__AVR_ATmega32U4__) || defined(SERIAL_PORT_USBVIRTUAL) || defined(SERIAL_USB) || defined(SERIALUSB_PID) || defined(ARDUINO_attiny3217)
     delay(4000); // To be able to connect Serial monitor after reset or power up and before first print out. Do not wait for an attached Serial Monitor!
 #endif
     // Just to know which program is running on my Arduino
@@ -97,7 +97,7 @@ void loop() {
     static uint8_t sInRangeCounter = 0;
     static uint16_t tRandomSeed;
 
-    unsigned int tCentimeter = getUSDistanceAsCentiMeterWithCentimeterTimeout(300);
+    unsigned int tCentimeter = getUSDistanceAsCentimeterWithCentimeterTimeout(300);
     Serial.print("Distance=");
     Serial.print(tCentimeter);
     Serial.println("cm.");
@@ -133,7 +133,7 @@ void loop() {
             // wait for distance to be out of range for NUMBER_OF_CONSECUTIVE_OUT_RANGE_READINGS consecutive readings
             uint8_t tCounter = 0;
             while (tCounter < NUMBER_OF_CONSECUTIVE_OUT_RANGE_READINGS) {
-                tCentimeter = getUSDistanceAsCentiMeter();
+                tCentimeter = getUSDistanceAsCentimeter();
                 Serial.print("Distance=");
                 Serial.print(tCentimeter);
                 Serial.print("cm.");

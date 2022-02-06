@@ -1,5 +1,5 @@
 # [PlayRtttl](https://github.com/ArminJo/PlayRtttl)
-Available as Arduino library "PlayRtttl"
+Improved Arduino library version of the RTTTL.pde example code written by Brett Hagman http://www.roguerobotics.com/  bhagman@roguerobotics.com
 
 ### [Version 1.4.2](https://github.com/ArminJo/PlayRtttl/releases)
 
@@ -7,9 +7,10 @@ Available as Arduino library "PlayRtttl"
 [![Installation instructions](https://www.ardu-badge.com/badge/PlayRtttl.svg?)](https://www.ardu-badge.com/PlayRtttl)
 [![Commits since latest](https://img.shields.io/github/commits-since/ArminJo/PlayRtttl/latest)](https://github.com/ArminJo/PlayRtttl/commits/master)
 [![Build Status](https://github.com/ArminJo/PlayRtttl/workflows/LibraryBuild/badge.svg)](https://github.com/ArminJo/PlayRtttl/actions)
-[![Hit Counter](https://hitcounter.pythonanywhere.com/count/tag.svg?url=https%3A%2F%2Fgithub.com%2FArminJo%2FPlayRtttl)](https://github.com/brentvollebregt/hit-counter)
+![Hit Counter](https://visitor-badge.laobi.icu/badge?page_id=ArminJo_PlayRtttl)
 
-Improved Arduino library version of the RTTTL.pde example code written by Brett Hagman http://www.roguerobotics.com/  bhagman@roguerobotics.com
+Available as Arduino library "PlayRtttl"
+# Features
  - Plays RTTTL melodies/ringtones from FLASH or RAM.
  - Non blocking version.
  - Name output function.
@@ -28,7 +29,7 @@ WOKWI online simulation of the RandomMelody example.<br/>
 
 # Sample code
 ## Blocking play melody from FLASH
-```
+```c++
 #include <PlayRtttl.h>
 const int TONE_PIN = 11;
 ...
@@ -38,7 +39,7 @@ const int TONE_PIN = 11;
 ```
 ## Non blocking play
 
-```
+```c++
 ...
     startPlayRtttlPGM(TONE_PIN, TakeOnMe);
     while (updatePlayRtttl()) {
@@ -48,25 +49,49 @@ const int TONE_PIN = 11;
 ...
 ```
 
+# RTTTL format
+\<NameString>:\<Option>:(\<Option>:)\<Note>,\<Note>...<br/>
+
+Option:<br/>
+- d=Default duration of a note
+- o=Default octave
+- b=Beats per minutes of a quarter note
+- opt l=Number of loops
+- opt s=Style - see "#define RTX_STYLE_CONTINUOUS 'C'" and following above
+
+Note:<br/>
+- opt duration (1 for a whole, 4 for a quarter note, etc.)
+- note (p = pause)
+- opt dot to increase duration by half
+- opt octave
+
+Example: `"Short:d=4,o=3,b=240,s=4:c4,8g,8g,a,g.,b,c4"`
+
 # Compile options / macros for this library
 To customize the library to different requirements, there are some compile options / makros available.<br/>
-Modify it by commenting them out or in, or change the values if applicable. Or define the macro with the -D compiler option for global compile (the latter is not possible with the Arduino IDE, so consider using [Sloeber](https://eclipse.baeyens.it).
+Modify them by enabling / disabling them, or change the values if applicable.
 Some options which are enabled by default can be disabled also by defining a *inhibit* macro like `USE_NO_RTX_EXTENSIONS`.
+
 | Macro | Default | File | Disable macro | Description |
 |-|-|-|-|-|
-| `SUPPORT_RTX_EXTENSIONS` | enabled | PlayRtttl.h | `USE_NO_RTX_EXTENSIONS` | Support loop and style.<br/>Even without `SUPPORT_RTX_EXTENSIONS` the default style is natural (Tone length = note length - 1/16).<br/>Requires around 182 additional bytes FLASH. |
+| `SUPPORT_RTX_EXTENSIONS` | enabled | PlayRtttl.h | `USE_NO_RTX_EXTENSIONS` | Support loop and style.<br/>Even without `SUPPORT_RTX_EXTENSIONS` the default style is natural (Tone length = note length - 1/16).<br/>Requires around 182 additional bytes program space. |
 | `SUPPORT_RTX_FORMAT` | enabled | PlayRtttl.h | `USE_NO_RTX_EXTENSIONS` | Enables evaluating RTX format definitions `'s'` and `'l'`. |
 | `RTX_STYLE_DEFAULT` | 'N' | PlayRtttl.h |  | (Natural) Tone length = note length - 1/16. |
 
-### Modifying compile options with Arduino IDE
+### Changing include (*.h) files with Arduino IDE
 First, use *Sketch > Show Sketch Folder (Ctrl+K)*.<br/>
-If you did not yet stored the example as your own sketch, then you are instantly in the right library folder.<br/>
+If you have not yet saved the example as your own sketch, then you are instantly in the right library folder.<br/>
 Otherwise you have to navigate to the parallel `libraries` folder and select the library you want to access.<br/>
-In both cases the library files itself are located in the `src` directory.<br/>
+In both cases the library source and include files are located in the libraries `src` directory.<br/>
+The modification must be renewed for each new library version!
 
-### Modifying compile options with Sloeber IDE
-If you are using Sloeber as your IDE, you can easily define global symbols with *Properties > Arduino > CompileOptions*.<br/>
-![Sloeber settings](https://github.com/ArminJo/ServoEasing/blob/master/pictures/SloeberDefineSymbols.png)
+### Modifying compile options / macros with PlatformIO
+If you are using PlatformIO, you can define the macros in the *[platformio.ini](https://docs.platformio.org/en/latest/projectconf/section_env_build.html)* file with `build_flags = -D MACRO_NAME` or `build_flags = -D MACRO_NAME=macroValue`.
+
+### Modifying compile options / macros with Sloeber IDE
+If you are using [Sloeber](https://eclipse.baeyens.it) as your IDE, you can easily define global symbols with *Properties > Arduino > CompileOptions*.<br/>
+![Sloeber settings](https://github.com/Arduino-IRremote/Arduino-IRremote/blob/master/pictures/SloeberDefineSymbols.png)
+
 
 # Running with 1 MHz
 If running with 1 MHz, e.g on an ATtiny, the millis() interrupt needs so much time, that it disturbes the tone() generation by interrupt. You can avoid this by using a tone pin, which is directly supported by hardware. Look at the appropriate *pins_arduino.h*, find `digital_pin_to_timer_PGM[]` and choose pins with TIMER1x entries.

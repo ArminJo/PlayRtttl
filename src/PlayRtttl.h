@@ -51,8 +51,8 @@
 
 #if ! defined(USE_NO_RTX_EXTENSIONS) // if defined it suppresses the next 2 defines / useful for ATtinies to shrink code up to 182 bytes
 // Even without `SUPPORT_RTX_EXTENSIONS` the default style is natural (Tone length = note length - 1/16)
-#define SUPPORT_RTX_EXTENSIONS  // needs additional 200 bytes FLASH - support loop and style
-#define SUPPORT_RTX_FORMAT      // needs additional 100 bytes FLASH - can read RTX formatted definitions
+#define SUPPORT_RTX_EXTENSIONS  // needs additional 200 bytes program space - support loop and style
+#define SUPPORT_RTX_FORMAT      // needs additional 100 bytes program space - can read RTX formatted definitions
 #endif
 
 #ifdef SUPPORT_RTX_FORMAT
@@ -158,18 +158,17 @@ extern const int Notes[] PROGMEM; // The frequencies of notes of the highest oct
 
 /*
  * RTTTL format:
- * Prefix:
- *  Name
- *  Colon
- *  d=Default duration
+ * <NameString>:<Option>:(<Option>:)<Note>,<Note>...
+ *
+ * Option:
+ *  d=Default duration of a note
  *  o=Default octave
- *  b=Beats per minutes (of quarter note)
+ *  b=Beats per minutes of a quarter note
  *  opt l=Number of loops
  *  opt s=Style - see "#define RTX_STYLE_CONTINUOUS 'C'" and following above
- *  Colon
  *
  * Note:
- *  opt duration
+ *  opt duration (1 for a whole, 4 for a quarter note, etc.)
  *  note (p = pause)
  *  opt dot to increase duration by half
  *  opt octave
@@ -225,6 +224,7 @@ static const char Smurfs[] PROGMEM
 static const char Toccata[] PROGMEM
 ="Toccata:d=4,o=5,b=160:16a4,16g4,1a4,16g4,16f4,16d4,16e4,2c#4,16p,d.4,2p,16a4,16g4,1a4,8e.4,8f.4,8c#.4,2d4";
 static const char Short[] PROGMEM = "Short:d=4,o=3,b=240,s=4:c4,8g,8g,a,g.,b,c4";
+static const char Down[] PROGMEM = "Down:d=4,o=6,b=300,s=4:c7,p,f.,p.,2c,2p,1c5";
 
 static const char IHaveADream[] PROGMEM =
         "IHaveADr:b=125,o=6,d=8:32p,4f#5,4d#.,c#,2e.,4f#5,4b.5,a#5,2b.5,4f#5,4d#.,c#,2e.,4f#5,4b.5,a#5,2b.5,d#,e,f#.,16g#,4f#,2c#.,c#,d#,e.,16f#,2d#.,d#,e,f#.,16g#,4f#,2c#.,c#,d#,e.,16f#,1d#";
