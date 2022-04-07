@@ -61,7 +61,6 @@ jobs:
                 -DDEBUG
               RandomMelody:
                 -DDEBUG
-                -DUSE_NON_STANDARD_SERIAL_FOR_DEBUG
 
           - arduino-boards-fqbn: digistump:avr:digispark-tiny:clock=clock1  # ATtiny85 board @1 MHz
             platform-url: https://raw.githubusercontent.com/ArminJo/DigistumpArduino/master/package_digistump_index.json

@@ -1,7 +1,7 @@
 # [PlayRtttl](https://github.com/ArminJo/PlayRtttl)
 Improved Arduino library version of the RTTTL.pde example code written by Brett Hagman http://www.roguerobotics.com/  bhagman@roguerobotics.com
 
-### [Version 1.4.2](https://github.com/ArminJo/PlayRtttl/releases)
+### [Version 2.0.0](https://github.com/ArminJo/PlayRtttl/releases)
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Installation instructions](https://www.ardu-badge.com/badge/PlayRtttl.svg?)](https://www.ardu-badge.com/PlayRtttl)
@@ -68,15 +68,14 @@ Note:<br/>
 Example: `"Short:d=4,o=3,b=240,s=4:c4,8g,8g,a,g.,b,c4"`
 
 # Compile options / macros for this library
-To customize the library to different requirements, there are some compile options / makros available.<br/>
+To customize the library to different requirements, there are some compile options / macros available.<br/>
+These macros must be defined in your program before the line `#include <PlayRtttl.hpp>` to take effect.<br/>
 Modify them by enabling / disabling them, or change the values if applicable.
-Some options which are enabled by default can be disabled also by defining a *inhibit* macro like `USE_NO_RTX_EXTENSIONS`.
 
-| Macro | Default | File | Disable macro | Description |
-|-|-|-|-|-|
-| `SUPPORT_RTX_EXTENSIONS` | enabled | PlayRtttl.h | `USE_NO_RTX_EXTENSIONS` | Support loop and style.<br/>Even without `SUPPORT_RTX_EXTENSIONS` the default style is natural (Tone length = note length - 1/16).<br/>Requires around 182 additional bytes program space. |
-| `SUPPORT_RTX_FORMAT` | enabled | PlayRtttl.h | `USE_NO_RTX_EXTENSIONS` | Enables evaluating RTX format definitions `'s'` and `'l'`. |
-| `RTX_STYLE_DEFAULT` | 'N' | PlayRtttl.h |  | (Natural) Tone length = note length - 1/16. |
+| Name | Default value | Description |
+|-|-|-|
+| `USE_NO_RTX_EXTENSIONS` | disabled | Disables interpretation of RTX format definitions `'s'` (style) and `'l'` (loop).<br/>Even with `USE_NO_RTX_EXTENSIONS` activated, the default style is natural (Tone length = note length - 1/16).<br/>Saves up to 332 bytes program memory. |
+| `RTX_STYLE_DEFAULT` | 'N' | (Natural) Tone length = note length - 1/16. |
 
 ### Changing include (*.h) files with Arduino IDE
 First, use *Sketch > Show Sketch Folder (Ctrl+K)*.<br/>
@@ -104,6 +103,10 @@ More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tu
 In order to fit the examples to the 8K flash of ATtiny85 and ATtiny88, the [Arduino library ATtinySerialOut](https://github.com/ArminJo/ATtinySerialOut) is required for this CPU's.
 
 # Revision History
+### Version 2.0.0
+- Renamed PlayRttl.cpp to PlayRttl.hpp.
+- Removed Macros SUPPORT_RTX_EXTENSIONS and SUPPORT_RTX_FORMAT.
+
 ### Version 1.4.2
 - New example ReactionTimeTestGame.
 

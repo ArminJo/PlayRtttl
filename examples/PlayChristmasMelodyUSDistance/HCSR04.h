@@ -25,12 +25,12 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/gpl.html>.
+ *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
  *
  */
 
-#ifndef HCSR04_H_
-#define HCSR04_H_
+#ifndef _HCSR04_H
+#define _HCSR04_H
 
 #include <stdint.h>
 
@@ -64,6 +64,5 @@ extern volatile unsigned long sUSPulseMicros;
 #define HCSR04_MODE_USE_2_PINS      2
 extern uint8_t sHCSR04Mode;
 
-#endif // HCSR04_H_
-
+#endif // _HCSR04_H
 #pragma once

@@ -17,14 +17,14 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/gpl.html>.
+ *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
  *
  */
 
 #include <inttypes.h>
 
-#ifndef BLINK_LED_H_
-#define BLINK_LED_H_
+#ifndef _BLINK_LED_H
+#define _BLINK_LED_H
 
 // The simple blocking variant
 void blinkLEDBlocking(uint8_t aLedPin, uint8_t aBlinkCount, uint16_t aDelayMillis);
@@ -73,6 +73,5 @@ public:
     bool enabled = true; // LED enabled/disabled state
 };
 
-#endif /* BLINK_LED_H_ */
-
+#endif // _BLINK_LED_H
 #pragma once

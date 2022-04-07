@@ -1,9 +1,10 @@
 /*
- * PlayRttl.cpp
+ * PlayRttl.hpp
+ *
  * Plays RTTTL melodies / ringtones from FLASH or RAM.
  * Includes a non blocking version and a name output function.
  *
- *  Copyright (C) 2018  Armin Joachimsmeyer
+ *  Copyright (C) 2018-2022  Armin Joachimsmeyer
  *  armin.joachimsmeyer@gmail.com
  *
  *     Based on the RTTTL.pde example code written by Brett Hagman
@@ -25,8 +26,11 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/gpl.html>.
+ *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
  */
+
+#ifndef _PLAY_RTTTL_HPP
+#define _PLAY_RTTTL_HPP
 
 #include <Arduino.h>
 
@@ -36,13 +40,13 @@
 //#define DEBUG // Activate it to see debug output
 
 // Propagate debug level
-#ifdef TRACE
-#  ifndef DEBUG
+#if defined(TRACE)
+#  if !defined(DEBUG)
 #define DEBUG
 #  endif
 #endif
-#ifdef DEBUG
-Print *const sPointerToSerial = &Serial;  // needs 0 bytes Flash because it is constant
+#if defined(DEBUG)
+Print *const sPointerToSerial = &Serial;  // requires 0 bytes Flash because it is constant
 #endif //DEBUG
 
 struct playRtttlState sPlayRtttlState;
@@ -83,14 +87,14 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
     /*
      * Skip name and :
      */
-#ifdef DEBUG
+#if defined(DEBUG)
     sPointerToSerial->print(F("Title="));
 #endif
     while (*aRTTTLArrayPtr != ':') {
         /*
          * Read title
          */
-#ifdef DEBUG
+#if defined(DEBUG)
         sPointerToSerial->print(*aRTTTLArrayPtr);
 #endif
         aRTTTLArrayPtr++;
@@ -99,13 +103,13 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
     sPlayRtttlState.DefaultDuration = DEFAULT_DURATION;
     sPlayRtttlState.DefaultOctave = DEFAULT_OCTAVE;
     sPlayRtttlState.TimeForWholeNoteMillis = (60 * 1000L / DEFAULT_BPM) * 4;
-#ifdef SUPPORT_RTX_EXTENSIONS
+#if !defined(USE_NO_RTX_EXTENSIONS)
     sPlayRtttlState.NumberOfLoops = 1;
     sPlayRtttlState.StyleDivisorValue = sDefaultStyleDivisorValue;
 #endif
 
-#ifdef SUPPORT_RTX_FORMAT
-#ifdef DEBUG
+#if !defined(USE_NO_RTX_EXTENSIONS)
+#if defined(DEBUG)
     char tStyleChar = RTX_STYLE_DEFAULT;
 #else
     char tStyleChar;
@@ -141,7 +145,7 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
         /*
          * get default octave
          */
-        if (*aRTTTLArrayPtr == 'o') {
+        else if (*aRTTTLArrayPtr == 'o') {
             aRTTTLArrayPtr++;
             aRTTTLArrayPtr++;              // skip "o="
             tNumber = *aRTTTLArrayPtr++ - '0';
@@ -151,8 +155,8 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
             sPlayRtttlState.DefaultOctave = tNumber;
         }
 
-#ifdef SUPPORT_RTX_FORMAT
-        if (*aRTTTLArrayPtr == 's') {
+#if !defined(USE_NO_RTX_EXTENSIONS)
+        else if (*aRTTTLArrayPtr == 's') {
             // get Style
             aRTTTLArrayPtr++;
             aRTTTLArrayPtr++;           // skip "s="
@@ -162,7 +166,7 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
         }
 
         // get loops
-        if (*aRTTTLArrayPtr == 'l') {
+        else if (*aRTTTLArrayPtr == 'l') {
             tNumber = 0;
             aRTTTLArrayPtr++;
             aRTTTLArrayPtr++;              // skip "l="
@@ -176,7 +180,7 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
         }
 #endif
 
-        if (*aRTTTLArrayPtr == 'b') {
+        else if (*aRTTTLArrayPtr == 'b') {
             // get BPM
             aRTTTLArrayPtr++;
             aRTTTLArrayPtr++;              // skip "b="
@@ -195,14 +199,14 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
 
     aRTTTLArrayPtr++; // skip colon
 
-#ifdef DEBUG
+#if defined(DEBUG)
     sPointerToSerial->print(F(" DefaultDuration="));
     sPointerToSerial->print(sPlayRtttlState.DefaultDuration);
     sPointerToSerial->print(F(" DefaultOctave="));
     sPointerToSerial->print(sPlayRtttlState.DefaultOctave);
     sPointerToSerial->print(F(" BPM="));
     sPointerToSerial->print(tBPM);
-#ifdef SUPPORT_RTX_FORMAT
+#if !defined(USE_NO_RTX_EXTENSIONS)
     sPointerToSerial->print(F(" Style="));
     sPointerToSerial->print(tStyleChar);
     if (sPlayRtttlState.StyleDivisorValue != 0) {
@@ -218,7 +222,7 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
 
     sPlayRtttlState.MillisOfNextAction = 0;
     sPlayRtttlState.NextTonePointer = aRTTTLArrayPtr;
-#ifdef SUPPORT_RTX_EXTENSIONS
+#if !defined(USE_NO_RTX_EXTENSIONS)
     sPlayRtttlState.LastTonePointer = aRTTTLArrayPtr;
 #endif
     sPlayRtttlState.Flags.IsRunning = true;
@@ -262,7 +266,7 @@ bool updatePlayRtttl(void) {
         return false;
     }
 
-#ifdef TRACE
+#if defined(TRACE)
     bool isSharp = false;
     char tNoteCharUppercase;
 #endif
@@ -278,7 +282,7 @@ bool updatePlayRtttl(void) {
          * Check if end of string reached
          */
         if (tChar == '\0') {
-#ifdef SUPPORT_RTX_EXTENSIONS
+#if !defined(USE_NO_RTX_EXTENSIONS)
             uint8_t tNumberOfLoops = sPlayRtttlState.NumberOfLoops;
             if (tNumberOfLoops > 1) {
                 sPlayRtttlState.NumberOfLoops--;
@@ -291,10 +295,10 @@ bool updatePlayRtttl(void) {
                     sPlayRtttlState.OnComplete();
                 }
                 return false;
-#ifdef SUPPORT_RTX_EXTENSIONS
+#if !defined(USE_NO_RTX_EXTENSIONS)
             } else {
                 // loop again
-#ifdef DEBUG
+#if defined(DEBUG)
                 sPointerToSerial->print(F("Loop count="));
                 sPointerToSerial->println(sPlayRtttlState.NumberOfLoops);
 #endif
@@ -302,7 +306,7 @@ bool updatePlayRtttl(void) {
                 sPlayRtttlState.NextTonePointer = sPlayRtttlState.LastTonePointer;
                 return updatePlayRtttl();
             }
-#endif //  SUPPORT_RTX_EXTENSIONS
+#endif //  INTERPRETE_RTX_FORMAT
         }
 
         uint8_t tDurationNumber;
@@ -325,7 +329,7 @@ bool updatePlayRtttl(void) {
 
 // now get the note
         tNote = 42; // Pause
-#ifdef TRACE
+#if defined(TRACE)
         tNoteCharUppercase = tChar - 0x20;
 #endif
 
@@ -354,7 +358,7 @@ bool updatePlayRtttl(void) {
             break;
         case 'p':
         default:
-#ifdef TRACE
+#if defined(TRACE)
             tNoteCharUppercase = 'P';
 #endif
             tNote = 42; // pause
@@ -365,7 +369,7 @@ bool updatePlayRtttl(void) {
 
         // now, get optional '#' sharp (or '_' as seen on many songs)
         if (tChar == '#' || tChar == '_') {
-#ifdef TRACE
+#if defined(TRACE)
             isSharp = true;
 #endif
             tNote++;
@@ -376,7 +380,7 @@ bool updatePlayRtttl(void) {
 // now, get optional '.' of dotted note
         if (tChar == '.') {
             tDuration += tDuration / 2;
-#ifdef DEBUG
+#if defined(DEBUG)
             tDurationNumber += tDurationNumber / 2;
 #endif
             tRTTTLArrayPtr++;
@@ -405,7 +409,7 @@ bool updatePlayRtttl(void) {
         /*
          * now play the note
          */
-#  if defined(SUPPORT_RTX_EXTENSIONS)
+#  if !defined(USE_NO_RTX_EXTENSIONS)
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
         unsigned long tDurationOfTone;
 #endif
@@ -419,7 +423,7 @@ bool updatePlayRtttl(void) {
 #if defined(ESP32)
             ledcWriteTone(TONE_LEDC_CHANNEL, tFrequency);
 #else
-#  if defined(SUPPORT_RTX_EXTENSIONS)
+#  if !defined(USE_NO_RTX_EXTENSIONS)
             if (sPlayRtttlState.StyleDivisorValue != 0) {
                 /*
                  * handle style parameter, compute duration of tone output for note and do rounding for integer division
@@ -432,7 +436,7 @@ bool updatePlayRtttl(void) {
             }
 
 #  else
-            // even without SUPPORT_RTX_EXTENSIONS the default style is natural (Tone length = note length - 1/16)
+            // even without INTERPRETE_RTX_FORMAT the default style is natural (Tone length = note length - 1/16)
             tone(sPlayRtttlState.TonePin, tFrequency, tDuration - (tDuration >> 4));
 #  endif
 
@@ -460,7 +464,7 @@ bool updatePlayRtttl(void) {
                 digitalWrite(sPlayRtttlState.TonePin, HIGH);
             }
         }
-#ifdef TRACE
+#if defined(TRACE)
         sPointerToSerial->print(F("Playing: NOTE_"));
         sPointerToSerial->print(tNoteCharUppercase);
         if (isSharp) {
@@ -479,7 +483,7 @@ bool updatePlayRtttl(void) {
         sPointerToSerial->print(Notes[tNote] >> (NOTES_OCTAVE - tOctave), 10);
 #  endif
         sPointerToSerial->print(F(" Hz for "));
-#  if defined(SUPPORT_RTX_EXTENSIONS)
+#  if !defined(USE_NO_RTX_EXTENSIONS)
         if (sPlayRtttlState.StyleDivisorValue != 0 && tNote <= 12) {
             sPointerToSerial->print(tDurationOfTone, 10);
             sPointerToSerial->print(F(" of "));
@@ -590,7 +594,7 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
     /*
      * Skip name and :
      */
-#ifdef DEBUG
+#if defined(DEBUG)
     sPointerToSerial->print(F("Title="));
 #endif
     char tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
@@ -598,7 +602,7 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
         /*
          * Read title
          */
-#ifdef DEBUG
+#if defined(DEBUG)
         sPointerToSerial->print(tPGMChar);
 #endif
         aRTTTLArrayPtrPGM++;
@@ -608,13 +612,13 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
     sPlayRtttlState.DefaultDuration = DEFAULT_DURATION;
     sPlayRtttlState.DefaultOctave = DEFAULT_OCTAVE;
     sPlayRtttlState.TimeForWholeNoteMillis = (60 * 1000L / DEFAULT_BPM) * 4;
-#if defined(SUPPORT_RTX_EXTENSIONS)
+#if !defined(USE_NO_RTX_EXTENSIONS)
     sPlayRtttlState.NumberOfLoops = 1;
     sPlayRtttlState.StyleDivisorValue = sDefaultStyleDivisorValue;
 #endif
 
-#ifdef SUPPORT_RTX_FORMAT
-#ifdef DEBUG
+#if !defined(USE_NO_RTX_EXTENSIONS)
+#if defined(DEBUG)
     char tStyleChar = RTX_STYLE_DEFAULT;
 #else
     char tStyleChar;
@@ -665,7 +669,7 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
             tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
         } else
 
-#ifdef SUPPORT_RTX_FORMAT
+#if !defined(USE_NO_RTX_EXTENSIONS)
         if (tPGMChar == 's') {
             // get Style
             aRTTTLArrayPtrPGM++;
@@ -715,14 +719,14 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
 
     aRTTTLArrayPtrPGM++; // skip colon
 
-#ifdef DEBUG
+#if defined(DEBUG)
     sPointerToSerial->print(F(" DefaultDuration="));
     sPointerToSerial->print(sPlayRtttlState.DefaultDuration);
     sPointerToSerial->print(F(" DefaultOctave="));
     sPointerToSerial->print(sPlayRtttlState.DefaultOctave);
     sPointerToSerial->print(F(" BPM="));
     sPointerToSerial->print(tBPM);
-#ifdef SUPPORT_RTX_FORMAT
+#if !defined(USE_NO_RTX_EXTENSIONS)
     sPointerToSerial->print(F(" Style="));
     sPointerToSerial->print(tStyleChar);
     if (sPlayRtttlState.StyleDivisorValue != 0) {
@@ -738,7 +742,7 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
 
     sPlayRtttlState.MillisOfNextAction = 0;
     sPlayRtttlState.NextTonePointer = aRTTTLArrayPtrPGM;
-#ifdef SUPPORT_RTX_EXTENSIONS
+#if !defined(USE_NO_RTX_EXTENSIONS)
     sPlayRtttlState.LastTonePointer = aRTTTLArrayPtrPGM;
 #endif
     sPlayRtttlState.Flags.IsRunning = true;
@@ -858,13 +862,13 @@ void setTonePinIsInverted(bool aTonePinIsInverted) {
     sPlayRtttlState.Flags.IsTonePinInverted = aTonePinIsInverted;
 }
 
-#ifdef SUPPORT_RTX_EXTENSIONS
+#if !defined(USE_NO_RTX_EXTENSIONS)
 /*
  * 0 means forever
  */
 void setNumberOfLoops(uint8_t aNumberOfLoops) {
     sPlayRtttlState.NumberOfLoops = aNumberOfLoops;
-#ifdef DEBUG
+#if defined(DEBUG)
     sPointerToSerial->print(F("Set NumberOfLoops to "));
     sPointerToSerial->println(sPlayRtttlState.NumberOfLoops);
 #endif
@@ -889,4 +893,7 @@ uint8_t convertStyleCharacterToDivisorValue(char aStyleCharacter) {
     }
     return 0; // RTX_STYLE_CONTINUOUS
 }
-#endif // SUPPORT_RTX_EXTENSIONS
+#endif // USE_NO_RTX_EXTENSIONS
+
+#endif // _PLAY_RTTTL_HPP
+#pragma once

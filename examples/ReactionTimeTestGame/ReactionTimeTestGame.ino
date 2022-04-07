@@ -39,7 +39,7 @@
  */
 
 #include <Arduino.h>
-#include "PlayRtttl.h"
+#include "PlayRtttl.hpp"
 
 #define VERSION_EXAMPLE "2.1"
 
