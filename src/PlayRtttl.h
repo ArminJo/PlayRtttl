@@ -44,7 +44,7 @@
 #endif
 #include "pitches.h"
 
-#define VERSION_PLAY_RTTTL "2.0.0"
+#define VERSION_PLAY_RTTTL "2.0.1"
 #define VERSION_PLAY_RTTTL_MAJOR 2
 #define VERSION_PLAY_RTTTL_MINOR 0
 #define VERSION_PLAY_RTTTL_PATCH 1
@@ -166,6 +166,8 @@ extern const int Notes[] PROGMEM; // The frequencies of notes of the highest oct
  *  d=Default duration of a note
  *  o=Default octave
  *  b=Beats per minutes of a quarter note
+ *
+ * Disabled by USE_NO_RTX_EXTENSIONS:
  *  opt l=Number of loops
  *  opt s=Style - see "#define RTX_STYLE_CONTINUOUS 'C'" and following above
  *
@@ -184,7 +186,11 @@ extern const int Notes[] PROGMEM; // The frequencies of notes of the highest oct
 
 // Use rtx format to save space
 static const char StarWars[] PROGMEM
+#if defined(USE_NO_RTX_EXTENSIONS)
+= "StarWars:d=32,o=5,b=45:p,f#,f#,f#,8b.,8f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,e6,8c#6,f#,f#,f#,8b.,8f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,e6,8c#6";
+#else
 = "StarWars:d=32,o=5,b=45,l=2:p,f#,f#,f#,8b.,8f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,e6,8c#6";
+#endif
 static const char MahnaMahna[] PROGMEM
         = "MahnaMahna:d=16,o=6,b=125:c#,c.,b5,8a#.5,8f.,4g#,a#,g.,4d#,8p,c#,c.,b5,8a#.5,8f.,g#.,8a#.,4g,8p,c#,c.,b5,8a#.5,8f.,4g#,f,g.,8d#.,f,g.,8d#.,f,8g,8d#.,f,8g,d#,8c,a#5,8d#.,8d#.,16d#.,16d#.,8d#.";
 static const char LeisureSuit[] PROGMEM

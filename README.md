@@ -69,7 +69,7 @@ Example: `"Short:d=4,o=3,b=240,s=4:c4,8g,8g,a,g.,b,c4"`
 
 # Compile options / macros for this library
 To customize the library to different requirements, there are some compile options / macros available.<br/>
-These macros must be defined in your program before the line `#include <PlayRtttl.hpp>` to take effect.<br/>
+These macros must be defined in your program **before** the line `#include <PlayRtttl.hpp>` to take effect.<br/>
 Modify them by enabling / disabling them, or change the values if applicable.
 
 | Name | Default value | Description |

@@ -50,7 +50,7 @@ const int INVERTED_TONE_PIN = 3;
 
 const int TONE_PIN = 11;
 
-const int LDR_PIN = A4; // LDR connected to Ground and 4700 Ohm connected to VCC (depends on the LDR type).
+const int LDR_PIN = A4; // LDR connected to Ground and 4700 ohm connected to VCC (depends on the LDR type).
 #define TEMT_6000_DARK_VALUE 10
 
 const int TEMT_6000_PIN = A5;
