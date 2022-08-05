@@ -32,8 +32,6 @@
 #ifndef _PLAY_RTTTL_HPP
 #define _PLAY_RTTTL_HPP
 
-#include <Arduino.h>
-
 #include "PlayRtttl.h"
 
 //#define TRACE // Activate it to see the note played on Serial output
@@ -233,6 +231,10 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
     updatePlayRtttl();
 }
 
+bool isPlayRtttlRunning(){
+    return sPlayRtttlState.Flags.IsRunning;
+}
+
 void stopPlayRtttl(void) {
 #if defined(ESP32)
     ledcWriteTone(TONE_LEDC_CHANNEL, 0);
@@ -298,15 +300,15 @@ bool updatePlayRtttl(void) {
 #if !defined(USE_NO_RTX_EXTENSIONS)
             } else {
                 // loop again
-#if defined(DEBUG)
+#  if defined(DEBUG)
                 sPointerToSerial->print(F("Loop count="));
                 sPointerToSerial->println(sPlayRtttlState.NumberOfLoops);
-#endif
+#  endif
                 sPlayRtttlState.MillisOfNextAction = 0;
                 sPlayRtttlState.NextTonePointer = sPlayRtttlState.LastTonePointer;
                 return updatePlayRtttl();
             }
-#endif //  INTERPRETE_RTX_FORMAT
+#endif // USE_NO_RTX_EXTENSIONS
         }
 
         uint8_t tDurationNumber;
@@ -409,7 +411,7 @@ bool updatePlayRtttl(void) {
         /*
          * now play the note
          */
-#  if !defined(USE_NO_RTX_EXTENSIONS)
+#if !defined(USE_NO_RTX_EXTENSIONS)
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
         unsigned long tDurationOfTone;
 #endif
@@ -422,6 +424,7 @@ bool updatePlayRtttl(void) {
 
 #if defined(ESP32)
             ledcWriteTone(TONE_LEDC_CHANNEL, tFrequency);
+            (void) tDurationOfTone; // to avoid compiler warnings
 #else
 #  if !defined(USE_NO_RTX_EXTENSIONS)
             if (sPlayRtttlState.StyleDivisorValue != 0) {
@@ -514,16 +517,16 @@ void getRtttlName(const char *aRTTTLArrayPtr, char *aBuffer, uint8_t aBuffersize
  * call it e.g. printNamePGM(RTTTLMelodies[tRandomIndex], &Serial);
  */
 void printName(const char *aRTTTLArrayPtr, Print *aSerial) {
-    char StringBuffer[16];
+    char tStringBuffer[16];
     aSerial->print(F("Now playing: "));
-    getRtttlName(aRTTTLArrayPtr, StringBuffer, sizeof(StringBuffer));
-    aSerial->println(StringBuffer);
+    getRtttlName(aRTTTLArrayPtr, tStringBuffer, sizeof(tStringBuffer));
+    aSerial->println(tStringBuffer);
 }
 
 /*
  * Plays one of the songs in the array specified non blocking. Ie. you must call updatePlayRtttl() in your loop or use the callback function.
  * aNumberOfEntriesInSongArrayPGM is (sizeof(<MyArrayName>) / sizeof(char *) - 1)
- * char StringBuffer[16] is sufficient for most titles.
+ * char tStringBuffer[16] is sufficient for most titles.
  */
 void startPlayRandomRtttlFromArray(uint8_t aTonePin, const char *const aSongArray[], uint8_t aNumberOfEntriesInSongArray,
         char *aBufferPointer, uint8_t aBufferSize, void (*aOnComplete)()) {
@@ -789,10 +792,10 @@ void printNamePGM(const char *aRTTTLArrayPtrPGM, Print *aSerial) {
 #if !defined(__AVR__) // Let the function work for non AVR platforms
     printName(aRTTTLArrayPtrPGM, aSerial);
 #else
-    char StringBuffer[16];
+    char tStringBuffer[16];
     aSerial->print(F("Now playing: "));
-    getRtttlNamePGM(aRTTTLArrayPtrPGM, StringBuffer, sizeof(StringBuffer));
-    aSerial->println(StringBuffer);
+    getRtttlNamePGM(aRTTTLArrayPtrPGM, tStringBuffer, sizeof(tStringBuffer));
+    aSerial->println(tStringBuffer);
 #endif
 }
 
@@ -800,7 +803,7 @@ void printNamePGM(const char *aRTTTLArrayPtrPGM, Print *aSerial) {
  * !!! Songs are in an array stored in FLASH containing pointers to song arrays also stored in FLASH, see PlayRtttl.h. !!!
  * Plays one of the songs in the array specified non blocking. Ie. you must call updatePlayRtttl() in your loop or use the callback function.
  * aNumberOfEntriesInSongArrayPGM is (sizeof(<MyArrayName>) / sizeof(char *) - 1)
- * char StringBuffer[16] is sufficient for most titles.
+ * char tStringBuffer[16] is sufficient for most titles.
  */
 void startPlayRandomRtttlFromArrayPGM(uint8_t aTonePin, const char *const aSongArrayPGM[], uint8_t aNumberOfEntriesInSongArrayPGM,
         char *aBufferPointer, uint8_t aBufferSize, void (*aOnComplete)()) {
@@ -896,4 +899,3 @@ uint8_t convertStyleCharacterToDivisorValue(char aStyleCharacter) {
 #endif // USE_NO_RTX_EXTENSIONS
 
 #endif // _PLAY_RTTTL_HPP
-#pragma once

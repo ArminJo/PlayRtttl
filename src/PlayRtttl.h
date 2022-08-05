@@ -47,7 +47,15 @@
 #define VERSION_PLAY_RTTTL "2.0.0"
 #define VERSION_PLAY_RTTTL_MAJOR 2
 #define VERSION_PLAY_RTTTL_MINOR 0
+#define VERSION_PLAY_RTTTL_PATCH 1
 // The change log is at the bottom of the file
+
+/*
+ * Macro to convert 3 version parts into an integer
+ * To be used in preprocessor comparisons, such as #if VERSION_PLAY_RTTTL_HEX >= VERSION_HEX_VALUE(3, 0, 0)
+ */
+#define VERSION_HEX_VALUE(major, minor, patch) ((major << 16) | (minor << 8) | (patch))
+#define VERSION_PLAY_RTTTL_HEX  VERSION_HEX_VALUE(VERSION_PLAY_RTTTL_MAJOR, VERSION_PLAY_RTTTL_MINOR, VERSION_PLAY_RTTTL_PATCH)
 
 //#define USE_NO_RTX_EXTENSIONS // Disables RTX format definitions `'s'` (style) and `'l'` (loop). Saves up to 332 bytes program memory
 // Even with `USE_NO_RTX_EXTENSIONS` the default style is natural (Tone length = note length - 1/16)
@@ -109,9 +117,10 @@ void playRandomRtttlSampleBlockingPGM(uint8_t aTonePin);
 void playRandomRtttlSampleBlockingPGMAndPrintName(uint8_t aTonePin, Print *aSerial);
 
 // To be called from loop. - Returns true if tone is playing, false if tone has ended or stopped
-bool updatePlayRtttl(void);
+bool updatePlayRtttl();
+bool isPlayRtttlRunning();
 
-void stopPlayRtttl(void);
+void stopPlayRtttl();
 
 struct playRtttlState {
     long MillisOfNextAction;
@@ -276,6 +285,9 @@ static const char *const RTTTLChristmasMelodies[] PROGMEM = { JingleBell, Rudolp
 #endif
 
 /*
+ * Version 2.0.1 08/2022
+ * - Added function isPlayRtttlRunning().
+ *
  * Version 2.0.0 04/2022
  * - Renamed PlayRttl.cpp to PlayRttl.hpp.
  * - Removed Macros SUPPORT_RTX_EXTENSIONS and SUPPORT_RTX_FORMAT.
@@ -316,5 +328,3 @@ static const char *const RTTTLChristmasMelodies[] PROGMEM = { JingleBell, Rudolp
  */
 
 #endif // _PLAY_RTTTL_H
-#pragma once
-

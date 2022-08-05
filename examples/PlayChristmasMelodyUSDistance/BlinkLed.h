@@ -74,4 +74,3 @@ public:
 };
 
 #endif // _BLINK_LED_H
-#pragma once

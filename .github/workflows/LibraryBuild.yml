@@ -9,10 +9,13 @@
 name: LibraryBuild
 
 on:
+  workflow_dispatch: # To run it manually
+    description: 'manual build check'
   push: # see: https://help.github.com/en/actions/reference/events-that-trigger-workflows#pull-request-event-pull_request
     paths:
     - '**.ino'
     - '**.cpp'
+    - '**.hpp'
     - '**.h'
     - '**LibraryBuild.yml'
   pull_request:
@@ -46,7 +49,7 @@ jobs:
           - arduino:avr:mega
           - digistump:avr:digispark-tiny:clock=clock1
           - esp8266:esp8266:huzzah:eesz=4M3M,xtal=80
-          - esp32:esp32:featheresp32:FlashFreq=80
+#          - esp32:esp32:featheresp32:FlashFreq=80 # Strange error, the arduino compile tries to run: python3 esptool.py ...
           - STMicroelectronics:stm32:GenF1:pnum=BLUEPILL_F103C8
 
         # Specify parameters for each board.
@@ -73,9 +76,9 @@ jobs:
             platform-url: https://arduino.esp8266.com/stable/package_esp8266com_index.json
             sketches-exclude: LightToTone,PlayChristmasMelodyUSDistance,ReactionTimeTestGame # EasyButton and Talkie library not available
 
-          - arduino-boards-fqbn: esp32:esp32:featheresp32:FlashFreq=80
-            platform-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
-            sketches-exclude: LightToTone,PlayChristmasMelodyUSDistance,ReactionTimeTestGame # EasyButton and Talkie library not available
+#          - arduino-boards-fqbn: esp32:esp32:featheresp32:FlashFreq=80
+#            platform-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+#            sketches-exclude: LightToTone,PlayChristmasMelodyUSDistance,ReactionTimeTestGame # EasyButton and Talkie library not available
 
           - arduino-boards-fqbn: STMicroelectronics:stm32:GenF1:pnum=BLUEPILL_F103C8
             platform-url: https://raw.githubusercontent.com/stm32duino/BoardManagerFiles/main/package_stmicroelectronics_index.json
@@ -88,8 +91,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@master
 
+      - name: Arduino Lint
+        uses: arduino/arduino-lint-action@v1
+        with:
+          library-manager: update
+
       - name: Compile all examples
-        uses: ArminJo/arduino-test-compile@v2
+        uses: ArminJo/arduino-test-compile@master
         with:
           arduino-board-fqbn: ${{ matrix.arduino-boards-fqbn }}
           platform-url: ${{ matrix.platform-url }}

@@ -1,7 +1,7 @@
 # [PlayRtttl](https://github.com/ArminJo/PlayRtttl)
 Improved Arduino library version of the RTTTL.pde example code written by Brett Hagman http://www.roguerobotics.com/  bhagman@roguerobotics.com
 
-### [Version 2.0.0](https://github.com/ArminJo/PlayRtttl/releases)
+### [Version 2.0.1](https://github.com/ArminJo/PlayRtttl/releases)
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Installation instructions](https://www.ardu-badge.com/badge/PlayRtttl.svg?)](https://www.ardu-badge.com/PlayRtttl)
@@ -103,9 +103,12 @@ More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tu
 In order to fit the examples to the 8K flash of ATtiny85 and ATtiny88, the [Arduino library ATtinySerialOut](https://github.com/ArminJo/ATtinySerialOut) is required for this CPU's.
 
 # Revision History
+### Version 2.0.1
+- Added function isPlayRtttlRunning().
+
 ### Version 2.0.0
 - Renamed PlayRttl.cpp to PlayRttl.hpp.
-- Removed Macros SUPPORT_RTX_EXTENSIONS and SUPPORT_RTX_FORMAT.
+- Removed macros SUPPORT_RTX_EXTENSIONS and SUPPORT_RTX_FORMAT.
 
 ### Version 1.4.2
 - New example ReactionTimeTestGame.
@@ -147,7 +150,7 @@ In order to fit the examples to the 8K flash of ATtiny85 and ATtiny88, the [Ardu
 Initial Arduino library version
 
 # CI
-Since Travis CI is unreliable and slow, the library examples are now tested with GitHub Actions for the following boards:
+The library examples are tested with GitHub Actions for the following boards:
 
 - arduino:avr:uno
 - arduino:avr:leonardo

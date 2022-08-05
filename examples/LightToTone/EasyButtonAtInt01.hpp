@@ -82,6 +82,9 @@ EasyButton *EasyButton::sPointerToButton0ForISR;
 #if defined(USE_BUTTON_1)
 EasyButton *EasyButton::sPointerToButton1ForISR;
 #endif
+#if !defined(USE_BUTTON_0) && !defined(USE_BUTTON_1)
+#error One of USE_BUTTON_0 or USE_BUTTON_1 must be defined
+#endif
 
 // The eclipse formatter has problems with // comments in undefined code blocks
 // !!! Must be without comment and closed by @formatter:on
@@ -181,6 +184,32 @@ init(false); // 2. button
 }
 #endif // NO_BUTTON_RELEASE_CALLBACK
 
+#if defined(USE_ATTACH_INTERRUPT) || defined(USE_ATTACH_INTERRUPT_DIRECT)
+#  if defined(USE_ATTACH_INTERRUPT)
+
+#  else
+
+#  endif
+
+#else
+
+#  if defined(USE_INT0)
+
+
+#  elif defined(USE_INT1)
+
+
+#  elif defined(USE_PCIE) // For ATtiny85 etc.
+
+
+#  elif defined(USE_PCINT0)
+
+#  elif defined(USE_PCINT1)
+
+#  elif defined(USE_PCINT2)
+
+#  endif
+#endif // defined(USE_ATTACH_INTERRUPT)
 /*
  * Sets pin mode to INPUT_PULLUP if not defined(BUTTON_IS_ACTIVE_HIGH) and enables INT0 Interrupt on any logical change.
  */
@@ -724,4 +753,3 @@ ISR(INT1_vect)
 
 #endif // defined(__AVR__)
 #endif // _EASY_BUTTON_AT_INT01_HPP
-#pragma once
