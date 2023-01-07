@@ -2,8 +2,9 @@
  * PlayChristmasMelodyUSDistance.cpp
  *
  * Plays a random Christmas melody if US sensor value is in a defined range.
+ * If TALKIE_FEEDBACK is defined, the current distance is spelled by Talkie
  *
- *  Copyright (C) 2019  Armin Joachimsmeyer
+ *  Copyright (C) 2019-2023  Armin Joachimsmeyer
  *  armin.joachimsmeyer@gmail.com
  *
  *  This file is part of PlayRttl https://github.com/ArminJo/PlayRtttl.
@@ -15,8 +16,8 @@
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *  See the GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
@@ -27,7 +28,7 @@
 //#define USE_NO_RTX_EXTENSIONS // Disables RTX format definitions `'s'` (style) and `'l'` (loop). Saves up to 332 bytes program memory
 #include <PlayRtttl.hpp>
 
-#include "HCSR04.h"
+#include "HCSR04.hpp"
 #include "BlinkLed.h"
 
 #define TALKIE_FEEDBACK
@@ -41,7 +42,7 @@ Talkie Voice;
 
 #define USE_BUTTON_0
 #include <EasyButtonAtInt01.hpp>
-EasyButton Button0AtPB6;
+EasyButton Button0AtPin2; // Pin2 on
 #endif
 
 /*
@@ -80,6 +81,8 @@ void setup() {
 #endif
     // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ " from " __DATE__ "\r\nUsing library version " VERSION_PLAY_RTTTL));
+    Serial.print(F("Button pin="));
+    Serial.println(INT0_PIN);
 
     initUSDistancePins(PIN_TRIGGER_OUT, PIN_ECHO_IN);
 
@@ -105,7 +108,7 @@ void loop() {
     Serial.println("cm.");
 
 #if defined(TALKIE_FEEDBACK)
-    if (Button0AtPB6.ButtonToggleState) {
+    if (Button0AtPin2.ButtonToggleState) {
         /*
          * Output distance with talkie
          */
@@ -141,7 +144,7 @@ void loop() {
                 Serial.print("cm.");
 
 #if defined(TALKIE_FEEDBACK)
-                if (Button0AtPB6.ButtonToggleState) {
+                if (Button0AtPin2.ButtonToggleState) {
                     /*
                      * Output distance with talkie
                      */

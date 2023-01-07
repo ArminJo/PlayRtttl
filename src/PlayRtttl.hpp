@@ -22,8 +22,8 @@
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *  See the GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
@@ -35,15 +35,20 @@
 #include "PlayRtttl.h"
 
 //#define TRACE // Activate it to see the note played on Serial output
-//#define DEBUG // Activate it to see debug output
-
-// Propagate debug level
 #if defined(TRACE)
+// Propagate trace level
 #  if !defined(DEBUG)
 #define DEBUG
 #  endif
 #endif
-#if defined(DEBUG)
+
+#if defined(DEBUG) && !defined(LOCAL_DEBUG)
+#define LOCAL_DEBUG
+#else
+//#define LOCAL_DEBUG // This enables debug output only for this file
+#endif
+
+#if defined(LOCAL_DEBUG)
 Print *const sPointerToSerial = &Serial;  // requires 0 bytes Flash because it is constant
 #endif //DEBUG
 
@@ -85,14 +90,14 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
     /*
      * Skip name and :
      */
-#if defined(DEBUG)
+#if defined(LOCAL_DEBUG)
     sPointerToSerial->print(F("Title="));
 #endif
     while (*aRTTTLArrayPtr != ':') {
         /*
          * Read title
          */
-#if defined(DEBUG)
+#if defined(LOCAL_DEBUG)
         sPointerToSerial->print(*aRTTTLArrayPtr);
 #endif
         aRTTTLArrayPtr++;
@@ -107,7 +112,7 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
 #endif
 
 #if !defined(USE_NO_RTX_EXTENSIONS)
-#if defined(DEBUG)
+#if defined(LOCAL_DEBUG)
     char tStyleChar = RTX_STYLE_DEFAULT;
 #else
     char tStyleChar;
@@ -197,7 +202,7 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
 
     aRTTTLArrayPtr++; // skip colon
 
-#if defined(DEBUG)
+#if defined(LOCAL_DEBUG)
     sPointerToSerial->print(F(" DefaultDuration="));
     sPointerToSerial->print(sPlayRtttlState.DefaultDuration);
     sPointerToSerial->print(F(" DefaultOctave="));
@@ -231,7 +236,7 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
     updatePlayRtttl();
 }
 
-bool isPlayRtttlRunning(){
+bool isPlayRtttlRunning() {
     return sPlayRtttlState.Flags.IsRunning;
 }
 
@@ -300,7 +305,7 @@ bool updatePlayRtttl(void) {
 #if !defined(USE_NO_RTX_EXTENSIONS)
             } else {
                 // loop again
-#  if defined(DEBUG)
+#  if defined(LOCAL_DEBUG)
                 sPointerToSerial->print(F("Loop count="));
                 sPointerToSerial->println(sPlayRtttlState.NumberOfLoops);
 #  endif
@@ -382,7 +387,7 @@ bool updatePlayRtttl(void) {
 // now, get optional '.' of dotted note
         if (tChar == '.') {
             tDuration += tDuration / 2;
-#if defined(DEBUG)
+#if defined(LOCAL_DEBUG)
             tDurationNumber += tDurationNumber / 2;
 #endif
             tRTTTLArrayPtr++;
@@ -597,7 +602,7 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
     /*
      * Skip name and :
      */
-#if defined(DEBUG)
+#if defined(LOCAL_DEBUG)
     sPointerToSerial->print(F("Title="));
 #endif
     char tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
@@ -605,7 +610,7 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
         /*
          * Read title
          */
-#if defined(DEBUG)
+#if defined(LOCAL_DEBUG)
         sPointerToSerial->print(tPGMChar);
 #endif
         aRTTTLArrayPtrPGM++;
@@ -621,7 +626,7 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
 #endif
 
 #if !defined(USE_NO_RTX_EXTENSIONS)
-#if defined(DEBUG)
+#if defined(LOCAL_DEBUG)
     char tStyleChar = RTX_STYLE_DEFAULT;
 #else
     char tStyleChar;
@@ -722,7 +727,7 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
 
     aRTTTLArrayPtrPGM++; // skip colon
 
-#if defined(DEBUG)
+#if defined(LOCAL_DEBUG)
     sPointerToSerial->print(F(" DefaultDuration="));
     sPointerToSerial->print(sPlayRtttlState.DefaultDuration);
     sPointerToSerial->print(F(" DefaultOctave="));
@@ -871,7 +876,7 @@ void setTonePinIsInverted(bool aTonePinIsInverted) {
  */
 void setNumberOfLoops(uint8_t aNumberOfLoops) {
     sPlayRtttlState.NumberOfLoops = aNumberOfLoops;
-#if defined(DEBUG)
+#if defined(LOCAL_DEBUG)
     sPointerToSerial->print(F("Set NumberOfLoops to "));
     sPointerToSerial->println(sPlayRtttlState.NumberOfLoops);
 #endif
@@ -897,5 +902,9 @@ uint8_t convertStyleCharacterToDivisorValue(char aStyleCharacter) {
     return 0; // RTX_STYLE_CONTINUOUS
 }
 #endif // USE_NO_RTX_EXTENSIONS
+
+#if defined(LOCAL_DEBUG)
+#undef LOCAL_DEBUG
+#endif
 
 #endif // _PLAY_RTTTL_HPP

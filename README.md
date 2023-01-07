@@ -21,6 +21,10 @@ Available as Arduino library "PlayRtttl"
  - Supports RTX format - 2 additional parameters: 1. l=<number_of_loops> 2.s=<Style[N|S|C]>).
  - Tone style (relation of tone output to note length) and loop count can be set for a melody.
 
+# Required resources
+Arduino `tone()` function and thus Timer 2 on Arduino Uno, Nano etc.<br/>
+`updatePlayRtttl()` must be repeatedly called to proceed in melody.
+
 YouTube video of the RandomMelody example in action.<br/>
 [![RandomMelody example](https://i.ytimg.com/vi/0n9_Fm3VP3w/hqdefault.jpg)](https://www.youtube.com/watch?v=0n9_Fm3VP3w)
 
@@ -157,7 +161,7 @@ The library examples are tested with GitHub Actions for the following boards:
 - arduino:avr:mega
 - esp8266:esp8266:huzzah:eesz=4M3M,xtal=80
 - esp32:esp32:featheresp32:FlashFreq=80
-- STM32:stm32:GenF1:pnum=BLUEPILL_F103C8
+- STMicroelectronics:stm32:GenF1:pnum=BLUEPILL_F103C8
 
 ## Requests for modifications / extensions
 Please write me a PM including your motivation/problem if you need a modification or an extension.
