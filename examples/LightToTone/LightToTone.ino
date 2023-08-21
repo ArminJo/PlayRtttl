@@ -36,7 +36,7 @@
 #define USE_BUTTON_0
 #include <EasyButtonAtInt01.hpp>
 
-EasyButton Button0AtPin2;
+EasyButton PageSwitchButton0AtPin2;
 //#define DEBUG
 
 /*
@@ -119,7 +119,7 @@ void loop() {
 
     int tLightValue = readLightValue();
 
-    if (!Button0AtPin2.ButtonToggleState) {
+    if (!PageSwitchButton0AtPin2.ButtonToggleState) {
 
         /*
          * Play pentatonic notes

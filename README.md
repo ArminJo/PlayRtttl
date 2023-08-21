@@ -1,13 +1,35 @@
+<div align = center>
+
 # [PlayRtttl](https://github.com/ArminJo/PlayRtttl)
 Improved Arduino library version of the RTTTL.pde example code written by Brett Hagman http://www.roguerobotics.com/  bhagman@roguerobotics.com
 
-### [Version 2.0.1](https://github.com/ArminJo/PlayRtttl/releases)
+[![Badge License: GPLv3](https://img.shields.io/badge/License-GPLv3-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
+ &nbsp; &nbsp; 
+[![Badge Version](https://img.shields.io/github/v/release/ArminJo/PlayRtttl?include_prereleases&color=yellow&logo=DocuSign&logoColor=white)](https://github.com/ArminJo/PlayRtttl/releases/latest)
+ &nbsp; &nbsp; 
+[![Badge Commits since latest](https://img.shields.io/github/commits-since/ArminJo/PlayRtttl/latest?color=yellow)](https://github.com/ArminJo/PlayRtttl/commits/master)
+ &nbsp; &nbsp; 
+[![Badge Build Status](https://github.com/ArminJo/PlayRtttl/workflows/LibraryBuild/badge.svg)](https://github.com/ArminJo/PlayRtttl/actions)
+ &nbsp; &nbsp; 
+![Badge Hit Counter](https://visitor-badge.laobi.icu/badge?page_id=ArminJo_PlayRtttl)
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Installation instructions](https://www.ardu-badge.com/badge/PlayRtttl.svg?)](https://www.ardu-badge.com/PlayRtttl)
-[![Commits since latest](https://img.shields.io/github/commits-since/ArminJo/PlayRtttl/latest)](https://github.com/ArminJo/PlayRtttl/commits/master)
-[![Build Status](https://github.com/ArminJo/PlayRtttl/workflows/LibraryBuild/badge.svg)](https://github.com/ArminJo/PlayRtttl/actions)
-![Hit Counter](https://visitor-badge.laobi.icu/badge?page_id=ArminJo_PlayRtttl)
+<br/>
+<br/>
+[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
+
+Available as [Arduino library "PlayRtttl"](https://www.arduinolibraries.info/libraries/play-rtttl).
+
+[![Button Install](https://img.shields.io/badge/Install-brightgreen?logoColor=white&logo=GitBook)](https://www.ardu-badge.com/PlayRtttl)
+ &nbsp; &nbsp; 
+[![Button Changelog](https://img.shields.io/badge/Changelog-blue?logoColor=white&logo=AzureArtifacts)](https://github.com/ArminJo/PlayRtttl#revision-history)
+
+</div>
+
+#### If you find this library useful, please give it a star.
+
+<br/>
 
 Available as Arduino library "PlayRtttl"
 # Features
@@ -77,7 +99,7 @@ These macros must be defined in your program **before** the line `#include <Play
 Modify them by enabling / disabling them, or change the values if applicable.
 
 | Name | Default value | Description |
-|-|-|-|
+|-|-:|-|
 | `USE_NO_RTX_EXTENSIONS` | disabled | Disables interpretation of RTX format definitions `'s'` (style) and `'l'` (loop).<br/>Even with `USE_NO_RTX_EXTENSIONS` activated, the default style is natural (Tone length = note length - 1/16).<br/>Saves up to 332 bytes program memory. |
 | `RTX_STYLE_DEFAULT` | 'N' | (Natural) Tone length = note length - 1/16. |
 
@@ -162,8 +184,3 @@ The library examples are tested with GitHub Actions for the following boards:
 - esp8266:esp8266:huzzah:eesz=4M3M,xtal=80
 - esp32:esp32:featheresp32:FlashFreq=80
 - STMicroelectronics:stm32:GenF1:pnum=BLUEPILL_F103C8
-
-## Requests for modifications / extensions
-Please write me a PM including your motivation/problem if you need a modification or an extension.
-
-#### If you find this library useful, please give it a star.
