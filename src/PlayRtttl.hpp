@@ -422,10 +422,16 @@ bool updatePlayRtttl(void) {
 #endif
         if (tNote <= 12) {
 #if defined(__AVR__)
-            uint16_t tFrequency = pgm_read_word(&Notes[tNote]) >> (NOTES_OCTAVE - tOctave);
+            uint16_t tFrequency = pgm_read_word(&Notes[tNote]);
 #else
-            uint16_t tFrequency = Notes[tNote] >> (NOTES_OCTAVE - tOctave);
+            uint16_t tFrequency = Notes[tNote];
 #endif // defined(__AVR__)
+            if (tOctave <= NOTES_OCTAVE) {
+                tFrequency >>= (NOTES_OCTAVE - tOctave);
+            } else {
+                tFrequency <<= (tOctave - NOTES_OCTAVE);
+            }
+
 
 #if defined(ESP32)
             ledcWriteTone(TONE_LEDC_CHANNEL, tFrequency);
