@@ -129,6 +129,9 @@ More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tu
 In order to fit the examples to the 8K flash of ATtiny85 and ATtiny88, the [Arduino library ATtinySerialOut](https://github.com/ArminJo/ATtinySerialOut) is required for this CPU's.
 
 # Revision History
+### Version 2.1.0
+- Add ability to play C8 and beyond.
+
 ### Version 2.0.1
 - Added function isPlayRtttlRunning().
 

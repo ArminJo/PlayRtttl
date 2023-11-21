@@ -291,6 +291,9 @@ static const char *const RTTTLChristmasMelodies[] PROGMEM = { JingleBell, Rudolp
 #endif
 
 /*
+ * Version 2.1.0 11/2023
+ * - Add ability to play C8 and beyond.
+ *
  * Version 2.0.1 08/2022
  * - Added function isPlayRtttlRunning().
  *
