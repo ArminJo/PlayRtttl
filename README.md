@@ -23,11 +23,13 @@ Available as [Arduino library "PlayRtttl"](https://www.arduinolibraries.info/lib
 
 [![Button Install](https://img.shields.io/badge/Install-brightgreen?logoColor=white&logo=GitBook)](https://www.ardu-badge.com/PlayRtttl)
  &nbsp; &nbsp; 
-[![Button Changelog](https://img.shields.io/badge/Changelog-blue?logoColor=white&logo=AzureArtifacts)](https://github.com/ArminJo/PlayRtttl#revision-history)
+[![Button Changelog](https://img.shields.io/badge/Changelog-blue?logoColor=white&logo=AzureArtifacts)](https://github.com/ArminJo/PlayRtttl?tab=readme-ov-file#revision-history)
 
 </div>
 
 #### If you find this library useful, please give it a star.
+
+&#x1F30E; [Google Translate](https://translate.google.com/translate?sl=en&u=https://github.com/ArminJo/PlayRtttl)
 
 <br/>
 
@@ -129,6 +131,9 @@ More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tu
 In order to fit the examples to the 8K flash of ATtiny85 and ATtiny88, the [Arduino library ATtinySerialOut](https://github.com/ArminJo/ATtinySerialOut) is required for this CPU's.
 
 # Revision History
+### Version 2.2.0
+- Converted to use ESP32 version 3.x.
+
 ### Version 2.1.0
 - Add ability to play C8 and beyond.
 

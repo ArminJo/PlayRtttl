@@ -83,9 +83,6 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
     sPlayRtttlState.Flags.IsPGMMemory = false;
     sPlayRtttlState.OnComplete = aOnComplete;
     sPlayRtttlState.TonePin = aTonePin;
-#if defined(ESP32)
-    ledcAttachPin(aTonePin, 0);
-#endif
     int tNumber;
     /*
      * Skip name and :
@@ -242,7 +239,7 @@ bool isPlayRtttlRunning() {
 
 void stopPlayRtttl(void) {
 #if defined(ESP32)
-    ledcWriteTone(TONE_LEDC_CHANNEL, 0);
+    ledcWriteTone(sPlayRtttlState.TonePin, 0);
 #else
     noTone(sPlayRtttlState.TonePin);
 #if defined(TCCR2A)
@@ -434,7 +431,7 @@ bool updatePlayRtttl(void) {
 
 
 #if defined(ESP32)
-            ledcWriteTone(TONE_LEDC_CHANNEL, tFrequency);
+            ledcWriteTone(sPlayRtttlState.TonePin, tFrequency);
             (void) tDurationOfTone; // to avoid compiler warnings
 #else
 #  if !defined(USE_NO_RTX_EXTENSIONS)

@@ -44,10 +44,10 @@
 #endif
 #include "pitches.h"
 
-#define VERSION_PLAY_RTTTL "2.0.1"
+#define VERSION_PLAY_RTTTL "2.2.0"
 #define VERSION_PLAY_RTTTL_MAJOR 2
-#define VERSION_PLAY_RTTTL_MINOR 0
-#define VERSION_PLAY_RTTTL_PATCH 1
+#define VERSION_PLAY_RTTTL_MINOR 2
+#define VERSION_PLAY_RTTTL_PATCH 0
 // The change log is at the bottom of the file
 
 /*
