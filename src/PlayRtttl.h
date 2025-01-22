@@ -89,13 +89,13 @@ uint8_t convertStyleCharacterToDivisorValue(char aStyleCharacter);
 void getRtttlName(const char *aRTTTLArrayPtr, char *aBuffer, uint8_t aBuffersize);
 void printName(const char *aRTTTLArrayPtr, Print *aSerial);
 
-void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComplete)()=NULL);
+void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComplete)()=nullptr);
 void playRtttlBlocking(uint8_t aTonePin, const char *aRTTTLArrayPtr);
 
 void startPlayRandomRtttlFromArray(uint8_t aTonePin, const char *const aSongArray[], uint8_t aNumberOfEntriesInSongArray,
-        char *aBufferPointer = NULL, uint8_t aBufferSize = 0, void (*aOnComplete)()=NULL);
+        char *aBufferPointer = nullptr, uint8_t aBufferSize = 0, void (*aOnComplete)()=nullptr);
 void startPlayRandomRtttlFromArrayAndPrintName(uint8_t aTonePin, const char *const aSongArray[],
-        uint8_t aNumberOfEntriesInSongArray, Print *aSerial, void (*aOnComplete)()=NULL);
+        uint8_t aNumberOfEntriesInSongArray, Print *aSerial, void (*aOnComplete)()=nullptr);
 
 void playRandomRtttlSampleBlocking(uint8_t aTonePin);
 void playRandomRtttlSampleBlockingAndPrintName(uint8_t aTonePin, Print *aSerial);
@@ -104,14 +104,14 @@ void getRtttlNamePGM(const char *aRTTTLArrayPtrPGM, char *aBuffer, uint8_t aBuff
 void printNamePGM(const char *aRTTTLArrayPtrPGM, Print *aSerial);
 void printNamePGMPGM(const char *const*aRTTTLPGMArrayPtrPGM, Print *aSerial);
 
-void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*aOnComplete)()=NULL);
-void startPlayRtttlPGMPGM(uint8_t aTonePin, const char *const*aRTTTLPGMArrayPtrPGM, void (*aOnComplete)()=NULL);
+void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*aOnComplete)()=nullptr);
+void startPlayRtttlPGMPGM(uint8_t aTonePin, const char *const*aRTTTLPGMArrayPtrPGM, void (*aOnComplete)()=nullptr);
 void playRtttlBlockingPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM);
 
 void startPlayRandomRtttlFromArrayPGM(uint8_t aTonePin, const char *const aSongArrayPGM[], uint8_t aNumberOfEntriesInSongArrayPGM,
-        char *aBufferPointer = NULL, uint8_t aBufferSize = 0, void (*aOnComplete)()=NULL);
+        char *aBufferPointer = nullptr, uint8_t aBufferSize = 0, void (*aOnComplete)()=nullptr);
 void startPlayRandomRtttlFromArrayPGMAndPrintName(uint8_t aTonePin, const char *const aSongArrayPGM[],
-        uint8_t aNumberOfEntriesInSongArrayPGM, Print *aSerial, void (*aOnComplete)()=NULL);
+        uint8_t aNumberOfEntriesInSongArrayPGM, Print *aSerial, void (*aOnComplete)()=nullptr);
 
 void playRandomRtttlSampleBlockingPGM(uint8_t aTonePin);
 void playRandomRtttlSampleBlockingPGMAndPrintName(uint8_t aTonePin, Print *aSerial);

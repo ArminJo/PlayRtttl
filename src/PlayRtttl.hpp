@@ -42,7 +42,7 @@
 #  endif
 #endif
 
-#if defined(DEBUG) && !defined(LOCAL_DEBUG)
+#if defined(DEBUG)
 #define LOCAL_DEBUG
 #else
 //#define LOCAL_DEBUG // This enables debug output only for this file
@@ -69,7 +69,7 @@ uint8_t sDefaultStyleDivisorValue = RTTTL_STYLE_DEFAULT; // Natural (16)
  * Blocking versions
  */
 void playRtttlBlocking(uint8_t aTonePin, const char *aRTTTLArrayPtr) {
-    startPlayRtttl(aTonePin, aRTTTLArrayPtr, NULL);
+    startPlayRtttl(aTonePin, aRTTTLArrayPtr, nullptr);
     while (updatePlayRtttl()) {
         delay(1); // this in turn calls yield();
     }
@@ -206,7 +206,7 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
     sPointerToSerial->print(sPlayRtttlState.DefaultOctave);
     sPointerToSerial->print(F(" BPM="));
     sPointerToSerial->print(tBPM);
-#if !defined(USE_NO_RTX_EXTENSIONS)
+#  if !defined(USE_NO_RTX_EXTENSIONS)
     sPointerToSerial->print(F(" Style="));
     sPointerToSerial->print(tStyleChar);
     if (sPlayRtttlState.StyleDivisorValue != 0) {
@@ -216,7 +216,7 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
     }
     sPointerToSerial->print(F(" Loops="));
     sPointerToSerial->print(sPlayRtttlState.NumberOfLoops);
-#endif
+#  endif
     sPointerToSerial->println();
 #endif
 
@@ -237,15 +237,21 @@ bool isPlayRtttlRunning() {
     return sPlayRtttlState.Flags.IsRunning;
 }
 
+#if !defined(ESP_ARDUINO_VERSION)
+#define ESP_ARDUINO_VERSION 0x010101 // Version 1.1.1
+#endif
+#if !defined(ESP_ARDUINO_VERSION_VAL)
+#define ESP_ARDUINO_VERSION_VAL(major, minor, patch) ((major << 16) | (minor << 8) | (patch))
+#endif
 void stopPlayRtttl(void) {
-#if defined(ESP32)
+#if defined(ESP32) && ESP_ARDUINO_VERSION  <= ESP_ARDUINO_VERSION_VAL(2, 0, 2)
     ledcWriteTone(sPlayRtttlState.TonePin, 0);
 #else
     noTone(sPlayRtttlState.TonePin);
-#if defined(TCCR2A)
+#  if defined(TCCR2A)
     // reset direct hardware toggle output at OC2A / pin 11
     TCCR2A &= ~_BV(COM2A0);
-#endif
+#  endif
 #endif
     // noTone sets pin to LOW ->  need to handle inverted pin mode here
     if (sPlayRtttlState.Flags.IsTonePinInverted) {
@@ -295,7 +301,7 @@ bool updatePlayRtttl(void) {
 #endif
                 // end song
                 stopPlayRtttl();
-                if (sPlayRtttlState.OnComplete != NULL) {
+                if (sPlayRtttlState.OnComplete != nullptr) {
                     sPlayRtttlState.OnComplete();
                 }
                 return false;
@@ -432,7 +438,9 @@ bool updatePlayRtttl(void) {
 
 #if defined(ESP32)
             ledcWriteTone(sPlayRtttlState.TonePin, tFrequency);
+#if !defined(USE_NO_RTX_EXTENSIONS)
             (void) tDurationOfTone; // to avoid compiler warnings
+#endif
 #else
 #  if !defined(USE_NO_RTX_EXTENSIONS)
             if (sPlayRtttlState.StyleDivisorValue != 0) {
@@ -541,7 +549,7 @@ void startPlayRandomRtttlFromArray(uint8_t aTonePin, const char *const aSongArra
     uint8_t tRandomIndex = random(0, aNumberOfEntriesInSongArray - 1);
     char *tSongPtr = (char*) aSongArray[tRandomIndex];
     startPlayRtttl(aTonePin, tSongPtr, aOnComplete);
-    if (aBufferPointer != NULL) {
+    if (aBufferPointer != nullptr) {
 // copy title to buffer
         getRtttlName(tSongPtr, aBufferPointer, aBufferSize);
     }
@@ -573,7 +581,7 @@ void playRandomRtttlSampleBlockingAndPrintName(uint8_t aTonePin, Print *aSerial)
 }
 
 void playRtttlBlockingPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM) {
-    startPlayRtttlPGM(aTonePin, aRTTTLArrayPtrPGM, NULL);
+    startPlayRtttlPGM(aTonePin, aRTTTLArrayPtrPGM, nullptr);
     while (updatePlayRtttl()) {
         delay(1); // this in turn calls yield();
     }
@@ -822,7 +830,7 @@ void startPlayRandomRtttlFromArrayPGM(uint8_t aTonePin, const char *const aSongA
     uint8_t tRandomIndex = random(0, aNumberOfEntriesInSongArrayPGM - 1);
     const char *tSongPtr = (char*) pgm_read_word(&aSongArrayPGM[tRandomIndex]);
     startPlayRtttlPGM(aTonePin, tSongPtr, aOnComplete);
-    if (aBufferPointer != NULL) {
+    if (aBufferPointer != nullptr) {
 // copy title to buffer
         getRtttlNamePGM(tSongPtr, aBufferPointer, aBufferSize);
     }

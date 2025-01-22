@@ -47,8 +47,8 @@ jobs:
           - arduino:avr:uno|CompilerSwitches
           - arduino:avr:leonardo
           - arduino:avr:mega
-#          - ATTinyCore:avr:attinyx5:chip=85,clock=1internal
-#          - ATTinyCore:avr:attinyx7micr:sketchclock=1external16
+          - ATTinyCore:avr:attinyx5:chip=85,clock=1internal
+          - ATTinyCore:avr:attinyx7micr:sketchclock=1external16
           - esp8266:esp8266:huzzah:eesz=4M3M,xtal=80
 #          - esp32:esp32:featheresp32:FlashFreq=80 # Strange error, the arduino compile tries to run: python3 esptool.py ...
           - STMicroelectronics:stm32:GenF1:pnum=BLUEPILL_F103C8
@@ -69,19 +69,19 @@ jobs:
 #
 # ATTinyCore
 #
-#          - arduino-boards-fqbn: ATTinyCore:avr:attinyx5:chip=85,clock=1internal
-#            platform-url: http://drazzy.com/package_drazzy.com_index.json
-#            sketches-exclude: LightToTone PlayChristmasMelodyUSDistance RandomMelody ReactionTimeTestGame # Only OneMelody example
-#            build-properties: # the flags were put in compiler.cpp.extra_flags
-#              OneMelody:
-#                -DDEBUG
+          - arduino-boards-fqbn: ATTinyCore:avr:attinyx5:chip=85,clock=1internal
+            platform-url: http://drazzy.com/package_drazzy.com_index.json
+            sketches-exclude: LightToTone PlayChristmasMelodyUSDistance RandomMelody ReactionTimeTestGame # Only OneMelody example
+            build-properties: # the flags were put in compiler.cpp.extra_flags
+              OneMelody:
+                -DDEBUG
 
-#          - arduino-boards-fqbn: ATTinyCore:avr:attinyx7micr:sketchclock=1external16 # Digispark pro
-#            platform-url: http://drazzy.com/package_drazzy.com_index.json
-#            sketches-exclude: LightToTone,PlayChristmasMelodyUSDistance,RandomMelody,ReactionTimeTestGame # Only OneMelody example
-#            build-properties: # the flags were put in compiler.cpp.extra_flags
-#              OneMelody:
-#                -DDEBUG
+          - arduino-boards-fqbn: ATTinyCore:avr:attinyx7micr:sketchclock=1external16 # Digispark pro
+            platform-url: http://drazzy.com/package_drazzy.com_index.json
+            sketches-exclude: LightToTone,PlayChristmasMelodyUSDistance,RandomMelody,ReactionTimeTestGame # Only OneMelody example
+            build-properties: # the flags were put in compiler.cpp.extra_flags
+              OneMelody:
+                -DDEBUG
 
 #
 # ESP

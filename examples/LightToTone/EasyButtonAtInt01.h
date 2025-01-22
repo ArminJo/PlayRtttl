@@ -354,9 +354,9 @@ public:
 #endif
 
     volatile bool isButtonAtINT0;
-    void (*ButtonPressCallback)(bool aButtonToggleState) = NULL; // If not null, is called on every button press with ButtonToggleState as parameter
+    void (*ButtonPressCallback)(bool aButtonToggleState) = nullptr; // If not null, is called on every button press with ButtonToggleState as parameter
 #if !defined(NO_BUTTON_RELEASE_CALLBACK)
-    void (*ButtonReleaseCallback)(bool aButtonToggleState, uint16_t aButtonPressDurationMillis) = NULL; // If not null, is called on every button release with ButtonPressDurationMillis as parameter
+    void (*ButtonReleaseCallback)(bool aButtonToggleState, uint16_t aButtonPressDurationMillis) = nullptr; // If not null, is called on every button release with ButtonPressDurationMillis as parameter
 #endif
 
 #if defined(USE_BUTTON_0)
@@ -393,6 +393,7 @@ void __attribute__ ((weak)) handleINT1Interrupt();
 
 /*  Version 3.4.1 - 12/2023
  *  - Avoid wrong double press detection if calling checkForDoublePress() after release of button.
+ *  - Hack for ATmega 644.
  *
  *  Version 3.4.0 - 10/2023
  *  - Added NO_INITIALIZE_IN_CONSTRUCTOR macro to enable late initializing.

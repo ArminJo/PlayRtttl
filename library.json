@@ -1,13 +1,13 @@
 {
   "name": "PlayRtttl",
+  "version": "2.2.0",
   "keywords": ["Rtttl", "Ringtones", "Nokia"],
   "description": "Plays RTTTL / RTX melodies/ringtones from FLASH or RAM.",
+  "homepage": "https://github.com/ArminJo/PlayRtttl",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ArminJo/PlayRtttl"
+    "url": "https://github.com/ArminJo/PlayRtttl.git"
   },
-  "version": "2.2.0",
-  "exclude": "pictures",
   "authors": {
     "name": "Armin Joachimsmeyer",
     "email": "armin.arduino@gmail.com",
@@ -15,12 +15,8 @@
   },
   "license": "GPL-3.0-or-later",
   "frameworks": "arduino",
-  "platforms": [
-    "atmelavr",
-    "atmelmegaavr",
-    "atmelsam",
-    "espressif8266",
-    "espressif32",
-    "ststm32"
-  ]
+  "platforms": ["atmelavr", "atmelmegaavr", "atmelsam", "espressif8266", "espressif32", "ststm32"],
+  "headers": "PlayRtttl.hpp",
+  "examples": "examples/*/*.ino",
+  "export": {"exclude": [".github", "pictures"]}
 }
