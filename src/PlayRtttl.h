@@ -291,6 +291,10 @@ static const char *const RTTTLChristmasMelodies[] PROGMEM = { JingleBell, Rudolp
 #endif
 
 /*
+ * Version 2.2.0 02/2026
+ * - Converted to use ESP32 version 3.x.
+ * - Added switch to direct hardware toggle output at OC2B / pin 3
+ *
  * Version 2.1.0 11/2023
  * - Add ability to play C8 and beyond.
  *

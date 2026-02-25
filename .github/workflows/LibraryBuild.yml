@@ -70,14 +70,14 @@ jobs:
 # ATTinyCore
 #
           - arduino-boards-fqbn: ATTinyCore:avr:attinyx5:chip=85,clock=1internal
-            platform-url: http://drazzy.com/package_drazzy.com_index.json
+            platform-url: https://felias-fogg.github.io/downloads/package_debug_enabled_index.json
             sketches-exclude: LightToTone PlayChristmasMelodyUSDistance RandomMelody ReactionTimeTestGame # Only OneMelody example
             build-properties: # the flags were put in compiler.cpp.extra_flags
               OneMelody:
                 -DDEBUG
 
           - arduino-boards-fqbn: ATTinyCore:avr:attinyx7micr:sketchclock=1external16 # Digispark pro
-            platform-url: http://drazzy.com/package_drazzy.com_index.json
+            platform-url: https://felias-fogg.github.io/downloads/package_debug_enabled_index.json
             sketches-exclude: LightToTone,PlayChristmasMelodyUSDistance,RandomMelody,ReactionTimeTestGame # Only OneMelody example
             build-properties: # the flags were put in compiler.cpp.extra_flags
               OneMelody:

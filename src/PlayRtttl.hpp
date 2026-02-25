@@ -455,15 +455,22 @@ bool updatePlayRtttl(void) {
             }
 
 #  else
+            /*
+             * Generate the tone
+             */
             // even without INTERPRETE_RTX_FORMAT the default style is natural (Tone length = note length - 1/16)
             tone(sPlayRtttlState.TonePin, tFrequency, tDuration - (tDuration >> 4));
 #  endif
-
 #  if defined(TCCR2A)
             if (sPlayRtttlState.TonePin == 11) {
                 // switch to direct hardware toggle output at OC2A / pin 11
                 TCCR2A |= _BV(COM2A0);
             }
+            if (sPlayRtttlState.TonePin == 3) {
+                // switch to direct hardware toggle output at OC2B / pin 3. This indeed works :-), despite of the tone() ISR TIMER2_COMPA_vect.
+                TCCR2A |= _BV(COM2B0);
+            }
+
 #  endif
 #endif // defined(ESP32)
 
