@@ -1,15 +1,14 @@
 /*
- * PlayChristmasMelodyUSDistance.cpp
+ * PlayChristmasMelodyUSDistance.ino
  *
  * Plays a random Christmas melody if US sensor value is in a defined range.
  * If TALKIE_FEEDBACK is defined, the current distance is spelled by Talkie
  *
- *  Copyright (C) 2019-2023  Armin Joachimsmeyer
- *  armin.joachimsmeyer@gmail.com
+ *  Copyright (C) 2019-2026  Armin Joachimsmeyer
  *
- *  This file is part of PlayRttl https://github.com/ArminJo/PlayRtttl.
+ *  This file is part of PlayRtttl https://github.com/ArminJo/PlayRtttl.
  *
- *  PlayRttl is free software: you can redistribute it and/or modify
+ *  PlayRtttl is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
@@ -20,12 +19,12 @@
  *  See the GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
+ *  along with this program. If not, see <https://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
 #include <Arduino.h>
 
-//#define USE_NO_RTX_EXTENSIONS // Disables RTX format definitions `'s'` (style) and `'l'` (loop). Saves up to 332 bytes program memory
+//#define USE_NO_RTX_EXTENSIONS // Disables RTX format definitions 's' (style) and 'l' (loop). Saves up to 322 bytes program memory
 #include <PlayRtttl.hpp>
 
 #include "HCSR04.hpp"

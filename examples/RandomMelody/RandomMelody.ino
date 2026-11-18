@@ -1,16 +1,15 @@
 /*
- * RandomMelody.cpp
+ * RandomMelody.ino
  *
- * Plays a random melody. If you here the same melody twice and miss some melodies, than you get an idea of pseudo random.
+ * Plays a random melody. If you hear the same melody twice and miss some melodies, then you get an idea of pseudo random.
  *
- * More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/
+ * More RTTTL songs can be found under https://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/
  *
- *  Copyright (C) 2019  Armin Joachimsmeyer
- *  armin.joachimsmeyer@gmail.com
+ *  Copyright (C) 2019-2026  Armin Joachimsmeyer
  *
- *  This file is part of PlayRttl https://github.com/ArminJo/PlayRtttl.
+ *  This file is part of PlayRtttl https://github.com/ArminJo/PlayRtttl.
  *
- *  PlayRttl is free software: you can redistribute it and/or modify
+ *  PlayRtttl is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
@@ -21,13 +20,13 @@
  *  See the GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
+ *  along with this program. If not, see <https://www.gnu.org/licenses/gpl-3.0.html>.
  *
  */
 
 #include <Arduino.h>
 
-//#define USE_NO_RTX_EXTENSIONS // Disables RTX format definitions `'s'` (style) and `'l'` (loop). Saves up to 332 bytes program memory
+//#define USE_NO_RTX_EXTENSIONS // Disables RTX format definitions 's' (style) and 'l' (loop). Saves up to 322 bytes program memory
 #include <PlayRtttl.hpp>
 
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
@@ -73,16 +72,16 @@ void toggleLED_BUILTIN_Every10thCall() {
 void loop() {
     /*
      * Play random melody
-     * If you here the same melody twice and miss some melodies, than you get an idea of pseudo random.
+     * If you hear the same melody twice and miss some melodies, then you get an idea of pseudo random.
      */
-#if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__)
+#if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
     // use smaller array to fit into FLASH
     startPlayRandomRtttlFromArrayPGM(TONE_PIN, RTTTLMelodiesTiny, ARRAY_SIZE_MELODIES_TINY);
 #else
-    startPlayRandomRtttlFromArrayPGMAndPrintName(TONE_PIN, RTTTLMelodies, ARRAY_SIZE_MELODIES, &Serial);
+    startPlayRandomRtttlFromArrayPGMAndPrintName(&Serial, TONE_PIN, RTTTLMelodies, ARRAY_SIZE_MELODIES);
 #endif
 // for Christmas
-//    startPlayRandomRtttlFromArrayPGMAndPrintName(TONE_PIN, RTTTLChristmasMelodies, ARRAY_SIZE_CHRISTMAS_SONGS, &Serial);
+//    startPlayRandomRtttlFromArrayPGMAndPrintName(&Serial, TONE_PIN, RTTTLChristmasMelodies, ARRAY_SIZE_CHRISTMAS_MELODIES);
 
     while (updatePlayRtttl()) {
         /*

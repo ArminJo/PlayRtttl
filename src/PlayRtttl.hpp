@@ -1,11 +1,10 @@
 /*
- * PlayRttl.hpp
+ * PlayRtttl.hpp
  *
  * Plays RTTTL melodies / ringtones from FLASH or RAM.
  * Includes a non blocking version and a name output function.
  *
- *  Copyright (C) 2018-2022  Armin Joachimsmeyer
- *  armin.joachimsmeyer@gmail.com
+ *  Copyright (C) 2018-2026  Armin Joachimsmeyer
  *
  *     Based on the RTTTL.pde example code written by Brett Hagman
  *     http://www.roguerobotics.com/
@@ -13,9 +12,9 @@
  *
  *     The example melodies may have copyrights you have to respect.
  *
- *  This file is part of PlayRttl https://github.com/ArminJo/PlayRtttl.
+ *  This file is part of PlayRtttl https://github.com/ArminJo/PlayRtttl.
  *
- *  PlayRttl is free software: you can redistribute it and/or modify
+ *  PlayRtttl is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
@@ -26,7 +25,7 @@
  *  See the GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
+ *  along with this program. If not, see <https://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
 #ifndef _PLAY_RTTTL_HPP
@@ -34,12 +33,14 @@
 
 #include "PlayRtttl.h"
 
-//#define TRACE // Activate it to see the note played on Serial output
 #if defined(TRACE)
+#define LOCAL_TRACE
 // Propagate trace level
 #  if !defined(DEBUG)
 #define DEBUG
 #  endif
+#else
+//#define LOCAL_TRACE // Activate it to see the note played on Serial output
 #endif
 
 #if defined(DEBUG)
@@ -48,7 +49,7 @@
 //#define LOCAL_DEBUG // This enables debug output only for this file
 #endif
 
-#if defined(LOCAL_DEBUG)
+#if defined(LOCAL_DEBUG) || defined(LOCAL_TRACE)
 Print *const sPointerToSerial = &Serial;  // requires 0 bytes Flash because it is constant
 #endif //DEBUG
 
@@ -58,12 +59,14 @@ struct playRtttlState sPlayRtttlState;
  * The frequencies of notes of the highest octave.
  * Used to compute all other frequencies.
  */
-const int Notes[] PROGMEM = { NOTE_C7, NOTE_CS7, NOTE_D7, NOTE_DS7, NOTE_E7, NOTE_F7, NOTE_FS7, NOTE_G7, NOTE_GS7, NOTE_A7,
+const uint16_t Notes[] PROGMEM = { NOTE_C7, NOTE_CS7, NOTE_D7, NOTE_DS7, NOTE_E7, NOTE_F7, NOTE_FS7, NOTE_G7, NOTE_GS7, NOTE_A7,
 NOTE_AS7, NOTE_B7 };
 
-#define isdigit(n) (n >= '0' && n <= '9')
+#define RTTTL_IS_DIGIT(n) ((n) >= '0' && (n) <= '9') // saves over 100 bytes program space if used instead of isdigit(n)
 
+#if !defined(USE_NO_RTX_EXTENSIONS)
 uint8_t sDefaultStyleDivisorValue = RTTTL_STYLE_DEFAULT; // Natural (16)
+#endif
 
 /*
  * Blocking versions
@@ -90,7 +93,7 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
 #if defined(LOCAL_DEBUG)
     sPointerToSerial->print(F("Title="));
 #endif
-    while (*aRTTTLArrayPtr != ':') {
+    while (*aRTTTLArrayPtr != ':') { // do not check for end of string here, a string without any note makes no sense!
         /*
          * Read title
          */
@@ -102,9 +105,9 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
 
     sPlayRtttlState.DefaultDuration = DEFAULT_DURATION;
     sPlayRtttlState.DefaultOctave = DEFAULT_OCTAVE;
-    sPlayRtttlState.TimeForWholeNoteMillis = (60 * 1000L / DEFAULT_BPM) * 4;
+    sPlayRtttlState.TimeForWholeNoteMillis = (60 * 1000L * 4) / DEFAULT_BPM;
 #if !defined(USE_NO_RTX_EXTENSIONS)
-    sPlayRtttlState.NumberOfLoops = 1;
+    sPlayRtttlState.NumberOfRepetitions = 0;
     sPlayRtttlState.StyleDivisorValue = sDefaultStyleDivisorValue;
 #endif
 
@@ -119,7 +122,7 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
 
     do {
         /*
-         * Get character after separator (comma or colon)
+         * Skip separator (comma or colon)
          */
         aRTTTLArrayPtr++;
 
@@ -133,13 +136,14 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
             aRTTTLArrayPtr++;
             aRTTTLArrayPtr++;              // skip "d="
             tNumber = 0;
-            while (isdigit(*aRTTTLArrayPtr)) {
+            while (RTTTL_IS_DIGIT(*aRTTTLArrayPtr)) {
                 tNumber = (tNumber * 10) + (*aRTTTLArrayPtr++ - '0');
             }
             if (tNumber == 0) {
                 tNumber = DEFAULT_DURATION;
             }
             sPlayRtttlState.DefaultDuration = tNumber;
+            // aRTTTLArrayPtr now points to ‘,’ or ':'
         }
 
         /*
@@ -149,10 +153,11 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
             aRTTTLArrayPtr++;
             aRTTTLArrayPtr++;              // skip "o="
             tNumber = *aRTTTLArrayPtr++ - '0';
-            if (tNumber < 3 && tNumber > 7) {
+            if (tNumber < 0 || tNumber > 9) { // not a digit
                 tNumber = DEFAULT_OCTAVE;
             }
             sPlayRtttlState.DefaultOctave = tNumber;
+            // aRTTTLArrayPtr now points to ‘,’ or ':'
         }
 
 #if !defined(USE_NO_RTX_EXTENSIONS)
@@ -165,18 +170,18 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
             sPlayRtttlState.StyleDivisorValue = tNumber;
         }
 
-        // get loops
+        // get repetitions
         else if (*aRTTTLArrayPtr == 'l') {
             tNumber = 0;
             aRTTTLArrayPtr++;
             aRTTTLArrayPtr++;              // skip "l="
-            while (isdigit(*aRTTTLArrayPtr)) {
+            while (RTTTL_IS_DIGIT(*aRTTTLArrayPtr)) {
                 tNumber = (tNumber * 10) + (*aRTTTLArrayPtr++ - '0');
             }
-            if (tNumber == 15) {
+            if (tNumber > MAXIMUM_OF_REPETITIONS_ACCEPTED) {
                 tNumber = 0;
             }
-            sPlayRtttlState.NumberOfLoops = tNumber;
+            sPlayRtttlState.NumberOfRepetitions = tNumber;
         }
 #endif
 
@@ -185,17 +190,17 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
             aRTTTLArrayPtr++;
             aRTTTLArrayPtr++;              // skip "b="
 //            tBPM = 0;
-            while (isdigit(*aRTTTLArrayPtr)) {
+            while (RTTTL_IS_DIGIT(*aRTTTLArrayPtr)) {
                 tBPM = (tBPM * 10) + (*aRTTTLArrayPtr++ - '0');
             }
-            if (tBPM == 0) {
+            if (tBPM < 10) { // BPM < 10 makes no sense and lead to overflow for tDuration
                 tBPM = DEFAULT_BPM;
             }
             // BPM usually expresses the number of quarter notes per minute
-            sPlayRtttlState.TimeForWholeNoteMillis = (60 * 1000L / tBPM) * 4;
+            sPlayRtttlState.TimeForWholeNoteMillis = (60 * 1000L * 4) / tBPM;
         }
 
-    } while (*aRTTTLArrayPtr != ':');
+    } while (*aRTTTLArrayPtr != ':'); // do not check for end of string here, a string without any note makes no sense!
 
     aRTTTLArrayPtr++; // skip colon
 
@@ -214,13 +219,13 @@ void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComp
         sPointerToSerial->print(sPlayRtttlState.StyleDivisorValue);
         sPointerToSerial->print(F(" pause between notes,"));
     }
-    sPointerToSerial->print(F(" Loops="));
-    sPointerToSerial->print(sPlayRtttlState.NumberOfLoops);
+    sPointerToSerial->print(F(" Repetitions="));
+    sPointerToSerial->print(sPlayRtttlState.NumberOfRepetitions);
 #  endif
     sPointerToSerial->println();
 #endif
 
-    sPlayRtttlState.MillisOfNextAction = 0;
+    sPlayRtttlState.ToneStartMillis = 0;
     sPlayRtttlState.NextTonePointer = aRTTTLArrayPtr;
 #if !defined(USE_NO_RTX_EXTENSIONS)
     sPlayRtttlState.LastTonePointer = aRTTTLArrayPtr;
@@ -237,22 +242,12 @@ bool isPlayRtttlRunning() {
     return sPlayRtttlState.Flags.IsRunning;
 }
 
-#if !defined(ESP_ARDUINO_VERSION)
-#define ESP_ARDUINO_VERSION 0x010101 // Version 1.1.1
-#endif
-#if !defined(ESP_ARDUINO_VERSION_VAL)
-#define ESP_ARDUINO_VERSION_VAL(major, minor, patch) ((major << 16) | (minor << 8) | (patch))
-#endif
 void stopPlayRtttl(void) {
-#if defined(ESP32) && ESP_ARDUINO_VERSION  <= ESP_ARDUINO_VERSION_VAL(2, 0, 2)
-    ledcWriteTone(sPlayRtttlState.TonePin, 0);
-#else
     noTone(sPlayRtttlState.TonePin);
-#  if defined(TCCR2A)
-    // reset direct hardware toggle output at OC2A / pin 11
-    TCCR2A &= ~_BV(COM2A0);
-#  endif
+#if defined(TCCR2A) && (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328__) || defined(__AVR_ATmega168__))
+    TCCR2A &= ~(_BV(COM2A0) | _BV(COM2B0)); // reset direct hardware toggle output at OC2A / pin 11 and OC2B / pin 3
 #endif
+
     // noTone sets pin to LOW ->  need to handle inverted pin mode here
     if (sPlayRtttlState.Flags.IsTonePinInverted) {
         digitalWrite(sPlayRtttlState.TonePin, HIGH);
@@ -260,7 +255,7 @@ void stopPlayRtttl(void) {
     sPlayRtttlState.Flags.IsRunning = false;
 }
 
-char getNextCharFromRTTLArray(const char *aRTTTLArrayPtr) {
+char getNextCharFromRTTTLArray(const char *aRTTTLArrayPtr) {
     if (sPlayRtttlState.Flags.IsPGMMemory) {
         return pgm_read_byte(aRTTTLArrayPtr);
     }
@@ -276,60 +271,59 @@ bool updatePlayRtttl(void) {
         return false;
     }
 
-#if defined(TRACE)
+#if defined(LOCAL_TRACE)
     bool isSharp = false;
     char tNoteCharUppercase;
 #endif
 
-    long tMillis = millis();
-    if (tMillis >= sPlayRtttlState.MillisOfNextAction) {
+    unsigned long tMillis = millis();
+    if ((tMillis - sPlayRtttlState.ToneStartMillis) >= sPlayRtttlState.CurrentToneDuration) {
+        sPlayRtttlState.ToneStartMillis = tMillis;
+
         const char *tRTTTLArrayPtr = sPlayRtttlState.NextTonePointer;
 
         char tChar;
-        tChar = getNextCharFromRTTLArray(tRTTTLArrayPtr);
+        tChar = getNextCharFromRTTTLArray(tRTTTLArrayPtr);
 
         /*
          * Check if end of string reached
          */
         if (tChar == '\0') {
 #if !defined(USE_NO_RTX_EXTENSIONS)
-            uint8_t tNumberOfLoops = sPlayRtttlState.NumberOfLoops;
-            if (tNumberOfLoops > 1) {
-                sPlayRtttlState.NumberOfLoops--;
-            }
-            if (tNumberOfLoops == 1) {
-#endif
-                // end song
-                stopPlayRtttl();
-                if (sPlayRtttlState.OnComplete != nullptr) {
-                    sPlayRtttlState.OnComplete();
-                }
-                return false;
-#if !defined(USE_NO_RTX_EXTENSIONS)
-            } else {
+            uint8_t tNumberOfRepetitions = sPlayRtttlState.NumberOfRepetitions;
+            if (tNumberOfRepetitions > 0) {
+                sPlayRtttlState.NumberOfRepetitions--;
                 // loop again
 #  if defined(LOCAL_DEBUG)
                 sPointerToSerial->print(F("Loop count="));
-                sPointerToSerial->println(sPlayRtttlState.NumberOfLoops);
+                sPointerToSerial->println(sPlayRtttlState.NumberOfRepetitions);
 #  endif
-                sPlayRtttlState.MillisOfNextAction = 0;
+                sPlayRtttlState.ToneStartMillis = 0;
                 sPlayRtttlState.NextTonePointer = sPlayRtttlState.LastTonePointer;
                 return updatePlayRtttl();
             }
-#endif // USE_NO_RTX_EXTENSIONS
+#endif
+            // end song
+            stopPlayRtttl();
+            if (sPlayRtttlState.OnComplete != nullptr) {
+                sPlayRtttlState.OnComplete();
+            }
+            return false;
+
         }
 
         uint8_t tDurationNumber;
-        unsigned long tDuration;
+        uint16_t tDuration;
         uint8_t tNote;
         uint8_t tOctave;
+        bool tIncrementOctave = false;
 
 // first, get note duration, if available
         tDurationNumber = 0;
-        while (isdigit(tChar)) {
+        while (RTTTL_IS_DIGIT(tChar)) {
             tDurationNumber = (tDurationNumber * 10) + (tChar - '0');
             tRTTTLArrayPtr++;
-            tChar = getNextCharFromRTTLArray(tRTTTLArrayPtr);
+            tChar = getNextCharFromRTTTLArray(tRTTTLArrayPtr);
         }
 
         if (tDurationNumber == 0) {
@@ -338,8 +332,8 @@ bool updatePlayRtttl(void) {
         tDuration = sPlayRtttlState.TimeForWholeNoteMillis / tDurationNumber;
 
 // now get the note
-        tNote = 42; // Pause
-#if defined(TRACE)
+        tNote = NOTE_CODE_FOR_PAUSE;
+#if defined(LOCAL_TRACE)
         tNoteCharUppercase = tChar - 0x20;
 #endif
 
@@ -364,27 +358,32 @@ bool updatePlayRtttl(void) {
             break;
         case 'b':
         case 'h':  // I have seen this
-            tNote = 11;
+            tNote = 11; // is MAXIMUM_NOTE_INDEX_IN_OCTAVE
             break;
         case 'p':
         default:
-#if defined(TRACE)
+#if defined(LOCAL_TRACE)
             tNoteCharUppercase = 'P';
 #endif
-            tNote = 42; // pause
+            tNote = NOTE_CODE_FOR_PAUSE; // pause
         }
 
         tRTTTLArrayPtr++;
-        tChar = getNextCharFromRTTLArray(tRTTTLArrayPtr);
+        tChar = getNextCharFromRTTTLArray(tRTTTLArrayPtr);
 
         // now, get optional '#' sharp (or '_' as seen on many songs)
         if (tChar == '#' || tChar == '_') {
-#if defined(TRACE)
+#if defined(LOCAL_TRACE)
             isSharp = true;
 #endif
-            tNote++;
+            if (tNote == MAXIMUM_NOTE_INDEX_IN_OCTAVE) {   // b# == c of next octave
+                tNote = 0;
+                tIncrementOctave = true;
+            } else {
+                tNote++;
+            }
             tRTTTLArrayPtr++;
-            tChar = getNextCharFromRTTLArray(tRTTTLArrayPtr);
+            tChar = getNextCharFromRTTTLArray(tRTTTLArrayPtr);
         }
 
 // now, get optional '.' of dotted note
@@ -394,22 +393,25 @@ bool updatePlayRtttl(void) {
             tDurationNumber += tDurationNumber / 2;
 #endif
             tRTTTLArrayPtr++;
-            tChar = getNextCharFromRTTLArray(tRTTTLArrayPtr);
+            tChar = getNextCharFromRTTTLArray(tRTTTLArrayPtr);
         }
 
 // now, get octave
-        if (isdigit(tChar)) {
+        if (RTTTL_IS_DIGIT(tChar)) {
             tOctave = tChar - '0';
             tRTTTLArrayPtr++;
-            tChar = getNextCharFromRTTLArray(tRTTTLArrayPtr);
+            tChar = getNextCharFromRTTTLArray(tRTTTLArrayPtr);
         } else {
             tOctave = sPlayRtttlState.DefaultOctave;
+        }
+        if (tIncrementOctave) {
+            tOctave++;
         }
 
         if (tChar == '.') {         // believe me I have seen this (e.g. in SilentNight)
             tDuration += tDuration / 2;
             tRTTTLArrayPtr++;
-            tChar = getNextCharFromRTTLArray(tRTTTLArrayPtr);
+            tChar = getNextCharFromRTTTLArray(tRTTTLArrayPtr);
         }
 
         if (tChar == ',') {
@@ -419,11 +421,10 @@ bool updatePlayRtttl(void) {
         /*
          * now play the note
          */
-#if !defined(USE_NO_RTX_EXTENSIONS)
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#if !defined(USE_NO_RTX_EXTENSIONS) && defined(LOCAL_TRACE)
         unsigned long tDurationOfTone;
 #endif
-        if (tNote <= 12) {
+        if (tNote <= MAXIMUM_NOTE_INDEX_IN_OCTAVE) {
 #if defined(__AVR__)
             uint16_t tFrequency = pgm_read_word(&Notes[tNote]);
 #else
@@ -435,17 +436,15 @@ bool updatePlayRtttl(void) {
                 tFrequency <<= (tOctave - NOTES_OCTAVE);
             }
 
-#if defined(ESP32)
-            ledcWriteTone(sPlayRtttlState.TonePin, tFrequency);
 #if !defined(USE_NO_RTX_EXTENSIONS)
-            (void) tDurationOfTone; // to avoid compiler warnings
-#endif
-#else
-#  if !defined(USE_NO_RTX_EXTENSIONS)
+
             if (sPlayRtttlState.StyleDivisorValue != 0) {
                 /*
                  * handle style parameter, compute duration of tone output for note and do rounding for integer division
                  */
+#if !defined(LOCAL_TRACE)
+                unsigned long tDurationOfTone; // This variable is required for trace below
+#endif
                 tDurationOfTone = tDuration
                         - ((tDuration + (sPlayRtttlState.StyleDivisorValue / 2)) / sPlayRtttlState.StyleDivisorValue);
                 tone(sPlayRtttlState.TonePin, tFrequency, tDurationOfTone);
@@ -453,14 +452,14 @@ bool updatePlayRtttl(void) {
                 tone(sPlayRtttlState.TonePin, tFrequency, tDuration);
             }
 
-#  else
+#else
             /*
              * Generate the tone
              */
-            // even without INTERPRETE_RTX_FORMAT the default style is natural (Tone length = note length - 1/16)
+            // even without USE_NO_RTX_EXTENSIONS the default style is natural (Tone length = note length - 1/16)
             tone(sPlayRtttlState.TonePin, tFrequency, tDuration - (tDuration >> 4));
-#  endif
-#  if defined(TCCR2A)
+#endif
+#if defined(TCCR2A) && (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328__) || defined(__AVR_ATmega168__))
             if (sPlayRtttlState.TonePin == 11) {
                 // switch to direct hardware toggle output at OC2A / pin 11
                 TCCR2A |= _BV(COM2A0);
@@ -470,46 +469,44 @@ bool updatePlayRtttl(void) {
                 TCCR2A |= _BV(COM2B0);
             }
 
-#  endif
-#endif // defined(ESP32)
+#endif
 
         } else {
             // Play pause, need to handle inverted pin mode here
-#if defined(ESP32)
-            ledcWriteTone(TONE_LEDC_CHANNEL, 0);
-#else
             noTone(sPlayRtttlState.TonePin);
-#if defined(TCCR2A)
+#if defined(TCCR2A) && (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328__) || defined(__AVR_ATmega168__))
             // reset direct hardware toggle output at OC2A / pin 11 and OC2B / pin 3
             TCCR2A &= ~(_BV(COM2A0) | _BV(COM2B0));
 #endif
-#endif // defined(ESP32)
 
             if (sPlayRtttlState.Flags.IsTonePinInverted) {
                 digitalWrite(sPlayRtttlState.TonePin, HIGH);
             }
         }
-#if defined(TRACE)
+#if defined(LOCAL_TRACE)
         sPointerToSerial->print(F("Playing: NOTE_"));
         sPointerToSerial->print(tNoteCharUppercase);
         if (isSharp) {
             sPointerToSerial->print('#');
         }
-        if (tNote <= 12) {
+        if (tNote <= MAXIMUM_NOTE_INDEX_IN_OCTAVE) {
             sPointerToSerial->print(tOctave, 10);
         }
         sPointerToSerial->print(F(", "));
         sPointerToSerial->print(tDurationNumber, 10);
 
         sPointerToSerial->print(F(" | "));
+        if (tNote <= MAXIMUM_NOTE_INDEX_IN_OCTAVE && tOctave <= NOTES_OCTAVE) {
 #  if defined(__AVR__)
-        sPointerToSerial->print(pgm_read_word(&Notes[tNote]) >> (NOTES_OCTAVE - tOctave), 10);
+            sPointerToSerial->print(pgm_read_word(&Notes[tNote]) >> (NOTES_OCTAVE - tOctave), 10);
 #  else
-        sPointerToSerial->print(Notes[tNote] >> (NOTES_OCTAVE - tOctave), 10);
+            sPointerToSerial->print(Notes[tNote] >> (NOTES_OCTAVE - tOctave), 10);
 #  endif
-        sPointerToSerial->print(F(" Hz for "));
+            sPointerToSerial->print(F(" Hz"));
+        }
+        sPointerToSerial->print(F(" for "));
 #  if !defined(USE_NO_RTX_EXTENSIONS)
-        if (sPlayRtttlState.StyleDivisorValue != 0 && tNote <= 12) {
+        if (sPlayRtttlState.StyleDivisorValue != 0 && tNote <= MAXIMUM_NOTE_INDEX_IN_OCTAVE) {
             sPointerToSerial->print(tDurationOfTone, 10);
             sPointerToSerial->print(F(" of "));
         }
@@ -517,8 +514,8 @@ bool updatePlayRtttl(void) {
         sPointerToSerial->print(tDuration, 10);
         sPointerToSerial->println(F(" ms"));
 
-#endif //TRACE
-        sPlayRtttlState.MillisOfNextAction = tMillis + tDuration;
+#endif //LOCAL_TRACE
+        sPlayRtttlState.CurrentToneDuration = tDuration;
         sPlayRtttlState.NextTonePointer = tRTTTLArrayPtr;
     }
     return true;
@@ -526,7 +523,7 @@ bool updatePlayRtttl(void) {
 
 void getRtttlName(const char *aRTTTLArrayPtr, char *aBuffer, uint8_t aBuffersize) {
     char tChar = *aRTTTLArrayPtr++;
-    while (tChar != ':' && aBuffersize > 1) {
+    while (tChar != ':' && aBuffersize > 1) { // do not check for end of string here, a string without any note makes no sense!
         *aBuffer++ = tChar;
         aBuffersize--;
         tChar = *aRTTTLArrayPtr++;
@@ -536,24 +533,86 @@ void getRtttlName(const char *aRTTTLArrayPtr, char *aBuffer, uint8_t aBuffersize
 
 /*
  * Prints text "Now playing: Song xy"
- * call it e.g. printNamePGM(RTTTLMelodies[tRandomIndex], &Serial);
+ * call it e.g. printName(&Serial, MySongInRam);
  */
-void printName(const char *aRTTTLArrayPtr, Print *aSerial) {
-    char tStringBuffer[16];
+void printName(Print *aSerial, const char *aRTTTLArrayPtr) {
     aSerial->print(F("Now playing: "));
-    getRtttlName(aRTTTLArrayPtr, tStringBuffer, sizeof(tStringBuffer));
-    aSerial->println(tStringBuffer);
+    char tChar;
+    while ((tChar = *aRTTTLArrayPtr++) != ':') { // do not check for end of string here, a string without any note makes no sense!
+        aSerial->print(tChar);
+    }
+    aSerial->println();
+}
+
+/**
+ * @param  aRTTTLPGMArrayPtrPGM a pointer to PGM song data
+ */
+void printNamePGM(Print *aSerial, const char *aRTTTLArrayPtrPGM) {
+#if !defined(__AVR__) // Let the function work for non AVR platforms
+    printName(aSerial, aRTTTLArrayPtrPGM);
+#else
+    aSerial->print(F("Now playing: "));
+    char tChar;
+    while ((tChar = pgm_read_byte(aRTTTLArrayPtrPGM++)) != ':') { // do not check for end of string here, a string without any note makes no sense!
+        aSerial->print(tChar);
+    }
+    aSerial->println();
+#endif
+}
+
+/**
+ * @param  aRTTTLPGMArrayPtrPGM a pointer to an PGM array of pointers to PGM song data
+ */
+void printNamePGMPGM(Print *aSerial, const char *const*aRTTTLPGMArrayPtrPGM) {
+#if defined(__AVR__)
+    const char *tRTTTLPGMArrayPtrPGM = (const char*) pgm_read_word(aRTTTLPGMArrayPtrPGM);
+#else
+    const char *tRTTTLPGMArrayPtrPGM = *aRTTTLPGMArrayPtrPGM;
+#endif
+    printNamePGM(aSerial, tRTTTLPGMArrayPtrPGM);
+}
+
+const char* getRandomSongPtr(uint8_t aNumberOfEntriesInSongArray, const char *const aSongArray[]) {
+    return (aSongArray[random(0, aNumberOfEntriesInSongArray)]);
+}
+const char* getRandomSongPtrPGM(uint8_t aNumberOfEntriesInSongArrayPGM, const char *const aSongArrayPGM[]) {
+#if defined(__AVR__)
+    return (const char*) pgm_read_word(&aSongArrayPGM[random(aNumberOfEntriesInSongArrayPGM)]);
+#else
+    return aSongArrayPGM[random(aNumberOfEntriesInSongArrayPGM)];
+#endif
+}
+
+/*
+ * Plays one of the samples from RTTTLMelodies array
+ */
+void playRandomRtttlSampleBlocking(uint8_t aTonePin) {
+#if defined(__AVR__)
+    playRandomRtttlSampleBlockingPGM(aTonePin); // RTTTLMelodies is PROGMEM here, so use the right function
+#else
+    const char *tSongPtr = getRandomSongPtr(ARRAY_SIZE_MELODIES, RTTTLMelodies);
+    playRtttlBlocking(aTonePin, tSongPtr);
+#endif
+}
+
+void playRandomRtttlSampleBlockingAndPrintName(Print *aSerial, uint8_t aTonePin) {
+#if defined(__AVR__)
+    playRandomRtttlSampleBlockingPGMAndPrintName(aSerial, aTonePin); // RTTTLMelodies is PROGMEM here, so use the right function
+#else
+    const char *tSongPtr = getRandomSongPtr(ARRAY_SIZE_MELODIES, RTTTLMelodies);
+    printName(aSerial, tSongPtr);
+    playRtttlBlocking(aTonePin, tSongPtr);
+#endif
 }
 
 /*
  * Plays one of the songs in the array specified non blocking. Ie. you must call updatePlayRtttl() in your loop or use the callback function.
- * aNumberOfEntriesInSongArrayPGM is (sizeof(<MyArrayName>) / sizeof(char *) - 1)
+ * aNumberOfEntriesInSongArrayPGM is (sizeof(<MyArrayName>) / sizeof(char *))
  * char tStringBuffer[16] is sufficient for most titles.
  */
 void startPlayRandomRtttlFromArray(uint8_t aTonePin, const char *const aSongArray[], uint8_t aNumberOfEntriesInSongArray,
         char *aBufferPointer, uint8_t aBufferSize, void (*aOnComplete)()) {
-    uint8_t tRandomIndex = random(0, aNumberOfEntriesInSongArray - 1);
-    char *tSongPtr = (char*) aSongArray[tRandomIndex];
+    const char *tSongPtr = getRandomSongPtr(aNumberOfEntriesInSongArray, aSongArray);
     startPlayRtttl(aTonePin, tSongPtr, aOnComplete);
     if (aBufferPointer != nullptr) {
 // copy title to buffer
@@ -561,29 +620,11 @@ void startPlayRandomRtttlFromArray(uint8_t aTonePin, const char *const aSongArra
     }
 }
 
-void startPlayRandomRtttlFromArrayAndPrintName(uint8_t aTonePin, const char *const aSongArray[],
-        uint8_t aNumberOfEntriesInSongArray, Print *aSerial, void (*aOnComplete)()) {
-    uint8_t tRandomIndex = random(0, aNumberOfEntriesInSongArray - 1);
-    char *tSongPtr = (char*) aSongArray[tRandomIndex];
+void startPlayRandomRtttlFromArrayAndPrintName(Print *aSerial, uint8_t aTonePin, const char *const aSongArray[],
+        uint8_t aNumberOfEntriesInSongArray, void (*aOnComplete)()) {
+    const char *tSongPtr = getRandomSongPtr(aNumberOfEntriesInSongArray, aSongArray);
     startPlayRtttl(aTonePin, tSongPtr, aOnComplete);
-// print title
-    printName(tSongPtr, aSerial);
-}
-
-/*
- * Plays one of the samples from RTTTLMelodies array
- */
-void playRandomRtttlSampleBlocking(uint8_t aTonePin) {
-    uint8_t tRandomIndex = random(0, sizeof(RTTTLMelodies) / sizeof(char*) - 1);
-    char *tSongPtr = (char*) RTTTLMelodies[tRandomIndex];
-    playRtttlBlocking(aTonePin, tSongPtr);
-}
-
-void playRandomRtttlSampleBlockingAndPrintName(uint8_t aTonePin, Print *aSerial) {
-    uint8_t tRandomIndex = random(0, sizeof(RTTTLMelodies) / sizeof(char*) - 1);
-    char *tSongPtr = (char*) RTTTLMelodies[tRandomIndex];
-    printName(tSongPtr, aSerial);
-    playRtttlBlocking(aTonePin, tSongPtr);
+    printName(aSerial, tSongPtr);
 }
 
 void playRtttlBlockingPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM) {
@@ -623,7 +664,7 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
     sPointerToSerial->print(F("Title="));
 #endif
     char tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
-    while (tPGMChar != ':') {
+    while (tPGMChar != ':') { // do not check for end of string here, a string without any note makes no sense!
         /*
          * Read title
          */
@@ -636,18 +677,14 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
 
     sPlayRtttlState.DefaultDuration = DEFAULT_DURATION;
     sPlayRtttlState.DefaultOctave = DEFAULT_OCTAVE;
-    sPlayRtttlState.TimeForWholeNoteMillis = (60 * 1000L / DEFAULT_BPM) * 4;
+    sPlayRtttlState.TimeForWholeNoteMillis = (60 * 1000L * 4) / DEFAULT_BPM;
 #if !defined(USE_NO_RTX_EXTENSIONS)
-    sPlayRtttlState.NumberOfLoops = 1;
+    sPlayRtttlState.NumberOfRepetitions = 0;
     sPlayRtttlState.StyleDivisorValue = sDefaultStyleDivisorValue;
 #endif
 
 #if !defined(USE_NO_RTX_EXTENSIONS)
-#if defined(LOCAL_DEBUG)
-    char tStyleChar = RTX_STYLE_DEFAULT;
-#else
     char tStyleChar;
-#endif
 #endif
     int tBPM = 0;
 
@@ -668,7 +705,7 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
             aRTTTLArrayPtrPGM++;              // skip "d="
             tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
             tNumber = 0;
-            while (isdigit(tPGMChar)) {
+            while (RTTTL_IS_DIGIT(tPGMChar)) {
                 tNumber = (tNumber * 10) + (tPGMChar - '0');
                 aRTTTLArrayPtrPGM++;
                 tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
@@ -677,6 +714,8 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
                 tNumber = DEFAULT_DURATION;
             }
             sPlayRtttlState.DefaultDuration = tNumber;
+            // aRTTTLArrayPtrPGM now points to ',' or ':' and tPGMChar contains it
+
         } else if (tPGMChar == 'o') {
             /*
              * get default octave
@@ -685,13 +724,14 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
             aRTTTLArrayPtrPGM++;              // skip "o="
             tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
             tNumber = tPGMChar - '0';
-            if (tNumber < 3 && tNumber > 7) {
+            if (tNumber < 0 || tNumber > 9) { // not a digit
                 tNumber = DEFAULT_OCTAVE;
             }
             sPlayRtttlState.DefaultOctave = tNumber;
             //get comma or colon
             aRTTTLArrayPtrPGM++;
             tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
+            // aRTTTLArrayPtrPGM now points to ',' or ':' and tPGMChar contains it
         } else
 
 #if !defined(USE_NO_RTX_EXTENSIONS)
@@ -705,21 +745,22 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
             //get comma or colon
             aRTTTLArrayPtrPGM++;
             tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
+
         } else if (tPGMChar == 'l') {
-            // get loops
+            // get repetitions
             aRTTTLArrayPtrPGM++;
             aRTTTLArrayPtrPGM++;              // skip "l="
             tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
             tNumber = 0;
-            while (isdigit(tPGMChar)) {
+            while (RTTTL_IS_DIGIT(tPGMChar)) {
                 tNumber = (tNumber * 10) + (tPGMChar - '0');
                 aRTTTLArrayPtrPGM++;
                 tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
             }
-            if (tNumber == 15) {
+            if (tNumber > MAXIMUM_OF_REPETITIONS_ACCEPTED) {
                 tNumber = 0;
             }
-            sPlayRtttlState.NumberOfLoops = tNumber;
+            sPlayRtttlState.NumberOfRepetitions = tNumber;
         } else
 #endif
 
@@ -728,19 +769,19 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
             aRTTTLArrayPtrPGM++;
             aRTTTLArrayPtrPGM++;              // skip "b="
             tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
-            while (isdigit(tPGMChar)) {
+            while (RTTTL_IS_DIGIT(tPGMChar)) {
                 tBPM = (tBPM * 10) + (tPGMChar - '0');
                 aRTTTLArrayPtrPGM++;
                 tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM);
             }
-            if (tBPM == 0) {
+            if (tBPM < 10) { // BPM < 10 makes no sense and lead to overflow for tDuration
                 tBPM = DEFAULT_BPM;
             }
             // BPM usually expresses the number of quarter notes per minute
-            sPlayRtttlState.TimeForWholeNoteMillis = (60 * 1000L / tBPM) * 4;
+            sPlayRtttlState.TimeForWholeNoteMillis = (60 * 1000L * 4) / tBPM;
         }
 
-    } while (tPGMChar != ':');
+    } while (tPGMChar != ':'); // do not check for end of string here, a string without any note makes no sense!
 
     aRTTTLArrayPtrPGM++; // skip colon
 
@@ -759,13 +800,13 @@ void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*a
         sPointerToSerial->print(sPlayRtttlState.StyleDivisorValue);
         sPointerToSerial->print(F(" pause between notes,"));
     }
-    sPointerToSerial->print(F(" Loops="));
-    sPointerToSerial->print(sPlayRtttlState.NumberOfLoops);
+    sPointerToSerial->print(F(" Repetitions="));
+    sPointerToSerial->print(sPlayRtttlState.NumberOfRepetitions);
 #endif
     sPointerToSerial->println();
 #endif
 
-    sPlayRtttlState.MillisOfNextAction = 0;
+    sPlayRtttlState.ToneStartMillis = 0;
     sPlayRtttlState.NextTonePointer = aRTTTLArrayPtrPGM;
 #if !defined(USE_NO_RTX_EXTENSIONS)
     sPlayRtttlState.LastTonePointer = aRTTTLArrayPtrPGM;
@@ -786,7 +827,7 @@ void getRtttlNamePGM(const char *aRTTTLArrayPtrPGM, char *aBuffer, uint8_t aBuff
     getRtttlName(aRTTTLArrayPtrPGM, aBuffer, aBuffersize);
 #else
     char tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM++);
-    while (tPGMChar != ':' && aBuffersize > 1) {
+    while (tPGMChar != ':' && aBuffersize > 1) { // do not check for end of string here, a string without any note makes no sense!
         *aBuffer++ = tPGMChar;
         aBuffersize--;
         tPGMChar = pgm_read_byte(aRTTTLArrayPtrPGM++);
@@ -795,36 +836,10 @@ void getRtttlNamePGM(const char *aRTTTLArrayPtrPGM, char *aBuffer, uint8_t aBuff
 #endif
 }
 
-/**
- * @param  aRTTTLPGMArrayPtrPGM a pointer to an PGM array of pointers to PGM song data
- */
-void printNamePGMPGM(const char *const*aRTTTLPGMArrayPtrPGM, Print *aSerial) {
-#if defined(__AVR__)
-    const char *tRTTTLPGMArrayPtrPGM = (const char*) pgm_read_word(aRTTTLPGMArrayPtrPGM);
-#else
-    const char *tRTTTLPGMArrayPtrPGM = *aRTTTLPGMArrayPtrPGM;
-#endif
-    printNamePGM(tRTTTLPGMArrayPtrPGM, aSerial);
-}
-
-/**
- * @param  aRTTTLPGMArrayPtrPGM a pointer to PGM song data
- */
-void printNamePGM(const char *aRTTTLArrayPtrPGM, Print *aSerial) {
-#if !defined(__AVR__) // Let the function work for non AVR platforms
-    printName(aRTTTLArrayPtrPGM, aSerial);
-#else
-    char tStringBuffer[16];
-    aSerial->print(F("Now playing: "));
-    getRtttlNamePGM(aRTTTLArrayPtrPGM, tStringBuffer, sizeof(tStringBuffer));
-    aSerial->println(tStringBuffer);
-#endif
-}
-
 /*
  * !!! Songs are in an array stored in FLASH containing pointers to song arrays also stored in FLASH, see PlayRtttl.h. !!!
  * Plays one of the songs in the array specified non blocking. Ie. you must call updatePlayRtttl() in your loop or use the callback function.
- * aNumberOfEntriesInSongArrayPGM is (sizeof(<MyArrayName>) / sizeof(char *) - 1)
+ * aNumberOfEntriesInSongArrayPGM is (sizeof(<MyArrayName>) / sizeof(char *))
  * char tStringBuffer[16] is sufficient for most titles.
  */
 void startPlayRandomRtttlFromArrayPGM(uint8_t aTonePin, const char *const aSongArrayPGM[], uint8_t aNumberOfEntriesInSongArrayPGM,
@@ -833,8 +848,7 @@ void startPlayRandomRtttlFromArrayPGM(uint8_t aTonePin, const char *const aSongA
     startPlayRandomRtttlFromArray(aTonePin, aSongArrayPGM, aNumberOfEntriesInSongArrayPGM, aBufferPointer, aBufferSize,
             aOnComplete);
 #else
-    uint8_t tRandomIndex = random(0, aNumberOfEntriesInSongArrayPGM - 1);
-    const char *tSongPtr = (char*) pgm_read_word(&aSongArrayPGM[tRandomIndex]);
+    const char *tSongPtr = getRandomSongPtrPGM(aNumberOfEntriesInSongArrayPGM, aSongArrayPGM);
     startPlayRtttlPGM(aTonePin, tSongPtr, aOnComplete);
     if (aBufferPointer != nullptr) {
 // copy title to buffer
@@ -846,16 +860,14 @@ void startPlayRandomRtttlFromArrayPGM(uint8_t aTonePin, const char *const aSongA
 /*
  * !!! Songs are in an array stored in FLASH containing pointers to song arrays also stored in FLASH, see PlayRtttl.h. !!!
  */
-void startPlayRandomRtttlFromArrayPGMAndPrintName(uint8_t aTonePin, const char *const aSongArrayPGM[],
-        uint8_t aNumberOfEntriesInSongArrayPGM, Print *aSerial, void (*aOnComplete)()) {
+void startPlayRandomRtttlFromArrayPGMAndPrintName(Print *aSerial, uint8_t aTonePin, const char *const aSongArrayPGM[],
+        uint8_t aNumberOfEntriesInSongArrayPGM, void (*aOnComplete)()) {
 #if !defined(__AVR__) // Let the function work for non AVR platforms
-    startPlayRandomRtttlFromArrayAndPrintName(aTonePin, aSongArrayPGM, aNumberOfEntriesInSongArrayPGM, aSerial, aOnComplete);
+    startPlayRandomRtttlFromArrayAndPrintName(aSerial, aTonePin, aSongArrayPGM, aNumberOfEntriesInSongArrayPGM, aOnComplete);
 #else
-    uint8_t tRandomIndex = random(0, aNumberOfEntriesInSongArrayPGM - 1);
-    const char *tSongPtr = (char*) pgm_read_word(&aSongArrayPGM[tRandomIndex]);
+    const char *tSongPtr = getRandomSongPtrPGM(aNumberOfEntriesInSongArrayPGM, aSongArrayPGM);
     startPlayRtttlPGM(aTonePin, tSongPtr, aOnComplete);
-// print title
-    printNamePGM(tSongPtr, aSerial);
+    printNamePGM(aSerial, tSongPtr);
 #endif
 }
 
@@ -866,19 +878,17 @@ void playRandomRtttlSampleBlockingPGM(uint8_t aTonePin) {
 #if !defined(__AVR__) // Let the function work for non AVR platforms
     playRandomRtttlSampleBlocking(aTonePin);
 #else
-    uint8_t tRandomIndex = random(0, sizeof(RTTTLMelodies) / sizeof(char*) - 1);
-    const char *tSongPtr = (char*) pgm_read_word(&RTTTLMelodies[tRandomIndex]);
+    const char *tSongPtr = getRandomSongPtrPGM(ARRAY_SIZE_MELODIES, RTTTLMelodies);
     playRtttlBlockingPGM(aTonePin, tSongPtr);
 #endif
 }
 
-void playRandomRtttlSampleBlockingPGMAndPrintName(uint8_t aTonePin, Print *aSerial) {
+void playRandomRtttlSampleBlockingPGMAndPrintName(Print *aSerial, uint8_t aTonePin) {
 #if !defined(__AVR__) // Let the function work for non AVR platforms
-    playRandomRtttlSampleBlockingAndPrintName(aTonePin, aSerial);
+    playRandomRtttlSampleBlockingAndPrintName(aSerial, aTonePin);
 #else
-    uint8_t tRandomIndex = random(0, sizeof(RTTTLMelodies) / sizeof(char*) - 1);
-    const char *tSongPtr = (char*) pgm_read_word(&RTTTLMelodies[tRandomIndex]);
-    printNamePGM(tSongPtr, aSerial);
+    const char *tSongPtr = getRandomSongPtrPGM(ARRAY_SIZE_MELODIES, RTTTLMelodies);
+    printNamePGM(aSerial, tSongPtr);
     playRtttlBlockingPGM(aTonePin, tSongPtr);
 #endif
 }
@@ -889,13 +899,14 @@ void setTonePinIsInverted(bool aTonePinIsInverted) {
 
 #if !defined(USE_NO_RTX_EXTENSIONS)
 /*
- * 0 means forever
+ * 0 means play melody only once without any repetition
+ * Call after startPlayRtttl…()
  */
-void setNumberOfLoops(uint8_t aNumberOfLoops) {
-    sPlayRtttlState.NumberOfLoops = aNumberOfLoops;
+void setNumberOfRepetitions(uint8_t aNumberOfRepetitions) {
+    sPlayRtttlState.NumberOfRepetitions = aNumberOfRepetitions;
 #if defined(LOCAL_DEBUG)
-    sPointerToSerial->print(F("Set NumberOfLoops to "));
-    sPointerToSerial->println(sPlayRtttlState.NumberOfLoops);
+    sPointerToSerial->print(F("Set NumberOfRepetitions to "));
+    sPointerToSerial->println(sPlayRtttlState.NumberOfRepetitions);
 #endif
 }
 
@@ -912,7 +923,7 @@ uint8_t convertStyleCharacterToDivisorValue(char aStyleCharacter) {
         return 2;
     } else if (aStyleCharacter == RTX_STYLE_NATURAL) {
         return 16;
-    } else if (aStyleCharacter > '0' && aStyleCharacter <= '9') {
+    } else if (aStyleCharacter >= '2' && aStyleCharacter <= '9') {
         // convert ASCII to number
         return aStyleCharacter - '0';
     }
@@ -923,5 +934,10 @@ uint8_t convertStyleCharacterToDivisorValue(char aStyleCharacter) {
 #if defined(LOCAL_DEBUG)
 #undef LOCAL_DEBUG
 #endif
+#if defined(LOCAL_TRACE)
+#undef LOCAL_TRACE
+#endif
+
+#undef RTTTL_IS_DIGIT
 
 #endif // _PLAY_RTTTL_HPP

@@ -1,16 +1,15 @@
 /*
- * RandomMelody.cpp
+ * OneMelody.ino
  *
  * Plays a melody from FLASH.
  *
- * More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/
+ * More RTTTL songs can be found under https://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/
  *
- *  Copyright (C) 2019  Armin Joachimsmeyer
- *  armin.joachimsmeyer@gmail.com
+ *  Copyright (C) 2019-2026  Armin Joachimsmeyer
  *
- *  This file is part of PlayRttl https://github.com/ArminJo/PlayRtttl.
+ *  This file is part of PlayRtttl https://github.com/ArminJo/PlayRtttl.
  *
- *  PlayRttl is free software: you can redistribute it and/or modify
+ *  PlayRtttl is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
@@ -21,13 +20,13 @@
  *  See the GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
+ *  along with this program. If not, see <https://www.gnu.org/licenses/gpl-3.0.html>.
  *
  */
 
 #include <Arduino.h>
 
-//#define USE_NO_RTX_EXTENSIONS // Disables RTX format definitions `'s'` (style) and `'l'` (loop). Saves up to 332 bytes program memory
+//#define USE_NO_RTX_EXTENSIONS // Disables RTX format definitions 's' (style) and 'l' (loop). Saves up to 322 bytes program memory
 #include <PlayRtttl.hpp>
 
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
@@ -45,7 +44,7 @@ const int TONE_PIN = 11;
 #endif
 
 char StarWarsInRam[] =
-        "StarWars:d=32,o=5,b=45,l=2,s=N:p,f#,f#,f#,8b.,8f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,e6,8c#6";
+        "StarWars:d=32,o=5,b=45,l=1,s=N:p,f#,f#,f#,8b.,8f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,e6,8c#6";
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
@@ -78,7 +77,7 @@ void loop() {
      * Tiny -> 6 melodies
      * Small -> 11 melodies
      */
-#if defined(__AVR_ATtiny85__)
+#if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
 //    for (uint_fast8_t i = 1; i < ARRAY_SIZE_MELODIES_SMALL; ++i) {
     for (uint_fast8_t i = 1; i < ARRAY_SIZE_MELODIES_TINY; ++i) {
 //        tSongPtr = &RTTTLMelodiesSmall[i];
@@ -87,7 +86,7 @@ void loop() {
     for (uint_fast8_t i = 0; i < ARRAY_SIZE_MELODIES; ++i) {
         tSongPtr = &RTTTLMelodies[i];
 #endif
-        printNamePGMPGM(tSongPtr, &Serial);
+        printNamePGMPGM(&Serial, tSongPtr);
         Serial.print(F("Index="));
         Serial.println(i);
 

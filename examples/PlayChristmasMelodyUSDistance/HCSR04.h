@@ -10,7 +10,6 @@
  *  All modules: Connect Trigger and Echo by a resistor of 4.7 kOhm.
  *
  *  Copyright (C) 2018-2020  Armin Joachimsmeyer
- *  Email: armin.joachimsmeyer@gmail.com
  *
  *  This file is part of Arduino-Utils https://github.com/ArminJo/Arduino-Utils.
  *
@@ -25,7 +24,7 @@
  *  See the GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
+ *  along with this program. If not, see <https://www.gnu.org/licenses/gpl-3.0.html>.
  *
  */
 
@@ -34,7 +33,9 @@
 
 #include <stdint.h>
 
+#if !defined(DISTANCE_TIMEOUT_RESULT)
 #define DISTANCE_TIMEOUT_RESULT                   0
+#endif
 #define US_DISTANCE_DEFAULT_TIMEOUT_MICROS    20000  // Timeout of 20000L is 3.43 meter
 #define US_DISTANCE_DEFAULT_TIMEOUT_CENTIMETER  343  // Timeout of 20000L is 3.43 meter
 

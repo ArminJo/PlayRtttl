@@ -14,7 +14,6 @@
  *  The macros INT0_PIN and INT1_PIN are set after the include.
  *
  *  Copyright (C) 2018-2024  Armin Joachimsmeyer
- *  armin.joachimsmeyer@gmail.com
  *
  *  This file is part of EasyButtonAtInt01 https://github.com/ArminJo/EasyButtonAtInt01.
  *
@@ -29,23 +28,25 @@
  *  See the GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
+ *  along with this program. If not, see <https://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
 #ifndef _EASY_BUTTON_AT_INT01_H
 #define _EASY_BUTTON_AT_INT01_H
 
-#define VERSION_EASY_BUTTON "3.4.0"
+#define VERSION_EASY_BUTTON "3.4.1"
 #define VERSION_EASY_BUTTON_MAJOR 3
 #define VERSION_EASY_BUTTON_MINOR 4
-#define VERSION_EASY_BUTTON_PATCH 0
+#define VERSION_EASY_BUTTON_PATCH 1
 // The change log is at the bottom of the file
 
 /*
  * Macro to convert 3 version parts into an integer
  * To be used in preprocessor comparisons, such as #if VERSION_EASY_BUTTON_HEX >= VERSION_HEX_VALUE(3, 0, 0)
  */
-#define VERSION_HEX_VALUE(major, minor, patch) ((major << 16) | (minor << 8) | (patch))
+#if !defined(VERSION_HEX_VALUE)
+#define VERSION_HEX_VALUE(major, minor, patch) (((major) << 16) | ((minor) << 8) | (patch))
+#endif
 #define VERSION_EASY_BUTTON_HEX  VERSION_HEX_VALUE(VERSION_EASY_BUTTON_MAJOR, VERSION_EASY_BUTTON_MINOR, VERSION_EASY_BUTTON_PATCH)
 #if defined(__AVR__)
 #include <Arduino.h>
@@ -322,8 +323,8 @@ public:
     volatile bool ButtonToggleState;    // Toggle is on press, not on release - initial value is false
 
     /*
-     * Flag to enable action only once. Only set to true by library.
-     * Can be checked and set to false by main program to enable only one action per button press.
+     * Flag to enable action only once. Library only sets it to true. Must be set to false by user program.
+     * Can be checked and set to false by main loop to enable only one action per button press.
      */
     volatile bool ButtonStateHasJustChanged;
 
@@ -391,7 +392,7 @@ void __attribute__ ((weak)) handleINT1Interrupt();
 
 #endif // defined(__AVR__)
 
-/*  Version 3.4.1 - 12/2023
+/*  Version 3.4.1 - 4/2026
  *  - Avoid wrong double press detection if calling checkForDoublePress() after release of button.
  *  - Hack for ATmega 644.
  *

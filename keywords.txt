@@ -1,5 +1,5 @@
 #######################################
-# Syntax Coloring Map For RtttlPlay
+# Syntax Coloring Map For PlayRtttl
 #######################################
 
 #######################################
@@ -11,22 +11,57 @@
 #######################################
 
 startPlayRtttl	KEYWORD2
-playRtttlBlocking	KEYWORD2
 startPlayRtttlPGM	KEYWORD2
-playRtttlBlockingPGM	KEYWORD2
-startPlayRandomRtttl	KEYWORD2
-startPlayRandomRtttl	KEYWORD2
-checkForRtttlToneUpdate	KEYWORD2
+startPlayRtttlPGMPGM	KEYWORD2
+updatePlayRtttl	KEYWORD2
 stopPlayRtttl	KEYWORD2
-getRtttlNamePGM	KEYWORD2
+isPlayRtttlRunning	KEYWORD2
+playRtttlBlocking	KEYWORD2
+playRtttlBlockingPGM	KEYWORD2
+startPlayRandomRtttlFromArray	KEYWORD2
+startPlayRandomRtttlFromArrayPGM	KEYWORD2
+startPlayRandomRtttlFromArrayAndPrintName	KEYWORD2
+startPlayRandomRtttlFromArrayPGMAndPrintName	KEYWORD2
+playRandomRtttlSampleBlocking	KEYWORD2
+playRandomRtttlSampleBlockingPGM	KEYWORD2
+playRandomRtttlSampleBlockingAndPrintName	KEYWORD2
+playRandomRtttlSampleBlockingPGMAndPrintName	KEYWORD2
+getRandomSongPtr	KEYWORD2
+getRandomSongPtrPGM	KEYWORD2
 getRtttlName	KEYWORD2
+getRtttlNamePGM	KEYWORD2
+printName	KEYWORD2
 printNamePGM	KEYWORD2
+printNamePGMPGM	KEYWORD2
 setTonePinIsInverted	KEYWORD2
+setNumberOfRepetitions	KEYWORD2
+setDefaultStyle	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
 #######################################
 
+RTTTLMelodies	LITERAL1
+RTTTLMelodiesSmall	LITERAL1
+RTTTLMelodiesTiny	LITERAL1
+RTTTLChristmasMelodies	LITERAL1
+ARRAY_SIZE_MELODIES	LITERAL1
+ARRAY_SIZE_MELODIES_SMALL	LITERAL1
+ARRAY_SIZE_MELODIES_TINY	LITERAL1
+ARRAY_SIZE_CHRISTMAS_MELODIES	LITERAL1
+
+RTTTL_STYLE_CONTINUOUS	LITERAL1
+RTTTL_STYLE_NATURAL	LITERAL1
+RTTTL_STYLE_STACCATO	LITERAL1
+RTTTL_STYLE_4	LITERAL1
+RTTTL_STYLE_8	LITERAL1
+RTX_STYLE_CONTINUOUS	LITERAL1
+RTX_STYLE_NATURAL	LITERAL1
+RTX_STYLE_STACCATO	LITERAL1
+RTX_STYLE_DEFAULT	LITERAL1
+VERSION_PLAY_RTTTL	LITERAL1
+
+NOTE_P	LITERAL1
 NOTE_B0	LITERAL1
 NOTE_C1	LITERAL1
 NOTE_CS1	LITERAL1

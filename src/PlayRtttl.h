@@ -3,19 +3,18 @@
  *
  * Includes 21 sample melodies.
  * The example melodies may have copyrights you have to respect.
- * More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/
+ * More RTTTL songs can be found under https://picaxe.com/RTTTL-Ringtones-for-Tune-Command/
  *
- *  Copyright (C) 2018  Armin Joachimsmeyer
- *  armin.joachimsmeyer@gmail.com
+ *  Copyright (C) 2018-2026  Armin Joachimsmeyer
  *
  *     Based on the RTTTL.pde example code written by Brett Hagman
  *     http://www.roguerobotics.com/
  *     bhagman@roguerobotics.com
  *
  *
- *  This file is part of PlayRttl https://github.com/ArminJo/PlayRtttl.
+ *  This file is part of PlayRtttl https://github.com/ArminJo/PlayRtttl.
  *
- *  PlayRttl is free software: you can redistribute it and/or modify
+ *  PlayRtttl is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
@@ -26,7 +25,7 @@
  *  See the GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
+ *  along with this program. If not, see <https://www.gnu.org/licenses/gpl-3.0.html>.
  *
  */
 
@@ -39,14 +38,14 @@
 #if defined(__AVR__)
 #include <avr/pgmspace.h>
 #endif
-#if defined(ESP32)
-#define TONE_LEDC_CHANNEL   0 // channel used for ledcWriteTone()
+#if !defined(__AVR__) && ! defined(PROGMEM)
+#define PROGMEM
 #endif
 #include "pitches.h"
 
-#define VERSION_PLAY_RTTTL "2.2.0"
+#define VERSION_PLAY_RTTTL "2.3.0"
 #define VERSION_PLAY_RTTTL_MAJOR 2
-#define VERSION_PLAY_RTTTL_MINOR 2
+#define VERSION_PLAY_RTTTL_MINOR 3
 #define VERSION_PLAY_RTTTL_PATCH 0
 // The change log is at the bottom of the file
 
@@ -54,10 +53,12 @@
  * Macro to convert 3 version parts into an integer
  * To be used in preprocessor comparisons, such as #if VERSION_PLAY_RTTTL_HEX >= VERSION_HEX_VALUE(3, 0, 0)
  */
-#define VERSION_HEX_VALUE(major, minor, patch) ((major << 16) | (minor << 8) | (patch))
+#if !defined(VERSION_HEX_VALUE)
+#define VERSION_HEX_VALUE(major, minor, patch) (((major) << 16) | ((minor) << 8) | (patch))
+#endif
 #define VERSION_PLAY_RTTTL_HEX  VERSION_HEX_VALUE(VERSION_PLAY_RTTTL_MAJOR, VERSION_PLAY_RTTTL_MINOR, VERSION_PLAY_RTTTL_PATCH)
 
-//#define USE_NO_RTX_EXTENSIONS // Disables RTX format definitions `'s'` (style) and `'l'` (loop). Saves up to 332 bytes program memory
+//#define USE_NO_RTX_EXTENSIONS // Disables RTX format definitions 's' (style) and 'l' (loop). Saves up to 322 bytes program memory
 // Even with `USE_NO_RTX_EXTENSIONS` the default style is natural (Tone length = note length - 1/16)
 
 #define DEFAULT_DURATION 4
@@ -70,60 +71,84 @@
 // my extensions :-)
 #define RTX_STYLE_4 '4'           // Tone length = note length - 1/4
 #define RTX_STYLE_8 '8'           // Tone length = note length - 1/8
+#if !defined(RTX_STYLE_DEFAULT)
 #define RTX_STYLE_DEFAULT RTX_STYLE_NATURAL
+#endif
+
 #define RTTTL_STYLE_CONTINUOUS 0  // Tone length = note length
 #define RTTTL_STYLE_NATURAL 16     // Tone length = note length - 1/16
 #define RTTTL_STYLE_STACCATO 2    // Tone length = note length - 1/2
 #define RTTTL_STYLE_4 4           // Tone length = note length - 1/4
 #define RTTTL_STYLE_8 8           // Tone length = note length - 1/8
+
+// set RTTTL_STYLE_DEFAULT according to RTX_STYLE_DEFAULT
+#if RTX_STYLE_DEFAULT == RTX_STYLE_CONTINUOUS
+#define RTTTL_STYLE_DEFAULT RTTTL_STYLE_CONTINUOUS
+#elif RTX_STYLE_DEFAULT == RTX_STYLE_STACCATO
+#define RTTTL_STYLE_DEFAULT RTTTL_STYLE_STACCATO
+#elif RTX_STYLE_DEFAULT == RTX_STYLE_NATURAL
 #define RTTTL_STYLE_DEFAULT RTTTL_STYLE_NATURAL
+#elif (RTX_STYLE_DEFAULT >= '2') && (RTX_STYLE_DEFAULT <= '9')
+#define RTTTL_STYLE_DEFAULT (RTX_STYLE_DEFAULT - '0')
+#else
+#undef RTX_STYLE_DEFAULT
+#define RTX_STYLE_DEFAULT RTX_STYLE_NATURAL
+#warning RTX_STYLE_DEFAULT is set to an invalid value -> use RTX_STYLE_NATURAL
+#define RTTTL_STYLE_DEFAULT RTTTL_STYLE_NATURAL
+#endif
 
 void setTonePinIsInverted(bool aTonePinIsInverted);
 
 #if !defined(USE_NO_RTX_EXTENSIONS)
-void setNumberOfLoops(uint8_t aNumberOfLoops);
+void setNumberOfRepetitions(uint8_t aNumberOfRepetitions); // call after startPlayRtttl…()
+inline void __attribute__ ((deprecated ("Renamed to setNumberOfRepetitions()"))) setNumberOfLoops(uint8_t aNumber) {
+    setNumberOfRepetitions(aNumber);
+}
 void setDefaultStyle(uint8_t aDefaultStyleDivisorValue);
 uint8_t convertStyleCharacterToDivisorValue(char aStyleCharacter);
 #endif
 
 void getRtttlName(const char *aRTTTLArrayPtr, char *aBuffer, uint8_t aBuffersize);
-void printName(const char *aRTTTLArrayPtr, Print *aSerial);
+void getRtttlNamePGM(const char *aRTTTLArrayPtrPGM, char *aBuffer, uint8_t aBuffersize);
+
+void printName(Print *aSerial, const char *aRTTTLArrayPtr);
+void printNamePGM(Print *aSerial, const char *aRTTTLArrayPtrPGM);
+void printNamePGMPGM(Print *aSerial, const char *const*aRTTTLPGMArrayPtrPGM);
 
 void startPlayRtttl(uint8_t aTonePin, const char *aRTTTLArrayPtr, void (*aOnComplete)()=nullptr);
-void playRtttlBlocking(uint8_t aTonePin, const char *aRTTTLArrayPtr);
+void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*aOnComplete)()=nullptr);
+void startPlayRtttlPGMPGM(uint8_t aTonePin, const char *const*aRTTTLPGMArrayPtrPGM, void (*aOnComplete)()=nullptr);
 
 void startPlayRandomRtttlFromArray(uint8_t aTonePin, const char *const aSongArray[], uint8_t aNumberOfEntriesInSongArray,
         char *aBufferPointer = nullptr, uint8_t aBufferSize = 0, void (*aOnComplete)()=nullptr);
-void startPlayRandomRtttlFromArrayAndPrintName(uint8_t aTonePin, const char *const aSongArray[],
-        uint8_t aNumberOfEntriesInSongArray, Print *aSerial, void (*aOnComplete)()=nullptr);
-
-void playRandomRtttlSampleBlocking(uint8_t aTonePin);
-void playRandomRtttlSampleBlockingAndPrintName(uint8_t aTonePin, Print *aSerial);
-
-void getRtttlNamePGM(const char *aRTTTLArrayPtrPGM, char *aBuffer, uint8_t aBuffersize);
-void printNamePGM(const char *aRTTTLArrayPtrPGM, Print *aSerial);
-void printNamePGMPGM(const char *const*aRTTTLPGMArrayPtrPGM, Print *aSerial);
-
-void startPlayRtttlPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM, void (*aOnComplete)()=nullptr);
-void startPlayRtttlPGMPGM(uint8_t aTonePin, const char *const*aRTTTLPGMArrayPtrPGM, void (*aOnComplete)()=nullptr);
-void playRtttlBlockingPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM);
-
 void startPlayRandomRtttlFromArrayPGM(uint8_t aTonePin, const char *const aSongArrayPGM[], uint8_t aNumberOfEntriesInSongArrayPGM,
         char *aBufferPointer = nullptr, uint8_t aBufferSize = 0, void (*aOnComplete)()=nullptr);
-void startPlayRandomRtttlFromArrayPGMAndPrintName(uint8_t aTonePin, const char *const aSongArrayPGM[],
-        uint8_t aNumberOfEntriesInSongArrayPGM, Print *aSerial, void (*aOnComplete)()=nullptr);
+void startPlayRandomRtttlFromArrayAndPrintName(Print *aSerial, uint8_t aTonePin, const char *const aSongArray[],
+        uint8_t aNumberOfEntriesInSongArray, void (*aOnComplete)()=nullptr);
+void startPlayRandomRtttlFromArrayPGMAndPrintName(Print *aSerial, uint8_t aTonePin, const char *const aSongArrayPGM[],
+        uint8_t aNumberOfEntriesInSongArrayPGM, void (*aOnComplete)()=nullptr);
 
+void playRtttlBlocking(uint8_t aTonePin, const char *aRTTTLArrayPtr);
+void playRtttlBlockingPGM(uint8_t aTonePin, const char *aRTTTLArrayPtrPGM);
+
+void playRandomRtttlSampleBlocking(uint8_t aTonePin);
 void playRandomRtttlSampleBlockingPGM(uint8_t aTonePin);
-void playRandomRtttlSampleBlockingPGMAndPrintName(uint8_t aTonePin, Print *aSerial);
+void playRandomRtttlSampleBlockingAndPrintName(Print *aSerial, uint8_t aTonePin);
+void playRandomRtttlSampleBlockingPGMAndPrintName(Print *aSerial, uint8_t aTonePin);
 
-// To be called from loop. - Returns true if tone is playing, false if tone has ended or stopped
+/*
+ * To be called from loop. - Returns true if tone is playing, false if tone has ended or stopped
+ */
 bool updatePlayRtttl();
 bool isPlayRtttlRunning();
-
 void stopPlayRtttl();
 
+const char* getRandomSongPtr(uint8_t aNumberOfEntriesInSongArray, const char *const aSongArray[]);
+const char* getRandomSongPtrPGM(uint8_t aNumberOfEntriesInSongArrayPGM, const char *const aSongArrayPGM[]);
+
 struct playRtttlState {
-    long MillisOfNextAction;
+    unsigned long ToneStartMillis;
+    uint16_t CurrentToneDuration;
     const char *NextTonePointer;
 
     struct {
@@ -139,13 +164,13 @@ struct playRtttlState {
 
     uint8_t DefaultDuration;
     uint8_t DefaultOctave;
-    long TimeForWholeNoteMillis;
+    uint16_t TimeForWholeNoteMillis;
 #if !defined(USE_NO_RTX_EXTENSIONS)
-    uint8_t NumberOfLoops;  // 0 means forever, 1 means we are in the last loop
+    uint8_t NumberOfRepetitions;
     // The divisor for the formula: Tone length = note length - note length * (1 / divisor)
     // If 0 then Tone length = note length;
     uint8_t StyleDivisorValue;
-    const char *LastTonePointer; // used for loops
+    const char *LastTonePointer; // used for repetitions
 
 #endif
 };
@@ -155,12 +180,15 @@ extern struct playRtttlState sPlayRtttlState;
 extern uint8_t sDefaultStyleDivisorValue;
 #endif
 
-extern const int Notes[] PROGMEM; // The frequencies of notes of the highest octave. Used to compute all other frequencies.
+extern const uint16_t Notes[] PROGMEM; // The frequencies of notes of the highest octave. Used to compute all other frequencies.
 #define NOTES_OCTAVE 7 // Octave of the notes contained in Notes array above
+#define MAXIMUM_NOTE_INDEX_IN_OCTAVE 11 // Each octave contains the notes 0 to 11
+#define NOTE_CODE_FOR_PAUSE (MAXIMUM_NOTE_INDEX_IN_OCTAVE + 1)
+#define MAXIMUM_OF_REPETITIONS_ACCEPTED   15 // if more, then we assume a formatting error and no additional loop is played
 
 /*
  * RTTTL format:
- * <NameString>:<Option>:(<Option>:)<Note>,<Note>...
+ * <NameString>:<Option>(,<Option>):<Note>,<Note>...
  *
  * Option:
  *  d=Default duration of a note
@@ -168,7 +196,7 @@ extern const int Notes[] PROGMEM; // The frequencies of notes of the highest oct
  *  b=Beats per minutes of a quarter note
  *
  * Disabled by USE_NO_RTX_EXTENSIONS:
- *  opt l=Number of loops
+ *  opt l=Number of additional repetitions
  *  opt s=Style - see "#define RTX_STYLE_CONTINUOUS 'C'" and following above
  *
  * Note:
@@ -180,16 +208,13 @@ extern const int Notes[] PROGMEM; // The frequencies of notes of the highest oct
 /*
  * Disclaimer: These ringtone melodies are for personal enjoyment only. All copyright belongs to its respective author.
  */
-#if !defined(__AVR__) && ! defined(PROGMEM)
-#define PROGMEM
-#endif
 
 // Use rtx format to save space
 static const char StarWars[] PROGMEM
 #if defined(USE_NO_RTX_EXTENSIONS)
 = "StarWars:d=32,o=5,b=45:p,f#,f#,f#,8b.,8f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,e6,8c#6,f#,f#,f#,8b.,8f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,e6,8c#6";
 #else
-= "StarWars:d=32,o=5,b=45,l=2:p,f#,f#,f#,8b.,8f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,e6,8c#6";
+= "StarWars:d=32,o=5,b=45,l=1:p,f#,f#,f#,8b.,8f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,c#6,8b.6,16f#.6,e6,d#6,e6,8c#6";
 #endif
 static const char MahnaMahna[] PROGMEM
         = "MahnaMahna:d=16,o=6,b=125:c#,c.,b5,8a#.5,8f.,4g#,a#,g.,4d#,8p,c#,c.,b5,8a#.5,8f.,g#.,8a#.,4g,8p,c#,c.,b5,8a#.5,8f.,4g#,f,g.,8d#.,f,g.,8d#.,f,8g,8d#.,f,8g,d#,8c,a#5,8d#.,8d#.,16d#.,16d#.,8d#.";
@@ -287,10 +312,19 @@ static const char *const RTTTLChristmasMelodies[] PROGMEM = { JingleBell, Rudolp
 #define ARRAY_SIZE_CHRISTMAS_MELODIES (sizeof(RTTTLChristmasMelodies)/sizeof(const char *)) // 11
 
 #if !defined(_PLAY_RTTTL_HPP) && !defined(SUPPRESS_HPP_WARNING)
-#warning You probably must change the line #include "PlayRttl.h" to #include "PlayRttl.hpp" in your ino file or define SUPPRESS_HPP_WARNING before the include to suppress this warning.
+#warning You probably must change the line #include "PlayRtttl.h" to #include "PlayRtttl.hpp" in your ino file or define SUPPRESS_HPP_WARNING before the include to suppress this warning.
 #endif
 
 /*
+ * Version 2.3.0 11/2026
+ * - Fixed: last melody of an array was never chosen by the random functions.
+ * - Fixed: check of default octave, b# and h#, millis() overflow, garbage output of printName() for RAM songs.
+ * - Fixed: Direct hardware toggle at pin 11 / 3 only for ATmega328 / 168 (not Mega).
+ * - Changed: ESP32 now uses tone() / noTone().
+ * - Changed: Renamed setNumberOfLoops() to setNumberOfRepetitions(). Old name is deprecated.
+ * - Changed: l=N now means N additional repetitions.
+ * - Added: RTX_STYLE_DEFAULT compile option, new functions getRandomSongPtr() and getRandomSongPtrPGM().
+ *
  * Version 2.2.0 02/2026
  * - Converted to use ESP32 version 3.x.
  * - Added switch to direct hardware toggle output at OC2B / pin 3
@@ -302,7 +336,7 @@ static const char *const RTTTLChristmasMelodies[] PROGMEM = { JingleBell, Rudolp
  * - Added function isPlayRtttlRunning().
  *
  * Version 2.0.0 04/2022
- * - Renamed PlayRttl.cpp to PlayRttl.hpp.
+ * - Renamed PlayRtttl.cpp to PlayRtttl.hpp.
  * - Removed Macros SUPPORT_RTX_EXTENSIONS and SUPPORT_RTX_FORMAT.
  *
  * Version 1.4.2 11/2020

@@ -12,19 +12,19 @@
  *
  *
  * Aufgaben:
- * 1. Warte bis ein Button gedrückt wird und gebe die Reaktionszeit aus. Schalte die LED des Spielers an und erhöhe die Punkte des Spielers.
+ * 1. Warte bis ein Button gedrÃ¼ckt wird und gebe die Reaktionszeit aus. Schalte die LED des Spielers an und erhÃ¶he die Punkte des Spielers.
  *      Benutze digitalRead() und z.B. "sRightPlayerScore++".
  * 2. Wenn der Punktestand POINTS_FOR_WIN erreicht hat, lasse die LED blinken und spiele eine Melodie.
- *      Benutze blinkLed() und playRtttlBlockingPGM(PIN_BUZZER, StarWars). Selektiere "StarWars" und drücke Taste F3.
- * 3. Bestrafe cheaten (der Button ist schon vor dem angehen der LED gedrückt) mit Punktabzug und signalisiere das mit einer blinkenden LED.
+ *      Benutze blinkLed() und playRtttlBlockingPGM(PIN_BUZZER, StarWars). Selektiere "StarWars" und drÃ¼cke Taste F3.
+ * 3. Bestrafe cheaten (der Button ist schon vor dem angehen der LED gedrÃ¼ckt) mit Punktabzug und signalisiere das mit einer blinkenden LED.
  *
  *
- *  Copyright (C) 2018-2020  Armin Joachimsmeyer
+ *  Copyright (C) 2018-2026  Armin Joachimsmeyer
  *  armin.joachimsmeyer@gmail.com
  *
- *  This file is part of PlayRttl https://github.com/ArminJo/PlayRtttl.
+ *  This file is part of PlayRtttl https://github.com/ArminJo/PlayRtttl.
  *
- *  PlayRttl is free software: you can redistribute it and/or modify
+ *  PlayRtttl is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
@@ -41,7 +41,7 @@
 #include <Arduino.h>
 #include "PlayRtttl.hpp"
 
-#define VERSION_EXAMPLE "2.1"
+#define VERSION_EXAMPLE "2.2"
 
 /*
  * Activate the next line if you want to run this program on an Arduino Multifunction Shield
@@ -144,8 +144,8 @@ void setup() {
 }
 
 /*
- * Die mittlere Led nach einer zufälligen Zeit anschalten und dann warten, welche Taste zuerst gedrückt wird.
- * Die Zeit bis zum Drücken der Taste ausgeben und die Led an der zuerst gedrückten Taste leuchten lassen.
+ * Die mittlere Led nach einer zufÃ¤lligen Zeit anschalten und dann warten, welche Taste zuerst gedrÃ¼ckt wird.
+ * Die Zeit bis zum DrÃ¼cken der Taste ausgeben und die Led an der zuerst gedrÃ¼ckten Taste leuchten lassen.
  * Wenn ein Spieler die Punktzahl erreicht hat eine Melodie spielen.
  * Danach kurz warten und die Messung wieder von vorne beginnen.
  */
@@ -157,7 +157,7 @@ void loop() {
 
     /*
      * Task 3. Check for cheating just before switching led on and give feedback if detected
-     * Bestrafe cheaten (der Button ist schon vor dem angehen der LED gedrückt) mit Punktabzug und signalisiere das mit einer blinkenden LED.
+     * Bestrafe cheaten (der Button ist schon vor dem angehen der LED gedrÃ¼ckt) mit Punktabzug und signalisiere das mit einer blinkenden LED.
      */
     tRightPlayerButton = digitalRead(PIN_RIGHT_BUTTON);
     tLeftPlayerButton = digitalRead(PIN_LEFT_BUTTON);
@@ -196,7 +196,7 @@ void loop() {
 
     /*
      * Task 1. Wait for press after LED switched on, give LED feedback and output reaction time
-     * Warte bis ein Button gedrückt wird und gebe die Reaktionszeit aus. Schalte die LED des Spielers an und erhöhe die Punkte des Spielers.
+     * Warte bis ein Button gedrÃ¼ckt wird und gebe die Reaktionszeit aus. Schalte die LED des Spielers an und erhÃ¶he die Punkte des Spielers.
      *    Benutze digitalRead() und z.B. "sRightPlayerScore++".
      */
     do {
@@ -253,7 +253,7 @@ void loop() {
     /*
      * Task 2. Check for score level, blink LED and play melody
      * Wenn der Punktestand POINTS_FOR_WIN erreicht hat, lasse die LED blinken und spiele eine Melodie.
-     *    Benutze blinkLed() und playRtttlBlockingPGM(PIN_BUZZER, StarWars). Selektiere "StarWars" und drücke Taste F3.
+     *    Benutze blinkLed() und playRtttlBlockingPGM(PIN_BUZZER, StarWars). Selektiere "StarWars" und drÃ¼cke Taste F3.
      */
     if (sRightPlayerScore >= POINTS_FOR_WIN) {
         sLeftPlayerScore = 0;
@@ -269,7 +269,7 @@ void loop() {
             // Play StarWars the first win
             startPlayRtttlPGM(PIN_BUZZER, StarWars);
         } else {
-            startPlayRandomRtttlFromArrayPGMAndPrintName(PIN_BUZZER, RTTTLMelodies, ARRAY_SIZE_MELODIES, &Serial);
+            startPlayRandomRtttlFromArrayPGMAndPrintName(&Serial, PIN_BUZZER, RTTTLMelodies, ARRAY_SIZE_MELODIES);
         }
         // update both libraries to let them act simultaneously
         // break if button is pressed after 2000 milliseconds
@@ -293,7 +293,7 @@ void loop() {
             // Play MissionImpossible the first win
             startPlayRtttlPGM(PIN_BUZZER, MissionImp);
         } else {
-            startPlayRandomRtttlFromArrayPGMAndPrintName(PIN_BUZZER, RTTTLMelodies, ARRAY_SIZE_MELODIES, &Serial);
+            startPlayRandomRtttlFromArrayPGMAndPrintName(&Serial, PIN_BUZZER, RTTTLMelodies, ARRAY_SIZE_MELODIES);
         }
         uint32_t tLastLedChangeMillis = millis();
         uint32_t tStartCheckButtonMillis = millis();

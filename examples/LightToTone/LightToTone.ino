@@ -1,19 +1,18 @@
 /*
- * LightToTone.cpp
+ * LightToTone.ino
  *
  * Plays a pitch based on the light intensity.
  * As long as light intensity is below a threshold a random melody is played.
  * The button switches between continuous pitch and pentatonic scale.
  * If a TEMT6000 module is attached, this value takes precedence over the LDR value.
  *
- * More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/
+ * More RTTTL songs can be found under https://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/
  *
- *  Copyright (C) 2018  Armin Joachimsmeyer
- *  armin.joachimsmeyer@gmail.com
+ *  Copyright (C) 2018-2026  Armin Joachimsmeyer
  *
- *  This file is part of PlayRttl https://github.com/ArminJo/PlayRtttl.
+ *  This file is part of PlayRtttl https://github.com/ArminJo/PlayRtttl.
  *
- *  PlayRttl is free software: you can redistribute it and/or modify
+ *  PlayRtttl is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
@@ -24,13 +23,13 @@
  *  See the GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
+ *  along with this program. If not, see <https://www.gnu.org/licenses/gpl-3.0.html>.
  *
  */
 
 #include <Arduino.h>
 
-//#define USE_NO_RTX_EXTENSIONS // Disables RTX format definitions `'s'` (style) and `'l'` (loop). Saves up to 332 bytes program memory
+//#define USE_NO_RTX_EXTENSIONS // Disables RTX format definitions 's' (style) and 'l' (loop). Saves up to 322 bytes program memory
 #include <PlayRtttl.hpp>
 
 #define USE_BUTTON_0
@@ -141,7 +140,7 @@ void loop() {
              * More RTTTL songs can be found under http://www.picaxe.com/RTTTL-Ringtones-for-Tune-Command/
              *
              */
-            startPlayRandomRtttlFromArrayPGMAndPrintName(TONE_PIN, RTTTLMelodies, ARRAY_SIZE_MELODIES, &Serial);
+            startPlayRandomRtttlFromArrayPGMAndPrintName(&Serial, TONE_PIN, RTTTLMelodies, ARRAY_SIZE_MELODIES);
             int tThresholdCount = 0;
             while (updatePlayRtttl()) {
                 delay(10);
